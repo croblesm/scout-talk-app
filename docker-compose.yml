@@ -1,0 +1,41 @@
+name: talkscout
+
+# Single-service compose: just SQL Server 2025.
+# Embeddings are generated in Node via the `ollama` npm package against the host's
+# local Ollama (faster on Apple Silicon: Metal acceleration). SQL Server stores the
+# resulting VECTOR(768) and ranks at search time with VECTOR_DISTANCE.
+
+services:
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2025-latest
+    platform: linux/amd64
+    container_name: talkscout-mssql
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "TalkScout!Demo2026"
+      MSSQL_PID: Developer
+      MSSQL_MEMORY_LIMIT_MB: "1800"
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql_data:/var/opt/mssql
+    deploy:
+      resources:
+        limits:
+          memory: 2048m
+          cpus: "2.0"
+    mem_limit: 2048m
+    cpus: 2.0
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa
+          -P "$$MSSQL_SA_PASSWORD" -C -Q "SELECT 1" -b -t 5
+      interval: 10s
+      timeout: 6s
+      retries: 12
+      start_period: 30s
+
+volumes:
+  mssql_data:

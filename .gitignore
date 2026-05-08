@@ -1,0 +1,21 @@
+node_modules/
+.next/
+out/
+build/
+*.tsbuildinfo
+
+.env
+.env.local
+.env.*.local
+
+prisma/.env
+prisma/migrations/dev.db*
+
+scripts/.caddy-root.crt
+
+# Operator runbook (private notes, per-machine)
+demo/demo.md
+
+.DS_Store
+*.log
+.vscode/*.log

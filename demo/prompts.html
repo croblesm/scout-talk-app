@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>TalkScout, AI-Powered Conference Session Finder</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #f8f9fa;
+    color: #1f2328;
+    padding: 2rem;
+    line-height: 1.55;
+    transition: background 0.2s, color 0.2s;
+  }
+  h1 {
+    margin: 0 0 0.5rem;
+    font-size: 2rem;
+    letter-spacing: -0.01em;
+  }
+  h2 {
+    margin: 2.5rem 0 1rem;
+    font-size: 1.4rem;
+    border-bottom: 2px solid #e5e7eb;
+    padding-bottom: 0.4rem;
+  }
+  h3 {
+    margin: 0 0 0.6rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+  p { margin: 0.5rem 0; }
+  ul { margin: 0.5rem 0 0.8rem 1.2rem; padding: 0; }
+  li { margin: 0.25rem 0; }
+  a { color: #4f46e5; }
+  code:not(pre code) {
+    background: #eef0f2;
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    font-family: 'SF Mono', ui-monospace, Menlo, Consolas, monospace;
+    font-size: 0.9em;
+  }
+  .container { max-width: 920px; margin: 0 auto; }
+  .lead {
+    font-size: 1.05rem;
+    color: #4b5563;
+    margin: 0.4rem 0 1.4rem;
+  }
+  .card {
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04);
+    border-left: 6px solid #4f46e5;
+    padding: 1rem 1.2rem;
+    margin-bottom: 1.5rem;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .card .meta {
+    font-size: 0.78rem;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.4rem;
+  }
+  .voiceover {
+    font-style: italic;
+    color: #555;
+    background: #f3f4f6;
+    border-left: 3px solid #d1d5db;
+    padding: 0.6rem 0.8rem;
+    border-radius: 4px;
+    margin: 0.6rem 0 0.8rem;
+  }
+  .pre-wrap {
+    position: relative;
+    margin: 0.6rem 0;
+  }
+  pre {
+    background: #282c34;
+    color: #f8f8f2;
+    padding: 1rem 1rem 1rem 1rem;
+    padding-right: 5rem;
+    border-radius: 6px;
+    overflow-x: auto;
+    font-family: 'SF Mono', ui-monospace, Menlo, Consolas, monospace;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    margin: 0;
+  }
+  pre code { color: inherit; background: transparent; }
+  .copy-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: #4f46e5;
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    padding: 0.35rem 0.7rem;
+    font-size: 0.78rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .copy-btn:hover { background: #4338ca; }
+  .copy-btn:active { transform: translateY(1px); }
+  .show-hint {
+    margin: 0.4rem 0 0;
+    padding: 0.4rem 0.7rem;
+    background: #fef3c7;
+    border-left: 3px solid #f59e0b;
+    border-radius: 4px;
+    font-size: 0.9rem;
+  }
+  .expected {
+    margin: 0.4rem 0 0;
+    padding: 0.4rem 0.7rem;
+    background: #ecfdf5;
+    border-left: 3px solid #10b981;
+    border-radius: 4px;
+    font-size: 0.9rem;
+  }
+  .toggle-btn {
+    position: fixed;
+    top: 1rem;
+    right: 2rem;
+    background: #4f46e5;
+    color: #ffffff;
+    border: none;
+    border-radius: 999px;
+    padding: 0.5rem 1rem;
+    font-family: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    z-index: 50;
+  }
+  .toast {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(120%);
+    background: #1f2937;
+    color: #ffffff;
+    padding: 0.7rem 1.2rem;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.2);
+    transition: transform 0.25s ease, opacity 0.25s ease;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 100;
+  }
+  .toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+  .timing-strip {
+    display: inline-block;
+    background: #eef2ff;
+    color: #4338ca;
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    margin-right: 0.4rem;
+  }
+
+  /* Dark mode */
+  body.dark { background: #1e1e1e; color: #e5e7eb; }
+  body.dark h2 { border-bottom-color: #3f3f46; }
+  body.dark .lead { color: #9ca3af; }
+  body.dark .card {
+    background: #2e2e2e;
+    border-left-color: #90cdf4;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.25);
+  }
+  body.dark .card .meta { color: #9ca3af; }
+  body.dark .voiceover { background: #3a3a3a; color: #cbd5e1; border-left-color: #4b5563; }
+  body.dark pre { background: #111; color: #f8f8f2; }
+  body.dark code:not(pre code) { background: #3a3a3a; color: #f3f4f6; }
+  body.dark .show-hint { background: #3a2f1a; color: #fde68a; }
+  body.dark .expected { background: #1a3a2a; color: #a7f3d0; }
+  body.dark .timing-strip { background: #312e81; color: #c7d2fe; }
+  body.dark a { color: #90cdf4; }
+</style>
+</head>
+<body>
+
+<button class="toggle-btn" type="button" onclick="toggleTheme()">Toggle theme</button>
+
+<div class="container">
+
+<h1>🤖 TalkScout, an AI-Powered Conference Session Finder</h1>
+<p class="lead">A tight 8-minute Data Exposed demo. Spec-driven build with GitHub Spec Kit, GitHub Copilot, the MSSQL VS Code extension, Prisma TypedSQL, and SQL Server 2025 native vectors.</p>
+
+<h2>🎬 Scenario Introduction</h2>
+<div class="card">
+  <p>I am Carlos Robles, Principal PM for SQL developer experiences at Microsoft. Today I want to show you how I built TalkScout, a small app that helps me find dev conferences worth pitching my next talk to. I describe the topic in plain English. TalkScout returns the top 5 upcoming conferences whose CFP topics semantically match, with the CFP status visible at a glance.</p>
+  <div class="voiceover">"Every speaker has the same problem: where should this talk go? Listings sites organize events by date and region, not by topical fit. So I built TalkScout, end to end, in eight minutes of demo time. The whole project lives in VS Code. SQL Server 2025 stores the vectors natively. Prisma keeps my TypeScript clean. GitHub Copilot, with Spec Kit, drove the spec all the way to working code."</div>
+</div>
+
+<h2>🚀 Step-by-Step Walkthrough</h2>
+
+<!-- ============================================================ -->
+<div class="card">
+  <div class="meta"><span class="timing-strip">0:00 to 0:30</span> Setup recap (no command)</div>
+  <h3>🔹 Step 1: Frame the problem</h3>
+  <div class="voiceover">"Docker is running with SQL Server 2025. Ollama is up on the host with nomic-embed-text pulled. The Spec Kit project is initialized. The repo has the spec, plan, and tasks already drafted (we did that off camera). Let's open the project."</div>
+  <p class="show-hint">📌 <strong>Show:</strong> VS Code Explorer panel.
+    <ol style="margin-top: 0.4rem;">
+      <li>Expand <code>.specify/</code>. Hover (no click) over <code>memory/constitution.md</code> and <code>templates/</code>. Skip <code>integrations/</code> and <code>scripts/</code> (plumbing, not interesting).</li>
+      <li>Expand <code>specs/001-talkscout/</code>. Hover over <code>spec.md</code>, <code>plan.md</code>, <code>tasks.md</code>, <code>analysis.md</code> in that order. Do not click anything; Step 2 opens them.</li>
+    </ol>
+  </p>
+</div>
+
+<!-- ============================================================ -->
+<div class="card">
+  <div class="meta"><span class="timing-strip">0:30 to 1:30</span> Spec flythrough (narrate, no command)</div>
+  <h3>🔹 Step 2: Walk through the Spec Kit artifacts</h3>
+  <div class="voiceover">"Spec Kit treats the spec as the source of truth. Here is the constitution, seven principles for this project. Here is the spec, the user stories and functional requirements. Here is the plan, the architecture and the tech stack. And here is tasks.md, the ordered build plan. Notice the slash command names at the top, /speckit.constitution, /speckit.specify, and so on. These are real GitHub Copilot Chat slash commands, installed by Spec Kit's CLI."</div>
+  <p class="show-hint">📌 <strong>Show, in this order:</strong></p>
+  <ul>
+    <li>Open <code>.specify/memory/constitution.md</code> and scroll to Principle II.</li>
+    <li>Open <code>specs/001-talkscout/spec.md</code> and scroll to FR-008 (the vocabulary-mismatch requirement).</li>
+    <li>Open <code>specs/001-talkscout/plan.md</code> and scroll to the architecture diagram.</li>
+    <li>Open <code>specs/001-talkscout/tasks.md</code> and scroll to the Critical Path line.</li>
+  </ul>
+</div>
+
+<!-- ============================================================ -->
+<div class="card">
+  <div class="meta"><span class="timing-strip">1:30 to 2:00</span> Live in <strong>GitHub Copilot Chat (VS Code)</strong></div>
+  <h3>🔹 Step 3: Run /speckit.analyze on camera</h3>
+  <div class="voiceover">"Before any code is written, Spec Kit cross-checks the spec, the plan, and the tasks for inconsistencies. Watch."</div>
+  <p class="show-hint">📌 <strong>Where:</strong> the Copilot Chat panel inside VS Code (Cmd+Ctrl+I, or click the speech-bubble icon in the Activity Bar). NOT the terminal. NOT the Copilot CLI (that's Step 10's cameo). NOT uvx (that only does `init`). The chat input is at the bottom of the panel.</p>
+  <div class="pre-wrap">
+    <pre id="cmd-3">/speckit.analyze</pre>
+    <button class="copy-btn" type="button" onclick="copyToClipboard('cmd-3')">Copy</button>
+  </div>
+  <p class="expected">✅ Expected: chat panel streams the report. After ~30 seconds, <code>specs/001-talkscout/analysis.md</code> updates on disk with 0 critical, 0 high findings.</p>
+  <p class="show-hint">📌 <strong>Show:</strong> after the command finishes, open <code>specs/001-talkscout/analysis.md</code> from the Explorer; scroll to the metrics table at the bottom and read the counts aloud.</p>
+</div>
+
+<!-- ============================================================ -->
+<div class="card">
+  <div class="meta"><span class="timing-strip">2:00 to 3:30</span> Live in <strong>GitHub Copilot Chat (VS Code)</strong></div>
+  <h3>🔹 Step 4: Run /speckit.implement on camera</h3>
+  <div class="voiceover">"Now Spec Kit reads tasks.md and starts executing. The repo is at the pre-implement git tag. Setup and Foundational tasks are already done. Copilot will scaffold the user-story tasks: the Server Action, the search components, and wire it all into the page. Live."</div>
+  <p class="show-hint">📌 <strong>Where:</strong> same Copilot Chat panel as Step 3. Same input box.</p>
+  <div class="pre-wrap">
+    <pre id="cmd-4">/speckit.implement</pre>
+    <button class="copy-btn" type="button" onclick="copyToClipboard('cmd-4')">Copy</button>
+  </div>
+  <p class="expected">✅ Expected: 5 files appear in the Explorer panel: <code>src/lib/cfp-status.ts</code>, <code>src/app/actions.ts</code>, <code>src/components/CfpStatusPill.tsx</code>, <code>src/components/EventCard.tsx</code>, <code>src/components/SearchInput.tsx</code>. <code>src/app/page.tsx</code> is modified (not new). Total time 60 to 120 seconds.</p>
+  <p class="show-hint">📌 <strong>Show:</strong> have the Explorer panel visible alongside the chat. When <code>page.tsx</code> updates, the browser tab on <code>localhost:3000</code> hot-reloads automatically and the search UI appears. Switch to the browser briefly to confirm, then back to VS Code for Step 5.</p>
+</div>
+
+<!-- ============================================================ -->
+<div class="card">
+  <div class="meta"><span class="timing-strip">3:30 to 4:30</span> Marquee #1: Copilot inline in a SQL file</div>
+  <h3>🔹 Step 5: Open searchEvents.sql, use Copilot inline</h3>
+  <div class="voiceover">"This is the only SQL file you will see today. Eight lines. SQL Server 2025 has a native VECTOR(768) column type and a VECTOR_DISTANCE function. The query embedding arrives as a JSON array of 768 floats and is cast to a vector in place. Watch what GitHub Copilot does inside this file."</div>
+  <p class="show-hint">📌 <strong>Show:</strong> open <code>prisma/sql/searchEvents.sql</code>. Place cursor on the line after <code>WHERE embedding IS NOT NULL</code>. Type the comment below; Copilot inline-suggests the AND clause.</p>
+  <div class="pre-wrap">
+    <pre id="cmd-5a">-- Filter to events whose CFP is still open today.</pre>
+    <button class="copy-btn" type="button" onclick="copyToClipboard('cmd-5a')">Copy</button>
+  </div>
+  <p class="expected">✅ Expected Copilot suggestion (accept with Tab):
+  <br /><code>AND cfpCloseDate &gt;= GETDATE() AND cfpOpenDate &lt;= GETDATE()</code></p>
+  <p class="voiceover" style="margin-top:0.6rem">"That is GitHub Copilot, working inside a TypedSQL file, against SQL Server 2025 syntax. No plugin tax. No copy and paste. Just type a comment, get a suggestion."</p>
+</div>
+
+<!-- ============================================================ -->
+<div class="card">
+  <div class="meta"><span class="timing-strip">4:30 to 5:00</span> The clean-TypeScript moment</div>
+  <h3>🔹 Step 6: Open actions.ts</h3>
+  <div class="voiceover">"And here is what the application code sees. Six lines of business logic. One embed call, one typed query. No SQL strings. No raw bindings. Prisma TypedSQL turns the .sql file from the previous step into a typed function I call directly."</div>
+  <p class="show-hint">📌 <strong>Show:</strong> open <code>src/app/actions.ts</code>. Hover the <code>searchEvents</code> import to show the inferred type. Hover the <code>results</code> variable to show the typed return.</p>
+</div>
+
+<!-- ============================================================ -->
+<div class="card">
+  <div class="meta"><span class="timing-strip">5:00 to 5:30</span> Marquee #2: MSSQL extension</div>
+  <h3>🔹 Step 7: MSSQL extension query editor, see the VECTOR column</h3>
+  <div class="voiceover">"Let me prove the VECTOR column is real. The MSSQL extension for VS Code talks to my local SQL Server 2025 container. I'll connect, run a quick SELECT, and you can see the vector data sitting in the row."</div>
+  <p class="show-hint">📌 <strong>Show:</strong> click the MSSQL extension icon. Use the existing <code>talkscout</code> connection (sa, TalkScout!Demo2026). Open a new query window. Paste the query below. Press F5.</p>
+  <div class="pre-wrap">
+    <pre id="cmd-7">SELECT TOP 3
+  name,
+  topics,
+  CAST(embedding AS NVARCHAR(80)) AS embedding_preview,
+  VECTORPROPERTY(embedding, 'Dimensions') AS dims
+FROM Event
+ORDER BY name;</pre>
+    <button class="copy-btn" type="button" onclick="copyToClipboard('cmd-7')">Copy</button>
+  </div>
+  <p class="expected">✅ Expected: results grid with three rows; <code>dims = 768</code> on each; <code>embedding_preview</code> shows the first 80 chars of the vector.</p>
+</div>
+
+<!-- ============================================================ -->
+<div class="card">
+  <div class="meta"><span class="timing-strip">5:30 to 6:00</span> Magic moment #1</div>
+  <h3>🔹 Step 8: Live search, "agentic workflows for databases"</h3>
+  <div class="voiceover">"Now to the actual app. The browser is already open at localhost:3000. I will type a topic I want to speak about, agentic workflows for databases, and you will see the top result has none of those words in its title or description. That's semantic search at work, not keyword matching."</div>
+  <div class="pre-wrap">
+    <pre id="cmd-8">agentic workflows for databases</pre>
+    <button class="copy-btn" type="button" onclick="copyToClipboard('cmd-8')">Copy</button>
+  </div>
+  <p class="expected">✅ Expected: top result is an event tagged with topics like "AI agents", "MCP", or "autonomous tooling". Verify by reading the title aloud and pointing out the word "agentic" appears nowhere.</p>
+</div>
+
+<!-- ============================================================ -->
+<div class="card">
+  <div class="meta"><span class="timing-strip">6:00 to 6:30</span> Magic moment #2</div>
+  <h3>🔹 Step 9: Live search, "type safety across the stack"</h3>
+  <div class="voiceover">"One more. Type safety across the stack. I expect a tRPC or end-to-end TypeScript event, even though my query never says tRPC."</div>
+  <div class="pre-wrap">
+    <pre id="cmd-9">type safety across the stack</pre>
+    <button class="copy-btn" type="button" onclick="copyToClipboard('cmd-9')">Copy</button>
+  </div>
+  <p class="expected">✅ Expected: top result is a tRPC-flavored or end-to-end TypeScript event. CFP-open pill should be visible on at least one result.</p>
+</div>
+
+<!-- ============================================================ -->
+<div class="card">
+  <div class="meta"><span class="timing-strip">6:30 to 7:00</span> Cross-surface cameo (different surface this time)</div>
+  <h3>🔹 Step 10: GitHub Copilot CLI cameo</h3>
+  <div class="voiceover">"Spec Kit slash commands work in the Copilot Chat panel inside VS Code, like we just saw. They also work in the GitHub Copilot CLI in the terminal. Same workflow, different surface."</div>
+  <p class="show-hint">📌 <strong>Where:</strong> the integrated terminal in VS Code (Ctrl+`). NOT the chat panel this time. NOT uvx. This is specifically the GitHub Copilot CLI.</p>
+  <div class="pre-wrap">
+    <pre id="cmd-10a">copilot</pre>
+    <button class="copy-btn" type="button" onclick="copyToClipboard('cmd-10a')">Copy</button>
+  </div>
+  <p>That starts the interactive session. When the prompt appears, type:</p>
+  <div class="pre-wrap">
+    <pre id="cmd-10b">/speckit.analyze</pre>
+    <button class="copy-btn" type="button" onclick="copyToClipboard('cmd-10b')">Copy</button>
+  </div>
+  <p class="expected">✅ Expected: the same kind of analysis report streams in the terminal. Don't wait for it to finish; let it run for about 15 seconds, then cut to the next card. (The cameo is about showing the cross-surface story, not the report content.)</p>
+</div>
+
+<!-- ============================================================ -->
+<div class="card">
+  <div class="meta"><span class="timing-strip">7:00 to 7:30</span> Optional cameo</div>
+  <h3>🔹 Step 11: MSSQL Schema Designer (optional, if time)</h3>
+  <div class="voiceover">"And the same MSSQL extension also gives me a visual schema designer. Prisma owns the migrations here, but if I wanted to inspect or edit the table layout visually, this is one click away."</div>
+  <p class="show-hint">📌 <strong>Show:</strong> in the MSSQL Object Explorer, right-click the <code>Event</code> table, choose "View Schema Designer". Linger 10 seconds. Skip if running short.</p>
+</div>
+
+<!-- ============================================================ -->
+<div class="card">
+  <div class="meta"><span class="timing-strip">7:30 to 8:00</span> Wrap</div>
+  <h3>🔹 Step 12: Closing statement</h3>
+  <div class="voiceover">"That's TalkScout. Eight minutes from spec to working semantic search, end to end inside VS Code. SQL Server 2025 stored the vectors. Prisma kept the TypeScript clean. GitHub Copilot, with Spec Kit, drove the build. Repo and links are below. Thanks for watching."</div>
+</div>
+
+<h2>🎯 What We Accomplished</h2>
+<div class="card">
+  <ul>
+    <li>✅ Built TalkScout end to end: spec, plan, tasks, working code, in eight minutes of camera time.</li>
+    <li>✅ Showed GitHub Spec Kit driving the workflow with real <code>/speckit.*</code> slash commands in Copilot Chat AND the Copilot CLI.</li>
+    <li>✅ Showed SQL Server 2025's native <code>VECTOR(768)</code> data type and <code>VECTOR_DISTANCE</code> function in the MSSQL VS Code extension.</li>
+    <li>✅ Showed GitHub Copilot working inside a <code>.sql</code> file (TypedSQL).</li>
+    <li>✅ Showed Prisma TypedSQL keeping application TypeScript free of SQL strings.</li>
+    <li>✅ Two semantic-search "magic moments" where the top result contained none of the query keywords.</li>
+  </ul>
+</div>
+
+<h2>🎯 Closing Statement</h2>
+<div class="card">
+  <p class="voiceover">"The pitch is simple. SQL Server 2025 is a great vector database now. Prisma is a great TypeScript ORM. GitHub Copilot, in VS Code, with Spec Kit, lets one developer go from idea to shipped feature in a coherent workflow. None of these are new tools individually, but composed together inside VS Code, they make this kind of demo possible at this kind of pace."</p>
+  <p><strong>Key takeaways:</strong></p>
+  <ul>
+    <li>Spec-driven development scales because the spec is on disk and reviewed before any code is written.</li>
+    <li>SQL Server 2025's vector support means you do not need a separate vector database for retrieval workloads at this scale.</li>
+    <li>Prisma TypedSQL is the cleanest way to use SQL Server's newest features from TypeScript without writing SQL strings in your app.</li>
+    <li>GitHub Copilot is a first-class citizen inside <code>.sql</code> files, not just <code>.ts</code> files.</li>
+  </ul>
+</div>
+
+<h2>📚 Resources</h2>
+<div class="card">
+  <ul>
+    <li><a href="https://github.com/github/spec-kit" target="_blank">GitHub Spec Kit on GitHub</a></li>
+    <li><a href="https://learn.microsoft.com/sql/relational-databases/vectors/vectors-sql-server" target="_blank">SQL Server 2025 vector data type docs</a></li>
+    <li><a href="https://www.prisma.io/docs/orm/prisma-client/queries/typedsql" target="_blank">Prisma TypedSQL docs</a></li>
+    <li><a href="https://marketplace.visualstudio.com/items?itemName=ms-mssql.mssql" target="_blank">MSSQL VS Code extension</a></li>
+    <li><a href="https://ollama.com/library/nomic-embed-text" target="_blank">nomic-embed-text on Ollama</a></li>
+    <li><a href="https://dev.events" target="_blank">dev.events, the source for upcoming dev conferences</a></li>
+  </ul>
+</div>
+
+<h2>🙏 Thank You</h2>
+<div class="card">
+  <p>Thanks to the SQL Server, Prisma, GitHub Copilot, and Spec Kit teams for the work that made this demo possible.</p>
+</div>
+
+</div>
+
+<div id="toast" class="toast">📋 Copied to clipboard!</div>
+
+<script>
+  function toggleTheme() {
+    document.body.classList.toggle('dark');
+  }
+  function copyToClipboard(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    var text = el.innerText;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text);
+    } else {
+      var ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); document.body.removeChild(ta);
+    }
+    var toast = document.getElementById('toast');
+    toast.classList.add('show');
+    setTimeout(function() { toast.classList.remove('show'); }, 2000);
+  }
+  // Respect system dark preference on first load
+  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    document.body.classList.add('dark');
+  }
+</script>
+</body>
+</html>

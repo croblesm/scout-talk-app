@@ -1,0 +1,31 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["typedSql"]
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+model Event {
+  id              String                       @id @default(cuid())
+  slug            String                       @unique
+  name            String
+  startDate       DateTime
+  endDate         DateTime
+  locationCity    String?
+  locationCountry String?
+  isVirtual       Boolean                      @default(false)
+  topics          String                       @db.NVarChar(Max)
+  description     String                       @db.NVarChar(Max)
+  cfpOpenDate     DateTime?
+  cfpCloseDate    DateTime?
+  cfpUrl          String?
+  contentHash     String                       @db.Char(64)
+  embedding       Unsupported("VECTOR(768)")?
+  ingestedAt      DateTime                     @default(now())
+  updatedAt       DateTime                     @updatedAt
+
+  @@map("Event")
+}
