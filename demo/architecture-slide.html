@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TalkScout Architecture</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0a0f;
+    color: #e4e4e7;
+    font-family: 'Inter', -apple-system, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 2rem 3rem 4rem;
+    overflow-y: auto;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    opacity: 0;
+    animation: fadeInDown 0.8s ease forwards;
+  }
+  .header .subtitle-top {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #818cf8;
+    margin-bottom: 0.6rem;
+    opacity: 0;
+    animation: fadeInDown 0.6s ease forwards;
+    animation-delay: 0.1s;
+  }
+  .header h1 {
+    font-size: 2.6rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #818cf8, #c084fc, #f472b6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
+  }
+  .header .tagline {
+    font-size: 1.05rem;
+    color: #71717a;
+    font-weight: 300;
+    max-width: 720px;
+    margin: 0 auto;
+    line-height: 1.5;
+  }
+
+  /* Flow */
+  .flow {
+    width: 100%;
+    max-width: 1100px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  /* Step (a row of one or more nodes plus the arrow leading into it) */
+  .step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  .step.active {
+    animation: slideUp 0.6s ease forwards;
+  }
+
+  .step-row {
+    display: flex;
+    gap: 1.4rem;
+    justify-content: center;
+    align-items: stretch;
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  .step-row.single { justify-content: center; }
+  .step-row.pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.4rem;
+    max-width: 880px;
+    margin: 0 auto;
+  }
+
+  /* Connector before a step (arrow that joins to previous) */
+  .connector {
+    color: #52525b;
+    font-size: 1.4rem;
+    line-height: 1;
+    text-align: center;
+    width: 100%;
+  }
+  .connector.split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.4rem;
+    max-width: 880px;
+    margin: 0 auto;
+    color: #52525b;
+    font-size: 0.78rem;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .connector.split .left  { text-align: right; padding-right: 1rem; }
+  .connector.split .right { text-align: left;  padding-left: 1rem; }
+  .connector.merge {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.4rem;
+    max-width: 880px;
+    margin: 0 auto;
+    color: #52525b;
+    font-size: 0.78rem;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .connector.merge .left  { text-align: right; padding-right: 1rem; }
+  .connector.merge .right { text-align: left;  padding-left: 1rem; }
+
+  /* Node */
+  .node {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 1rem 1.4rem;
+    min-width: 240px;
+    max-width: 360px;
+    flex: 1 1 320px;
+    transition: background 0.25s ease, border-color 0.25s ease;
+  }
+  .node:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.14);
+  }
+  .node .icon {
+    font-size: 1.55rem;
+    margin-bottom: 0.4rem;
+    line-height: 1;
+  }
+  .node h3 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #f4f4f5;
+    margin-bottom: 0.3rem;
+    letter-spacing: -0.01em;
+  }
+  .node p {
+    font-size: 0.82rem;
+    color: #a1a1aa;
+    line-height: 1.45;
+  }
+  .node .file {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: #818cf8;
+    background: rgba(129, 140, 248, 0.1);
+    padding: 0.1rem 0.45rem;
+    border-radius: 3px;
+    display: inline-block;
+    margin-top: 0.4rem;
+  }
+  .node .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.18rem 0.55rem;
+    border-radius: 3px;
+    display: inline-block;
+    margin-top: 0.5rem;
+    margin-right: 0.3rem;
+  }
+  .tag-server { background: rgba(129, 140, 248, 0.15); color: #a5b4fc; }
+  .tag-ai     { background: rgba(244, 114, 182, 0.15); color: #f9a8d4; }
+  .tag-db     { background: rgba(52, 211, 153, 0.15); color: #6ee7b7; }
+  .tag-ui     { background: rgba(192, 132, 252, 0.15); color: #d8b4fe; }
+  .tag-orm    { background: rgba(251, 191, 36, 0.15); color: #fde68a; }
+
+  /* Border accents per node type */
+  .node.input  { border-left: 3px solid #818cf8; }
+  .node.server { border-left: 3px solid #c084fc; }
+  .node.ai     { border-left: 3px solid #f472b6; }
+  .node.orm    { border-left: 3px solid #fbbf24; }
+  .node.db     { border-left: 3px solid #34d399; }
+  .node.ui     { border-left: 3px solid #c084fc; }
+
+  /* Inline code in nodes */
+  .node code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    padding: 0.1rem 0.3rem;
+    border-radius: 3px;
+  }
+  .node.ai code { color: #f9a8d4; background: rgba(244, 114, 182, 0.08); }
+  .node.db code { color: #6ee7b7; background: rgba(52, 211, 153, 0.08); }
+
+  /* Intro card (the pitch, revealed first before the flow nodes) */
+  .intro {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto 2rem;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 1.6rem 1.8rem;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  .intro.active { animation: slideUp 0.6s ease forwards; }
+  .intro h2 {
+    font-size: 1.35rem;
+    font-weight: 600;
+    color: #f4f4f5;
+    margin-bottom: 0.6rem;
+    letter-spacing: -0.01em;
+    background: linear-gradient(135deg, #818cf8, #c084fc, #f472b6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .intro p {
+    font-size: 0.95rem;
+    color: #a1a1aa;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+  .intro .stack-table {
+    display: grid;
+    grid-template-columns: minmax(180px, 1fr) 2fr 2fr;
+    gap: 0.5rem 1.2rem;
+    font-size: 0.82rem;
+  }
+  .intro .stack-table .h {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #52525b;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .intro .stack-table .tool {
+    font-weight: 600;
+    color: #e4e4e7;
+    padding: 0.45rem 0;
+  }
+  .intro .stack-table .tool strong {
+    background: linear-gradient(135deg, #818cf8, #c084fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 600;
+  }
+  .intro .stack-table .job, .intro .stack-table .why {
+    color: #a1a1aa;
+    padding: 0.45rem 0;
+    line-height: 1.45;
+  }
+
+  /* Footer */
+  .tools, .summary {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  .tools.active, .summary.active {
+    animation: slideUp 0.6s ease forwards;
+  }
+  .tools {
+    margin-top: 2.5rem;
+    text-align: center;
+  }
+  .tools .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #52525b;
+    margin-bottom: 0.8rem;
+  }
+  .tools .chips {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .chip {
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 0.4rem 0.9rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #e4e4e7;
+    transition: background 0.2s ease;
+  }
+  .chip:hover { background: rgba(255, 255, 255, 0.08); }
+  .chip strong { color: #818cf8; }
+
+  .summary {
+    margin-top: 2rem;
+    text-align: center;
+  }
+  .summary p {
+    font-size: 1.1rem;
+    color: #71717a;
+    font-weight: 300;
+  }
+  .summary em {
+    background: linear-gradient(135deg, #818cf8, #c084fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-style: normal;
+    font-weight: 600;
+  }
+
+  /* Hint */
+  .hint {
+    position: fixed;
+    bottom: 1.2rem;
+    right: 1.6rem;
+    font-size: 0.72rem;
+    color: #52525b;
+    opacity: 0;
+    animation: fadeInUp 0.5s ease forwards;
+    animation-delay: 0.6s;
+  }
+  .hint kbd {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0.12rem 0.45rem;
+    border-radius: 3px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.68rem;
+  }
+
+  /* Animations */
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <p class="subtitle-top">VS Code · GitHub Copilot · OpenSpec · MSSQL Extension · SQL Server 2025</p>
+  <h1>TalkScout</h1>
+  <p class="tagline">Semantic CFP finder for dev conferences. From spec to working app, end-to-end inside VS Code, with native vector search in SQL Server 2025.</p>
+</div>
+
+<!-- Intro / pitch card (revealed first before the flow nodes) -->
+<div class="intro">
+  <h2>What this stack gives you</h2>
+  <p>An end-to-end semantic-search application <strong>inside VS Code</strong>, with no separate vector database, no cloud embedding API, and no SQL string literals in TypeScript. Five tools, each doing exactly one job, composed so a developer can go from "I want a CFP finder" to "it ranks events in three seconds" without leaving the editor.</p>
+  <div class="stack-table">
+    <div class="h">Tool</div>
+    <div class="h">Job in this project</div>
+    <div class="h">Why it earns its place</div>
+
+    <div class="tool"><strong>SQL Server 2025</strong></div>
+    <div class="job">Stores 91 conferences with 768-dim embeddings as native <code style="font-family:'JetBrains Mono',monospace;color:#6ee7b7;background:rgba(52,211,153,0.08);padding:0.05rem 0.3rem;border-radius:3px;">VECTOR(768)</code> columns; ranks queries with <code style="font-family:'JetBrains Mono',monospace;color:#6ee7b7;background:rgba(52,211,153,0.08);padding:0.05rem 0.3rem;border-radius:3px;">VECTOR_DISTANCE</code></div>
+    <div class="why">One database for relational <em>and</em> vector data. No Pinecone + Postgres dual setup.</div>
+
+    <div class="tool"><strong>Ollama</strong> (host)</div>
+    <div class="job">Generates 768-dim embeddings via <code style="font-family:'JetBrains Mono',monospace;color:#f9a8d4;background:rgba(244,114,182,0.08);padding:0.05rem 0.3rem;border-radius:3px;">nomic-embed-text</code> for seed and search</div>
+    <div class="why">Local, free, no API keys, no data egress. Metal-accelerated on Apple Silicon.</div>
+
+    <div class="tool"><strong>Prisma 7</strong></div>
+    <div class="job">Migrations, the <code style="font-family:'JetBrains Mono',monospace;color:#fde68a;background:rgba(251,191,36,0.08);padding:0.05rem 0.3rem;border-radius:3px;">Event</code> model, typed bridge from TS to SQL via the <code style="font-family:'JetBrains Mono',monospace;color:#fde68a;background:rgba(251,191,36,0.08);padding:0.05rem 0.3rem;border-radius:3px;">@prisma/adapter-mssql</code> driver</div>
+    <div class="why">Schema-as-code. T-SQL stays in <code style="font-family:'JetBrains Mono',monospace;font-size:0.78rem;">prisma/sql/</code>; the call site reads as one line.</div>
+
+    <div class="tool"><strong>MSSQL VS Code extension</strong></div>
+    <div class="job">Connection management, query editor, results grid, Schema Designer</div>
+    <div class="why">Inspect the <code style="font-family:'JetBrains Mono',monospace;color:#6ee7b7;background:rgba(52,211,153,0.08);padding:0.05rem 0.3rem;border-radius:3px;">VECTOR(768)</code> column live in the IDE. No external tooling.</div>
+
+    <div class="tool"><strong>GitHub Copilot</strong> + OpenSpec</div>
+    <div class="job"><code style="font-family:'JetBrains Mono',monospace;color:#a5b4fc;background:rgba(129,140,248,0.08);padding:0.05rem 0.3rem;border-radius:3px;">/opsx-propose</code> generates a change spec from plain English; <code style="font-family:'JetBrains Mono',monospace;color:#a5b4fc;background:rgba(129,140,248,0.08);padding:0.05rem 0.3rem;border-radius:3px;">/opsx-apply</code> writes the code</div>
+    <div class="why">Spec-driven. Requirements are reviewable artifacts on disk, not chat history.</div>
+  </div>
+</div>
+
+<div class="flow">
+
+  <!-- Step 1: Input -->
+  <div class="step">
+    <div class="step-row single">
+      <div class="node input">
+        <div class="icon">⌨️</div>
+        <h3>Speaker types a topic</h3>
+        <p>"agentic workflows for databases"</p>
+        <span class="tag tag-ui">React 19 + Tailwind</span>
+        <div class="file">src/components/SearchInput.tsx</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2: Server Action -->
+  <div class="step">
+    <div class="connector">↓</div>
+    <div class="step-row single">
+      <div class="node server">
+        <div class="icon">⚡</div>
+        <h3>Next.js Server Action</h3>
+        <p>One typed function. Validates query length, embeds, queries, returns top 5.</p>
+        <span class="tag tag-server">Next.js 15</span>
+        <div class="file">src/app/actions.ts</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3: Forked branches (Ollama + Prisma) -->
+  <div class="step">
+    <div class="connector split">
+      <div class="left">embed(query)</div>
+      <div class="right">$queryRawUnsafe(SQL, vector)</div>
+    </div>
+    <div class="step-row pair">
+      <div class="node ai">
+        <div class="icon">🧠</div>
+        <h3>Host Ollama</h3>
+        <p>Local <code>nomic-embed-text</code>, 768 dimensions, Metal-accelerated on Apple Silicon. No cloud, no API keys.</p>
+        <span class="tag tag-ai">ollama npm</span>
+        <div class="file">src/lib/embed.ts</div>
+      </div>
+      <div class="node orm">
+        <div class="icon">🔗</div>
+        <h3>Prisma + SQL Loader</h3>
+        <p>SQL files loaded once at module load as string constants. App code stays free of T-SQL string literals.</p>
+        <span class="tag tag-orm">Prisma 6</span>
+        <div class="file">src/lib/sql.ts → prisma/sql/searchEvents.sql</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 4: SQL Server -->
+  <div class="step">
+    <div class="connector merge">
+      <div class="left">768-dim vector</div>
+      <div class="right">JSON.stringify(vector)</div>
+    </div>
+    <div class="step-row single">
+      <div class="node db">
+        <div class="icon">🗄️</div>
+        <h3>SQL Server 2025</h3>
+        <p>Native <code>VECTOR(768)</code> column. <code>VECTOR_DISTANCE('cosine', ...)</code> for ranking. No external vector database.</p>
+        <span class="tag tag-db">2025-latest</span>
+        <span class="tag tag-db">Docker</span>
+        <div class="file">prisma/sql/searchEvents.sql</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 5: Results -->
+  <div class="step">
+    <div class="connector">↓</div>
+    <div class="step-row single">
+      <div class="node ui">
+        <div class="icon">🎯</div>
+        <h3>Top 5 ranked CFPs</h3>
+        <p>Ranked by semantic similarity, with CFP-status pill (open / closing in N / closed) and similarity score as a percentage.</p>
+        <span class="tag tag-ui">EventCard.tsx</span>
+        <span class="tag tag-ui">CfpStatusPill.tsx</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Tools rail -->
+<div class="tools">
+  <div class="label">Built and demonstrated with</div>
+  <div class="chips">
+    <span class="chip"><strong>OpenSpec</strong> · /opsx-propose · /opsx-apply</span>
+    <span class="chip"><strong>GitHub Copilot</strong> · agent in VS Code Chat</span>
+    <span class="chip"><strong>MSSQL VS Code Extension</strong> · query editor + Schema Designer</span>
+    <span class="chip"><strong>Prisma 6</strong> · schema, migrations, raw SQL loader</span>
+    <span class="chip"><strong>SQL Server 2025</strong> · VECTOR(768), VECTOR_DISTANCE</span>
+    <span class="chip"><strong>Ollama</strong> · nomic-embed-text, host Metal</span>
+    <span class="chip"><strong>Next.js 15</strong> · App Router + Server Actions</span>
+  </div>
+</div>
+
+<div class="summary">
+  <p>Spec-driven. Type-safe. Local. <em>Eight minutes from idea to working semantic search.</em></p>
+</div>
+
+<div class="hint"><kbd>Space</kbd> or Click to advance · <kbd>A</kbd> show all · <kbd>R</kbd> reset</div>
+
+<script>
+  const intro   = document.querySelector('.intro');
+  const steps   = Array.from(document.querySelectorAll('.step'));
+  const tools   = document.querySelector('.tools');
+  const summary = document.querySelector('.summary');
+  const reveals = [intro, ...steps, tools, summary].filter(Boolean);
+  let current = -1;
+
+  function activate(index) {
+    if (index < 0 || index >= reveals.length) return;
+    reveals[index].classList.add('active');
+  }
+
+  function activateAll() {
+    reveals.forEach((el) => el.classList.add('active'));
+    current = reveals.length - 1;
+  }
+
+  function reset() {
+    reveals.forEach((el) => {
+      el.classList.remove('active');
+      // Force reflow to restart animations next time
+      void el.offsetWidth;
+    });
+    current = -1;
+  }
+
+  function next() {
+    if (current < reveals.length - 1) {
+      current += 1;
+      activate(current);
+    }
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.code === 'Space') { e.preventDefault(); next(); }
+    else if (e.code === 'KeyA') { activateAll(); }
+    else if (e.code === 'KeyR') { reset(); }
+  });
+
+  document.addEventListener('click', () => { next(); });
+</script>
+
+</body>
+</html>

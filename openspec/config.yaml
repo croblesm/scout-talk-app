@@ -1,0 +1,136 @@
+schema: spec-driven
+
+context: |
+  TalkScout: a CFP finder for upcoming dev conferences. A speaker types a topic
+  in plain English and the app returns the top 5 upcoming dev conferences whose
+  CFP topics semantically match, ranked by cosine similarity, with CFP status
+  visible at a glance.
+
+  Tech stack:
+  - TypeScript 5.x strict, Node.js 22 LTS
+  - Next.js 15 App Router with Server Actions
+  - React 19, Tailwind CSS v4, shadcn/ui (Input, Card, Badge, Button)
+  - Prisma 6.x against SQL Server 2025 (mcr.microsoft.com/mssql/server:2025-latest)
+  - SQL Server 2025 features used: native VECTOR(768) data type, VECTOR_DISTANCE
+  - Embeddings: nomic-embed-text via host-side Ollama (NOT via T-SQL AI functions)
+  - npm (broader audience familiarity than pnpm/yarn)
+
+  Architectural rules (NON-NEGOTIABLE):
+  - All T-SQL lives ONLY in prisma/sql/. The two files are searchEvents.sql and
+    upsertEvents.sql. They are loaded as string constants at module load by
+    src/lib/sql.ts and invoked via prisma.$queryRawUnsafe / $executeRawUnsafe.
+    Prisma TypedSQL is NOT used because it does not support the sqlserver
+    provider.
+  - Prisma 7.8 with the @prisma/adapter-mssql driver adapter. Node >= 22.13
+    required (set in package.json engines). The schema's datasource block has
+    NO `url = env(...)` (Prisma 7 removed that). Connection URL is declared in
+    `prisma.config.ts` at repo root for Migrate, and constructed at runtime via
+    `new PrismaMssql(process.env.DATABASE_URL!)` in `src/lib/db.ts` and
+    `prisma/seed.ts`. The seed file MUST `import 'dotenv/config'` at the top so
+    DATABASE_URL is loaded when run via tsx (Prisma's CLI used to auto-load it
+    in v6, but the Node-side adapter requires explicit dotenv).
+  - Embeddings are produced in Node via the ollama npm package, NOT via SQL
+    Server's CREATE EXTERNAL MODEL or AI_GENERATE_EMBEDDINGS.
+  - Container resource quotas: every SQL Server container is capped at 2 GB
+    memory and 2 CPUs.
+  - SQL Server 2025 image runs platform: linux/amd64 on Apple Silicon (Rosetta).
+  - Ollama runs on the host (not in a container) for the live demo to get
+    Metal acceleration. The dev container at .devcontainer/devcontainer.json
+    is the one exception: it runs Ollama inside the workspace container via
+    the `ghcr.io/prulloac/devcontainer-features/ollama:1` feature so first-time
+    users can repro the project without installing Ollama on their host.
+    Inside the dev container, `OLLAMA_HOST` is `http://localhost:11434`.
+  - The dev container uses Docker-in-Docker (`ghcr.io/devcontainers/features/docker-in-docker:2`)
+    so the user can run the project's root `docker-compose.yml` from inside the
+    container to start SQL Server. The dev container does NOT define its own
+    docker-compose.yml; one source of truth.
+
+  Project state:
+  - Database: 91 events seeded from data/dev-events.html via prisma/seed.ts.
+  - Search hot path: Browser to Server Action to embed(query) via Ollama, then
+    prisma.$queryRawUnsafe(SEARCH_EVENTS_SQL, JSON.stringify(vector), 5), then
+    SQL Server VECTOR_DISTANCE TOP 5 ranking.
+  - Full architecture diagrams live at `openspec/specs/architecture.md`
+    (Mermaid: search hot path + seed ingest path). Update that file when the
+    architecture changes.
+  - The repo at the pre-implement git tag has the foundation (Prisma schema,
+    migrations applied, src/lib/{db,embed,sql}.ts, prisma/sql/*.sql, seed.ts,
+    placeholder src/app/page.tsx) but NOT the search UI components, Server
+    Action, or cfp-status utility. Those land on camera via /opsx-apply.
+
+  Demo:
+  - 8-minute Data Exposed YouTube recording, 2026-05-11 (Monday).
+  - Repeatable via npm run demo:reset (rewinds to pre-implement, reseeds DB,
+    starts dev server in under 90 seconds).
+  - Two scripted on-camera search queries: "agentic workflows for databases"
+    and "type safety across the stack". Both demonstrate vocabulary mismatch.
+
+  Style:
+  - No em-dashes anywhere in generated documentation, comments, scripts.
+  - No "I've" contractions; write "I have".
+  - Short, direct sentences. Conventional Commits.
+
+  UI styling rules (apply when generating components or page composition):
+  - Force dark mode. In src/app/layout.tsx the html tag MUST have
+    `className="font-sans dark"` and `style={{ colorScheme: "dark" }}`.
+    The body MUST be `bg-zinc-950 text-zinc-100 antialiased` with NO `dark:`
+    variant classes (we are not respecting system preference; the demo is
+    always dark).
+  - Add a subtle radial indigo glow at the top of the page as ambient depth.
+    Implementation: in body, before children, render
+    `<div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,rgba(79,70,229,0.12),transparent_50%)]" />`.
+  - Page bg is zinc-950, cards float slightly lighter on top. Cards rendered
+    via shadcn `Card` are fine as-is in dark mode (the .dark CSS variables
+    handle it). Do not override the Card component.
+  - Title gradient: indigo-to-purple via tailwind classes
+    `bg-gradient-to-r from-accent to-accent-deep bg-clip-text text-transparent`
+    (the @theme variables for accent/accent-deep are set in globals.css to
+    #4f46e5 and #7c3aed).
+
+  SearchInput component rules (NON-NEGOTIABLE for visual quality):
+  - DO NOT use shadcn's `<Input>` component for the search input. Its
+    `bg-input/30` semi-transparent background bleeds the gradient wrapper
+    through and makes the placeholder unreadable. Use a plain `<input>`
+    element instead.
+  - The wrapper is a `<div>` with classes
+    `w-full rounded-xl bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 p-[2px] shadow-lg shadow-indigo-500/20 transition-shadow focus-within:shadow-indigo-500/40`.
+  - The inner `<input>` has classes
+    `h-12 w-full rounded-[10px] bg-zinc-900 px-4 text-base text-zinc-100 placeholder:text-zinc-400 outline-none disabled:cursor-not-allowed disabled:opacity-60`.
+  - Placeholder cycling: every 3 seconds, while the input is empty AND
+    unfocused, cycle through the 5 example queries documented in
+    data/queries.md (the 2 primary + 3 backup queries from the seed). Stop
+    cycling on first keystroke and never resume in the same session.
+
+  EventCard / Button-as-anchor rule (NON-NEGOTIABLE):
+  - When wrapping shadcn `Button` with a `render={<a ...>}` prop to make it a
+    link, ALWAYS pass `nativeButton={false}` as well. Without it, Base UI's
+    `ButtonPrimitive` throws a console error about losing native button
+    semantics. Example:
+        <Button
+          variant="outline"
+          size="sm"
+          nativeButton={false}
+          render={<a href={url} target="_blank" rel="noopener noreferrer" />}
+        >
+          Submit Proposal
+        </Button>
+
+  Tailwind class generation rule:
+  - Tailwind v4's class scanner sometimes misses many-file-at-once drops on
+    Apple Silicon. After a large `/opsx-apply` run, restart the dev server
+    with `pkill -f "next dev" && rm -rf .next && npm run dev` if the page
+    renders unstyled. This is a known operator step, not a code defect.
+
+rules:
+  proposal:
+    - Keep proposals under 600 words.
+    - Lead with the user-facing change, not the implementation.
+    - Always include a "Non-goals" section so out-of-scope items are explicit.
+  design:
+    - Honor the architecture rules in context above; do not propose alternatives
+      that violate them (e.g. raw T-SQL in TypeScript, AI_GENERATE_EMBEDDINGS,
+      EXTERNAL MODEL).
+  tasks:
+    - Each task names exactly one deliverable file (or a small tight group).
+    - Use a Conventional Commits prefix as the task title's verb.
+    - Tasks must be independently testable; typecheck and build are the gates.

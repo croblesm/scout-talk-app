@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>What We Did Today</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0a0f;
+    color: #e4e4e7;
+    font-family: 'Inter', -apple-system, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 2rem 3rem 5rem;
+    overflow-y: auto;
+  }
+  .container { max-width: 1100px; width: 100%; }
+
+  .header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    opacity: 0;
+    animation: fadeInDown 0.8s ease forwards;
+  }
+  .subtitle-top {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #818cf8;
+    margin-bottom: 0.6rem;
+    opacity: 0;
+    animation: fadeInDown 0.6s ease forwards;
+    animation-delay: 0.1s;
+  }
+  .header h1 {
+    font-size: 2.4rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #818cf8, #c084fc, #f472b6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
+  }
+  .tagline {
+    font-size: 1.05rem;
+    color: #71717a;
+    font-weight: 300;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .timeline {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 28px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(180deg, #818cf8 0%, #c084fc 30%, #f472b6 60%, #34d399 100%);
+    opacity: 0;
+    transition: opacity 0.6s ease 0.2s;
+  }
+  .timeline.started::before { opacity: 0.3; }
+
+  .step {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    padding: 1.1rem 0;
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  .step.active { animation: slideIn 0.6s ease forwards; }
+
+  .node {
+    position: relative;
+    z-index: 2;
+    flex-shrink: 0;
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid transparent;
+    line-height: 1;
+    transition: all 0.4s ease;
+  }
+  .node .icon { font-size: 1.4rem; }
+  .node .num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.62rem;
+    font-weight: 600;
+    margin-top: 0.18rem;
+    letter-spacing: 0.06em;
+  }
+
+  /* Color mapping by mode (solid backgrounds so the timeline line doesn't show through) */
+  .step.narrate .node {
+    background: #2a1a3f;
+    border-color: #c084fc;
+  }
+  .step.narrate .node .num { color: #c084fc; }
+  .step.live .node {
+    background: #3a1228;
+    border-color: #f472b6;
+  }
+  .step.live .node .num { color: #f472b6; }
+  .step.hands .node {
+    background: #0f3322;
+    border-color: #34d399;
+  }
+  .step.hands .node .num { color: #34d399; }
+  .step.cameo .node {
+    background: #3a2a0a;
+    border-color: #fbbf24;
+  }
+  .step.cameo .node .num { color: #fbbf24; }
+  .step.active .node { box-shadow: 0 0 18px rgba(129, 140, 248, 0.25); }
+
+  .content {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    padding: 1rem 1.4rem;
+    transition: all 0.3s ease;
+  }
+  .content:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+  .content-header {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    margin-bottom: 0.4rem;
+    flex-wrap: wrap;
+  }
+  .content-header h3 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #f4f4f5;
+    letter-spacing: -0.01em;
+  }
+  .timing {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.16rem 0.5rem;
+    border-radius: 999px;
+    background: rgba(129, 140, 248, 0.12);
+    color: #a5b4fc;
+    letter-spacing: 0.04em;
+  }
+  .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.66rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.16rem 0.55rem;
+    border-radius: 4px;
+  }
+  .tag-narrate { background: rgba(192, 132, 252, 0.15); color: #d8b4fe; }
+  .tag-live    { background: rgba(244, 114, 182, 0.15); color: #f9a8d4; }
+  .tag-hands   { background: rgba(52, 211, 153, 0.15); color: #6ee7b7; }
+  .tag-cameo   { background: rgba(251, 191, 36, 0.15); color: #fde68a; }
+
+  .content p {
+    font-size: 0.92rem;
+    color: #a1a1aa;
+    line-height: 1.55;
+  }
+  .content code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    background: rgba(129, 140, 248, 0.1);
+    color: #a5b4fc;
+    padding: 0.08rem 0.4rem;
+    border-radius: 3px;
+  }
+
+  /* Intro card (the pitch, revealed first before the timeline) */
+  .intro {
+    width: 100%;
+    margin: 0 auto 2rem;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 1.6rem 1.8rem;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  .intro.active { animation: slideUp 0.6s ease forwards; }
+  .intro h2 {
+    font-size: 1.35rem;
+    font-weight: 600;
+    margin-bottom: 0.6rem;
+    letter-spacing: -0.01em;
+    background: linear-gradient(135deg, #818cf8, #c084fc, #f472b6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .intro p {
+    font-size: 0.95rem;
+    color: #a1a1aa;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+  .intro .stack-table {
+    display: grid;
+    grid-template-columns: minmax(180px, 1fr) 2fr 2fr;
+    gap: 0.5rem 1.2rem;
+    font-size: 0.82rem;
+  }
+  .intro .stack-table .h {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #52525b;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .intro .stack-table .tool {
+    font-weight: 600;
+    color: #e4e4e7;
+    padding: 0.45rem 0;
+  }
+  .intro .stack-table .tool strong {
+    background: linear-gradient(135deg, #818cf8, #c084fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 600;
+  }
+  .intro .stack-table .job, .intro .stack-table .why {
+    color: #a1a1aa;
+    padding: 0.45rem 0;
+    line-height: 1.45;
+  }
+
+  .summary {
+    margin-top: 2.5rem;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  .summary.active { animation: slideUp 0.6s ease forwards; }
+  .summary p {
+    font-size: 1.1rem;
+    color: #71717a;
+    font-weight: 300;
+  }
+  .summary em {
+    background: linear-gradient(135deg, #818cf8, #c084fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-style: normal;
+    font-weight: 600;
+  }
+
+  .hint {
+    position: fixed;
+    bottom: 1.2rem;
+    right: 1.6rem;
+    font-size: 0.72rem;
+    color: #52525b;
+    opacity: 0;
+    animation: fadeInUp 0.5s ease forwards;
+    animation-delay: 0.6s;
+  }
+  .hint kbd {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0.12rem 0.45rem;
+    border-radius: 3px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.68rem;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-30px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <p class="subtitle-top">VS Code · GitHub Copilot · OpenSpec · MSSQL Extension · SQL Server 2025</p>
+    <h1>What We Did Today</h1>
+    <p class="tagline">Eight minutes from change proposal to working semantic search, end to end inside VS Code.</p>
+  </div>
+
+  <!-- Intro / pitch card (revealed first before the timeline) -->
+  <div class="intro">
+    <h2>What this stack gives you</h2>
+    <p>An end-to-end semantic-search application <strong>inside VS Code</strong>, with no separate vector database, no cloud embedding API, and no SQL string literals in TypeScript. Five tools, each doing one job. Eight minutes from change proposal to working app.</p>
+    <div class="stack-table">
+      <div class="h">Tool</div>
+      <div class="h">Job in this project</div>
+      <div class="h">Why it earns its place</div>
+
+      <div class="tool"><strong>SQL Server 2025</strong></div>
+      <div class="job">Stores 91 conferences with 768-dim embeddings as native VECTOR(768); ranks queries with VECTOR_DISTANCE</div>
+      <div class="why">One database for relational AND vector data. No Pinecone + Postgres dual setup.</div>
+
+      <div class="tool"><strong>Ollama</strong> (host)</div>
+      <div class="job">Generates 768-dim embeddings via nomic-embed-text for seed and search</div>
+      <div class="why">Local, free, no API keys, no data egress. Metal-accelerated on Apple Silicon.</div>
+
+      <div class="tool"><strong>Prisma 7</strong></div>
+      <div class="job">Migrations, Event model, typed bridge from TS to SQL via @prisma/adapter-mssql</div>
+      <div class="why">Schema-as-code. T-SQL stays in prisma/sql/; the call site reads as one line.</div>
+
+      <div class="tool"><strong>MSSQL VS Code extension</strong></div>
+      <div class="job">Connection management, query editor, results grid, Schema Designer</div>
+      <div class="why">Inspect VECTOR(768) data live in the IDE. No external tooling.</div>
+
+      <div class="tool"><strong>GitHub Copilot</strong> + OpenSpec</div>
+      <div class="job">/opsx-propose generates a change spec from plain English; /opsx-apply writes the code</div>
+      <div class="why">Spec-driven. Requirements are reviewable artifacts on disk, not chat history.</div>
+    </div>
+  </div>
+
+  <div class="timeline">
+
+    <div class="step narrate">
+      <div class="node"><span class="icon">📂</span><span class="num">01</span></div>
+      <div class="content">
+        <div class="content-header">
+          <h3>Framed the problem</h3>
+          <span class="timing">0:00 → 0:30</span>
+          <span class="tag tag-narrate">Setup</span>
+        </div>
+        <p>Walked through the project structure: <code>openspec/</code> with an empty <code>changes/</code> directory, <code>prisma/sql/</code> as the only home for T-SQL, and the placeholder page at <code>localhost:3000</code>.</p>
+      </div>
+    </div>
+
+    <div class="step narrate">
+      <div class="node"><span class="icon">📜</span><span class="num">02</span></div>
+      <div class="content">
+        <div class="content-header">
+          <h3>Walked the project context</h3>
+          <span class="timing">0:30 → 1:30</span>
+          <span class="tag tag-narrate">Narrate</span>
+        </div>
+        <p>Opened <code>openspec/config.yaml</code> with the architectural rules, <code>searchEvents.sql</code> with VECTOR_DISTANCE, and <code>src/lib/sql.ts</code> the runtime SQL loader.</p>
+      </div>
+    </div>
+
+    <div class="step live">
+      <div class="node"><span class="icon">🪄</span><span class="num">03</span></div>
+      <div class="content">
+        <div class="content-header">
+          <h3>Proposed the change</h3>
+          <span class="timing">1:30 → 3:00</span>
+          <span class="tag tag-live">Live</span>
+        </div>
+        <p>Ran <code>/opsx-propose add-semantic-search-ui</code> in GitHub Copilot Chat. OpenSpec generated <code>proposal.md</code>, <code>design.md</code>, and <code>tasks.md</code> from the project context.</p>
+      </div>
+    </div>
+
+    <div class="step live">
+      <div class="node"><span class="icon">⚡</span><span class="num">04</span></div>
+      <div class="content">
+        <div class="content-header">
+          <h3>Applied the change</h3>
+          <span class="timing">3:00 → 4:30</span>
+          <span class="tag tag-live">Live</span>
+        </div>
+        <p>Ran <code>/opsx-apply</code>. GitHub Copilot generated the Server Action, three React components, the cfp-status utility, and wired them into the page. Browser hot-reloaded into a working UI.</p>
+      </div>
+    </div>
+
+    <div class="step live">
+      <div class="node"><span class="icon">🛠️</span><span class="num">05</span></div>
+      <div class="content">
+        <div class="content-header">
+          <h3>Edited SQL with GitHub Copilot Chat</h3>
+          <span class="timing">3:30 → 4:30</span>
+          <span class="tag tag-live">Marquee #1</span>
+        </div>
+        <p>Asked Copilot in plain English to filter the search query to events whose CFP is currently open. The agent edited <code>prisma/sql/searchEvents.sql</code> directly with correct T-SQL syntax for SQL Server 2025.</p>
+      </div>
+    </div>
+
+    <div class="step narrate">
+      <div class="node"><span class="icon">🧬</span><span class="num">06</span></div>
+      <div class="content">
+        <div class="content-header">
+          <h3>Showed the clean TypeScript</h3>
+          <span class="timing">4:30 → 5:00</span>
+          <span class="tag tag-narrate">Narrate</span>
+        </div>
+        <p>Opened <code>src/app/actions.ts</code>: a few lines of business logic, one embed call, one parameterized query through <code>$queryRawUnsafe</code>. No T-SQL string literals in the application code.</p>
+      </div>
+    </div>
+
+    <div class="step hands">
+      <div class="node"><span class="icon">🗄️</span><span class="num">07</span></div>
+      <div class="content">
+        <div class="content-header">
+          <h3>Inspected vectors in MSSQL Extension</h3>
+          <span class="timing">5:00 → 5:30</span>
+          <span class="tag tag-hands">Marquee #2</span>
+        </div>
+        <p>Connected to the local SQL Server 2025 container, ran a SELECT against <code>Event</code>, and saw the <code>VECTOR(768)</code> column rendered live with <code>VECTORPROPERTY</code> dimensions.</p>
+      </div>
+    </div>
+
+    <div class="step hands">
+      <div class="node"><span class="icon">✨</span><span class="num">08</span></div>
+      <div class="content">
+        <div class="content-header">
+          <h3>Searched: agentic workflows</h3>
+          <span class="timing">5:30 → 6:00</span>
+          <span class="tag tag-hands">Magic moment #1</span>
+        </div>
+        <p>Typed "agentic workflows for databases" into the browser. Top result was a relevant event whose title and description never used the word "agentic". Vocabulary mismatch handled by semantic search.</p>
+      </div>
+    </div>
+
+    <div class="step hands">
+      <div class="node"><span class="icon">🎯</span><span class="num">09</span></div>
+      <div class="content">
+        <div class="content-header">
+          <h3>Searched: type safety across the stack</h3>
+          <span class="timing">6:00 → 6:30</span>
+          <span class="tag tag-hands">Magic moment #2</span>
+        </div>
+        <p>Typed "type safety across the stack". Top results were tRPC and end-to-end TypeScript events. Same trick, different topic.</p>
+      </div>
+    </div>
+
+    <div class="step cameo">
+      <div class="node"><span class="icon">📐</span><span class="num">10</span></div>
+      <div class="content">
+        <div class="content-header">
+          <h3>Schema Designer via GitHub Copilot Chat (agent)</h3>
+          <span class="timing">6:30 → 7:30</span>
+          <span class="tag tag-cameo">Cross-tool</span>
+        </div>
+        <p>Asked GitHub Copilot Chat in agent mode to open the MSSQL Schema Designer for the <code>Event</code> table. The visual layout opened, showing the <code>VECTOR(768)</code> column alongside the relational fields. Same agent that drove the spec, the code, and the SQL edit.</p>
+      </div>
+    </div>
+
+    <div class="step narrate">
+      <div class="node"><span class="icon">🎬</span><span class="num">11</span></div>
+      <div class="content">
+        <div class="content-header">
+          <h3>Wrap</h3>
+          <span class="timing">7:30 → 8:00</span>
+          <span class="tag tag-narrate">Closing</span>
+        </div>
+        <p>Recap the stack: SQL Server 2025 native vectors, Prisma raw queries, GitHub Copilot, OpenSpec, all inside VS Code.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="summary">
+    <p>Same workflow, same VS Code, same SQL Server. <em>Spec-driven, type-safe, local.</em></p>
+  </div>
+
+</div>
+
+<div class="hint"><kbd>Space</kbd> or Click to advance · <kbd>A</kbd> show all · <kbd>R</kbd> reset</div>
+
+<script>
+  const intro = document.querySelector('.intro');
+  const timeline = document.querySelector('.timeline');
+  const reveals = [intro, ...document.querySelectorAll('.step, .summary')].filter(Boolean);
+  let current = -1;
+
+  function activate(i) {
+    if (i < 0 || i >= reveals.length) return;
+    if (timeline) timeline.classList.add('started');
+    reveals[i].classList.add('active');
+    reveals[i].scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  function activateAll() {
+    if (timeline) timeline.classList.add('started');
+    reveals.forEach((el) => el.classList.add('active'));
+    current = reveals.length - 1;
+  }
+  function reset() {
+    if (timeline) timeline.classList.remove('started');
+    reveals.forEach((el) => {
+      el.classList.remove('active');
+      void el.offsetWidth;
+    });
+    current = -1;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  function next() {
+    if (current < reveals.length - 1) {
+      current += 1;
+      activate(current);
+    }
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.code === 'Space') { e.preventDefault(); next(); }
+    else if (e.code === 'KeyA') { activateAll(); }
+    else if (e.code === 'KeyR') { reset(); }
+  });
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('a')) return;
+    next();
+  });
+</script>
+
+</body>
+</html>

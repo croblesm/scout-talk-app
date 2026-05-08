@@ -1,0 +1,47 @@
+{
+  "name": "TalkScout",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:22-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/prulloac/devcontainer-features/ollama:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-mssql.mssql",
+        "GitHub.copilot",
+        "GitHub.copilot-chat",
+        "Prisma.prisma",
+        "bradlc.vscode-tailwindcss",
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        "ms-azuretools.vscode-docker",
+        "Fission-AI.openspec"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "[markdown]": { "editor.defaultFormatter": null },
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  },
+  "forwardPorts": [3000, 1433, 11434],
+  "portsAttributes": {
+    "3000":  { "label": "TalkScout (Next.js)", "onAutoForward": "openBrowser" },
+    "1433":  { "label": "SQL Server 2025",     "onAutoForward": "silent" },
+    "11434": { "label": "Ollama",              "onAutoForward": "silent" }
+  },
+  "remoteEnv": {
+    "DATABASE_URL": "sqlserver://localhost:1433;database=talkscout;user=sa;password=TalkScout!Demo2026;trustServerCertificate=true;encrypt=true",
+    "OLLAMA_HOST": "http://localhost:11434",
+    "EMBEDDING_MODEL": "nomic-embed-text",
+    "EMBEDDING_DIM": "768"
+  },
+  "postCreateCommand": "npm install && npx prisma generate",
+  "hostRequirements": {
+    "cpus": 4,
+    "memory": "8gb",
+    "storage": "32gb"
+  }
+}

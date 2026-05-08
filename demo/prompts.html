@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TalkScout: Spec-Driven Semantic Search with SQL Server 2025</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f8f9fa;
+            padding: 2rem;
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-left: 6px solid #4f46e5;
+        }
+        pre {
+            background-color: #282c34;
+            color: #f8f8f2;
+            padding: 1rem;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            position: relative;
+        }
+        .copy-btn {
+            background-color: #4f46e5;
+            color: white;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            float: right;
+            margin-top: 0.5rem;
+        }
+        .voiceover {
+            font-style: italic;
+            margin: 0.5rem 0 1rem;
+            color: #555;
+        }
+        code {
+            background-color: #e9ecef;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9rem;
+        }
+        .theme-toggle {
+            position: fixed;
+            top: 1rem;
+            right: 2rem;
+            background: #4f46e5;
+            color: white;
+            padding: 0.4rem 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        body.dark {
+            background-color: #1e1e1e;
+            color: #f0f0f0;
+        }
+
+        body.dark .card {
+            background-color: #2e2e2e;
+            border-left-color: #90cdf4;
+        }
+
+        body.dark h1, body.dark h2, body.dark h3 {
+            color: #ffffff;
+        }
+
+        body.dark .copy-btn {
+            background-color: #90cdf4;
+            color: black;
+        }
+
+        body.dark pre {
+            background-color: #111;
+            color: #eee;
+        }
+
+        body.dark code {
+            background-color: #333;
+            color: #90cdf4;
+        }
+
+        body.dark .voiceover {
+            color: #aaa;
+        }
+
+        body.dark #toast {
+            background-color: #555;
+        }
+    </style>
+</head>
+<body>
+
+<button class="theme-toggle" onclick="toggleTheme()">🌓 Theme</button>
+
+<h1>🤖 TalkScout: Spec-Driven Semantic Search with SQL Server 2025</h1>
+
+<h2>🎬 Scenario Introduction</h2>
+<p>I am Carlos Robles, Principal PM for SQL developer experiences at Microsoft. Today I am showing you how I built TalkScout, a CFP finder for upcoming dev conferences. A speaker types a topic in plain English, and the app returns the top five upcoming conferences whose CFPs match, ranked by semantic similarity.</p>
+
+<p>The whole project lives inside VS Code. Five tools, each doing one job:</p>
+<ul>
+    <li><strong>SQL Server 2025</strong> stores both the relational data and the embeddings as native <code>VECTOR(768)</code> columns, and ranks queries with <code>VECTOR_DISTANCE</code></li>
+    <li><strong>Ollama</strong> runs on my host with the <code>nomic-embed-text</code> model for embeddings, no cloud API key</li>
+    <li><strong>Prisma 7</strong> with the <code>@prisma/adapter-mssql</code> driver provides the typed bridge from TypeScript to SQL</li>
+    <li><strong>The MSSQL VS Code extension</strong> handles connection, query editor, and Schema Designer</li>
+    <li><strong>GitHub Copilot</strong> with <strong>OpenSpec</strong> drives the build itself, from change proposal to implementation</li>
+</ul>
+
+<p class="voiceover">"For this demo, the environment is ready. Docker is running with SQL Server 2025. Ollama is up on the host with the embedding model pulled. The repo is at the pre-implement git tag: foundation in place, no search UI yet. OpenSpec is installed but no change has been proposed. That happens live, on camera, in a moment."</p>
+
+<h2>🚀 Step-by-Step Walkthrough</h2>
+
+<div class="card">
+    <h3>🔹 Step 1: Frame the project (0:00 → 0:30)</h3>
+    <p class="voiceover">"Let me show you what is in the repo before we add anything."</p>
+    <p><em>📌 Show: VS Code Explorer panel.</em></p>
+    <ol>
+        <li>Expand <code>openspec/</code>. Point out the empty <code>changes/</code> directory and <code>config.yaml</code>. Say: "OpenSpec's structure. No change has been proposed yet."</li>
+        <li>Expand <code>.github/prompts/</code>. Hover over the four <code>opsx-*.prompt.md</code> files. Say: "These are the slash commands OpenSpec installed for GitHub Copilot Chat: /opsx-propose, /opsx-apply, /opsx-explore, /opsx-archive."</li>
+        <li>Expand <code>prisma/sql/</code>. Hover over <code>searchEvents.sql</code> and <code>upsertEvents.sql</code>. Say: "The only T-SQL in this entire repo lives in these two files."</li>
+    </ol>
+</div>
+
+<div class="card">
+    <h3>🔹 Step 2: The pitch and the architecture (0:30 → 1:30)</h3>
+    <p class="voiceover">"OpenSpec is config-light. One config.yaml plus a long-lived specs folder. The architecture file in there is the thesis of this entire demo: five tools doing one job each."</p>
+    <p><em>📌 Show: open <code>openspec/specs/architecture.md</code>. Press <code>Cmd+K V</code> to open the side-by-side Markdown preview. Scroll to top.</em></p>
+    <ol>
+        <li>Read the "What this stack gives you" paragraph aloud. Lead with: "End-to-end semantic search inside VS Code. No separate vector database. No cloud embedding API. No SQL strings in TypeScript."</li>
+        <li>Cursor down to the five-tool table. Read each row, one breath each: SQL Server 2025 → Ollama → Prisma → MSSQL extension → GitHub Copilot with OpenSpec.</li>
+        <li>Cursor down to the search hot path Mermaid diagram. Trace the flow with the cursor: "Browser to Server Action, branches to Ollama for the embedding and to Prisma for the loaded SQL, converges in SQL Server where VECTOR_DISTANCE ranks. Top five back to the UI."</li>
+        <li>Brief look at <code>openspec/config.yaml</code> <code>context:</code> block. Three architectural rules: "All T-SQL only in <code>prisma/sql/</code>. Embeddings in Node. Containers capped at 2 GB / 2 CPUs."</li>
+    </ol>
+</div>
+
+<div class="card">
+    <h3>🔹 Step 3: Propose the change with /opsx-propose (1:30 → 3:00)</h3>
+    <p class="voiceover">"OpenSpec calls the unit of work a 'change.' I am going to propose adding the search UI as a change. The slash command creates three artifacts in one shot: a proposal, a design, and a tasks file. Live in GitHub Copilot Chat."</p>
+    <p><em>📌 Where: the GitHub Copilot Chat panel inside VS Code (Cmd+Ctrl+I, or click the speech-bubble icon in the Activity Bar).</em></p>
+    <pre id="code1">/opsx-propose add-semantic-search-ui
+
+Add the user-facing semantic search UI to TalkScout. The repo already has the foundation (Prisma schema, migrations applied, src/lib/db.ts, src/lib/embed.ts wrapping host Ollama, src/lib/sql.ts loading prisma/sql/searchEvents.sql, the database seeded with 91 events including embeddings, and the placeholder page at src/app/page.tsx). What is missing: a Server Action that embeds the user's query and runs prisma.$queryRawUnsafe(SEARCH_EVENTS_SQL, ...), three React components (SearchInput with gradient border and placeholder cycling, EventCard with clickable CFP link, CfpStatusPill with five visual states), a pure-function cfp-status utility, and the page composition that wires it all together. The two scripted on-camera queries are "agentic workflows for databases" and "type safety across the stack". Honor the architectural and UI rules in openspec/config.yaml.</pre>
+    <button class="copy-btn" onclick="copyToClipboard('code1')">Copy</button>
+    <p><strong>Expected:</strong> a new directory <code>openspec/changes/add-semantic-search-ui/</code> appears with three files: <code>proposal.md</code>, <code>design.md</code>, <code>tasks.md</code>. Roughly 60 to 90 seconds. When done, open <code>tasks.md</code> briefly and scroll through the task list.</p>
+</div>
+
+<div class="card">
+    <h3>🔹 Step 4: Apply the change with /opsx-apply (3:00 → 4:30)</h3>
+    <p class="voiceover">"Now I tell OpenSpec to execute the tasks file. GitHub Copilot will create the Server Action, the three components, the cfp-status utility, and wire it all into the page. Live."</p>
+    <p><em>📌 Where: same GitHub Copilot Chat panel as Step 3. Same input box.</em></p>
+    <pre id="code2">/opsx-apply add-semantic-search-ui</pre>
+    <button class="copy-btn" onclick="copyToClipboard('code2')">Copy</button>
+    <p><strong>Expected:</strong> 5 files appear in the Explorer: <code>src/lib/cfp-status.ts</code>, <code>src/app/actions.ts</code>, <code>src/components/CfpStatusPill.tsx</code>, <code>src/components/EventCard.tsx</code>, <code>src/components/SearchInput.tsx</code>. <code>src/app/page.tsx</code> is modified (not new). Total time 60 to 120 seconds. Browser tab on <code>localhost:3000</code> hot-reloads automatically and the search UI appears.</p>
+</div>
+
+<div class="card">
+    <h3>🔹 Step 5: GitHub Copilot Chat edits the SQL file (3:30 → 4:30)</h3>
+    <p class="voiceover">"This is the only SQL file you will see today. Eight lines. SQL Server 2025 has a native VECTOR(768) column type and a VECTOR_DISTANCE function. Now watch GitHub Copilot Chat take an instruction in plain English and edit this file directly."</p>
+    <p><em>📌 Setup: open <code>prisma/sql/searchEvents.sql</code> in the editor so it is the active file. In the GitHub Copilot Chat panel, attach the active file as context (paperclip icon, or type <code>#searchEvents.sql</code>). Make sure agent mode is enabled.</em></p>
+    <pre id="code3">Modify prisma/sql/searchEvents.sql so the result set is filtered to events whose CFP submission window is currently open: cfpOpenDate is in the past or today, AND cfpCloseDate is today or in the future. Add the conditions to the existing WHERE clause. Keep the file otherwise unchanged. The dialect is T-SQL on SQL Server 2025; use GETDATE() for the current date.</pre>
+    <button class="copy-btn" onclick="copyToClipboard('code3')">Copy</button>
+    <p><strong>Expected:</strong> GitHub Copilot Chat opens the file, shows a diff, and adds two conditions to the WHERE clause:</p>
+    <pre id="code4">AND cfpOpenDate &lt;= GETDATE()
+AND cfpCloseDate &gt;= GETDATE()</pre>
+    <button class="copy-btn" onclick="copyToClipboard('code4')">Copy</button>
+    <p class="voiceover">"Plain English in. Working SQL out. The file is the only place T-SQL lives in this project, and the agent respected that."</p>
+</div>
+
+<div class="card">
+    <h3>🔹 Step 6: Open actions.ts (4:30 → 5:00)</h3>
+    <p class="voiceover">"And here is what the application code sees. A handful of lines of business logic. One embed call, one parameterized query. No SQL strings. The .sql file is loaded once at module load by <code>src/lib/sql.ts</code> and passed in. Type safety stays end-to-end."</p>
+    <p><em>📌 Show: open <code>src/app/actions.ts</code>. Point at the <code>SEARCH_EVENTS_SQL</code> import. Hover the <code>results</code> variable to show the typed return shape.</em></p>
+</div>
+
+<div class="card">
+    <h3>🔹 Step 7: Inspect the VECTOR column with the MSSQL extension (5:00 → 5:30)</h3>
+    <p class="voiceover">"Let me prove the VECTOR column is real. The MSSQL extension for VS Code talks to my local SQL Server 2025 container. I will connect, run a quick SELECT, and you can see the vector data sitting in the row alongside the relational fields."</p>
+    <p><em>📌 Show: click the MSSQL extension icon. Use the saved <code>talkscout</code> connection (sa, TalkScout!Demo2026). Open a new query window. Paste. Press F5.</em></p>
+    <pre id="code5">SELECT TOP 3
+    name,
+    topics,
+    CAST(embedding AS NVARCHAR(80)) AS embedding_preview,
+    VECTORPROPERTY(embedding, 'Dimensions') AS dims
+FROM Event
+ORDER BY name;</pre>
+    <button class="copy-btn" onclick="copyToClipboard('code5')">Copy</button>
+    <p><strong>Expected:</strong> results grid with three rows; <code>dims = 768</code> on each; <code>embedding_preview</code> shows the first 80 chars of the vector.</p>
+</div>
+
+<div class="card">
+    <h3>🔹 Step 8: Live search, "agentic workflows for databases" (5:30 → 6:00)</h3>
+    <p class="voiceover">"Now to the actual app. The browser is already open at localhost:3000. I will type a topic I want to speak about. Watch: the top result will not contain the word 'agentic' anywhere in its title or description. That is semantic search at work, not keyword matching."</p>
+    <pre id="code6">agentic workflows for databases</pre>
+    <button class="copy-btn" onclick="copyToClipboard('code6')">Copy</button>
+    <p><strong>Expected:</strong> top result is an event tagged with topics like "AI agents", "MCP", or "autonomous tooling". Verify by reading the title aloud and pointing out that the word "agentic" appears nowhere.</p>
+</div>
+
+<div class="card">
+    <h3>🔹 Step 9: Live search, "type safety across the stack" (6:00 → 6:30)</h3>
+    <p class="voiceover">"One more. Type safety across the stack. I expect a tRPC or end-to-end TypeScript event, even though my query never says tRPC."</p>
+    <pre id="code7">type safety across the stack</pre>
+    <button class="copy-btn" onclick="copyToClipboard('code7')">Copy</button>
+    <p><strong>Expected:</strong> top result is a tRPC-flavored or end-to-end TypeScript event. CFP-open pill should be visible on at least one result.</p>
+</div>
+
+<div class="card">
+    <h3>🔹 Step 10: Ask GitHub Copilot to open the Schema Designer (6:30 → 7:30)</h3>
+    <p class="voiceover">"Let me close the loop on GitHub Copilot in this stack. The MSSQL extension has a visual Schema Designer. I do not need to right-click and hunt menus. Agent mode can open it for me."</p>
+    <p><em>📌 Where: GitHub Copilot Chat panel in VS Code, in <strong>Agent mode</strong>. The MSSQL extension must be loaded with the <code>talkscout</code> connection active.</em></p>
+    <pre id="code8">Open the Schema Designer for the Event table in the talkscout database.</pre>
+    <button class="copy-btn" onclick="copyToClipboard('code8')">Copy</button>
+    <p><strong>Expected:</strong> the agent picks the MSSQL extension's Schema Designer tool on its own, invokes it, and the table view opens with the <code>Event</code> table laid out, including the <code>VECTOR(768)</code> embedding column.</p>
+    <p class="voiceover">"GitHub Copilot drove the spec. The same agent generated the code. The same agent wrote the SQL filter. And the same agent opened the Schema Designer. One assistant, every surface in this demo."</p>
+</div>
+
+<div class="card">
+    <h3>🔹 Step 11: Closing statement (7:30 → 8:00)</h3>
+    <p class="voiceover">"That is TalkScout. Eight minutes from change proposal to working semantic search, end to end inside VS Code. SQL Server 2025 stored the vectors. Prisma kept the TypeScript clean. GitHub Copilot, with OpenSpec, drove the build. Repo and links are below. Thanks for watching."</p>
+</div>
+
+<h2>🎯 What We Accomplished</h2>
+<div class="card">
+    <p>In this demo, we composed five tools inside VS Code to build an end-to-end semantic-search application:</p>
+    <ul>
+        <li>✅ Drove the entire workflow with <strong>OpenSpec</strong> slash commands (<code>/opsx-propose</code>, <code>/opsx-apply</code>) inside GitHub Copilot Chat</li>
+        <li>✅ Showed <strong>GitHub Copilot Chat in agent mode</strong> editing a real SQL file and opening the MSSQL Schema Designer with full schema awareness</li>
+        <li>✅ Used <strong>SQL Server 2025</strong>'s native <code>VECTOR(768)</code> data type and <code>VECTOR_DISTANCE</code> function, no separate vector database</li>
+        <li>✅ Used <strong>Ollama</strong> on the host with <code>nomic-embed-text</code> for embeddings, no cloud API key</li>
+        <li>✅ Used <strong>Prisma 7</strong> with the <code>@prisma/adapter-mssql</code> driver to keep all SQL strings out of TypeScript</li>
+        <li>✅ Used <strong>the MSSQL VS Code extension</strong> to inspect the <code>VECTOR(768)</code> column live and to render the Schema Designer</li>
+        <li>✅ Demonstrated two semantic-search "magic moments" where the top result contained none of the query keywords</li>
+    </ul>
+    <p><strong>Key takeaways:</strong></p>
+    <ul>
+        <li>SQL Server 2025's <code>VECTOR</code> type brings AI capabilities directly into your database, no external vector store required</li>
+        <li>Ollama makes local embedding models simple to manage without API keys or cloud dependencies</li>
+        <li>Prisma + a runtime SQL loader keeps application TypeScript free of T-SQL string literals</li>
+        <li>GitHub Copilot, in VS Code, with OpenSpec, lets one developer go from idea to shipped feature in a coherent workflow</li>
+    </ul>
+</div>
+
+<h2>🎯 Closing Statement</h2>
+<p class="voiceover">"In about eight minutes, we proposed a change with OpenSpec, watched GitHub Copilot apply it, edited a real SQL file with the agent, and ran semantic search against SQL Server 2025's native vectors, all without leaving VS Code and without writing a single line of SQL string literal in our application code. The whole stack is local. The whole demo is reproducible."</p>
+
+<h2>📚 Resources</h2>
+<div class="card">
+    <ul>
+        <li>📖 <strong>Setup Instructions:</strong> See <a href="../README.md">README.md</a> for the dev container and host install paths</li>
+        <li>📐 <strong>Architecture:</strong> See <a href="../openspec/specs/architecture.md">openspec/specs/architecture.md</a> for the runtime and seed-time flow diagrams</li>
+        <li>🐙 <strong>OpenSpec:</strong> <a href="https://github.com/Fission-AI/OpenSpec" target="_blank">github.com/Fission-AI/OpenSpec</a></li>
+        <li>💡 <strong>SQL Server 2025 vectors:</strong> <a href="https://learn.microsoft.com/sql/relational-databases/vectors/vectors-sql-server" target="_blank">Microsoft Learn docs</a></li>
+        <li>🤖 <strong>GitHub Copilot:</strong> <a href="https://github.com/features/copilot" target="_blank">github.com/features/copilot</a></li>
+        <li>🦙 <strong>Ollama nomic-embed-text:</strong> <a href="https://ollama.com/library/nomic-embed-text" target="_blank">ollama.com/library/nomic-embed-text</a></li>
+    </ul>
+</div>
+
+<h2>🙏 Thank You</h2>
+<p>Thanks to the SQL Server, Prisma, GitHub Copilot, and OpenSpec teams for the work that made this demo possible.</p>
+
+<div id="toast" style="
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #323232;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    opacity: 0;
+    transition: opacity 0.4s ease-in-out;
+    z-index: 1000;
+">
+📋 Copied to clipboard!
+</div>
+
+<script>
+    function toggleTheme() {
+        document.body.classList.toggle('dark');
+    }
+</script>
+<script>
+function copyToClipboard(id) {
+    const el = document.getElementById(id);
+    const text = el.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+        const toast = document.getElementById('toast');
+        toast.style.opacity = '1';
+        setTimeout(() => {
+            toast.style.opacity = '0';
+        }, 2000);
+    });
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+    "chat.promptFilesRecommendations": {
+        "opsx-propose": true,
+        "opsx-apply": true,
+        "opsx-explore": true,
+        "opsx-archive": true
+    },
+    "chat.tools.terminal.autoApprove": {
+        "openspec": true,
+        "npx openspec": true
+    }
+}

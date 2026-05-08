@@ -1,0 +1,25 @@
+node_modules/
+.next/
+out/
+build/
+*.tsbuildinfo
+
+.env
+.env.local
+.env.*.local
+
+prisma/.env
+prisma/migrations/dev.db*
+
+scripts/.caddy-root.crt
+
+# Operator runbook (private notes, per-machine)
+demo/demo.md
+
+# OpenSpec change-proposal artifacts (created live by /opsx-propose, regenerated on every demo:reset)
+openspec/changes/*/
+!openspec/changes/archive/
+
+.DS_Store
+*.log
+.vscode/*.log
