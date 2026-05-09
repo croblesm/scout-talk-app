@@ -16,7 +16,7 @@
  * Target wall clock under 90 seconds (SC-003).
  */
 import { spawn, spawnSync } from 'node:child_process'
-import { existsSync, rmSync } from 'node:fs'
+import { existsSync, readdirSync, rmSync } from 'node:fs'
 import { resolve } from 'node:path'
 
 const ROOT = process.cwd()
@@ -113,7 +113,6 @@ async function main() {
   // Delete any stale change directories so each take starts with no change.
   const changesDir = resolve(ROOT, 'openspec/changes')
   if (existsSync(changesDir)) {
-    const { readdirSync } = require('node:fs')
     for (const entry of readdirSync(changesDir, { withFileTypes: true })) {
       if (entry.isDirectory() && entry.name !== 'archive') {
         const target = resolve(changesDir, entry.name)
