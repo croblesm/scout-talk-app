@@ -157,7 +157,10 @@ Prerequisites: Docker (or OrbStack on Apple Silicon), VS Code, the **Dev Contain
 | `docker-outside-of-docker` feature | Mounts the host's `/var/run/docker.sock` into the container, so the `docker` CLI talks to your host's Docker daemon | Avoids the Docker-in-Docker / containerd 2.3 boot bug on Apple Silicon. Faster too (no nested VM). |
 | Host Ollama (not in container) | Embeddings server (nomic-embed-text, 768-dim) | Reached at `host.docker.internal:11434`. Metal-accelerated on Apple Silicon. Install on the host once via [Prerequisites](#2-ollama-host-install-not-containerized). |
 
-SQL Server runs as a **sibling container on the host's Docker** (launched by `docker compose up -d` from inside the dev container — the project's root `docker-compose.yml` is the one source of truth). The container is `platform: linux/amd64`, 2 GB / 2 CPU quota, runs under Rosetta on Apple Silicon. From inside the dev container, the database is reached at `host.docker.internal:1433` (already wired in `DATABASE_URL`).
+SQL Server runs as a **sibling container on the host's Docker** (launched by `docker compose up -d` from inside the dev container — the project's root `docker-compose.yml` is the one source of truth). The container is `platform: linux/amd64`, 2 GB / 2 CPU quota, runs under Rosetta on Apple Silicon. The dev container joins the same Docker network (`talkscout_default`, created automatically by `initializeCommand`), so the database is reached by container name: `talkscout-mssql:1433` (already wired in `DATABASE_URL`). This works the same way on Docker Desktop, OrbStack, and Codespaces.
+
+> [!NOTE]
+> When you add a connection in the **MSSQL VS Code extension** from inside the dev container, set the server to `talkscout-mssql,1433` (not `localhost,1433`).
 
 VS Code extensions installed automatically: MSSQL, GitHub Copilot, GitHub Copilot Chat, Prisma, Tailwind CSS IntelliSense, ESLint, Prettier, Docker, OpenSpec.
 

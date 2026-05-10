@@ -31,9 +31,13 @@
     "3000": { "label": "TalkScout (Next.js)", "onAutoForward": "openBrowser" },
     "1433": { "label": "SQL Server 2025",     "onAutoForward": "silent" }
   },
-  "runArgs": ["--add-host=host.docker.internal:host-gateway"],
+  "initializeCommand": "docker network inspect talkscout_default >/dev/null 2>&1 || docker network create talkscout_default",
+  "runArgs": [
+    "--add-host=host.docker.internal:host-gateway",
+    "--network=talkscout_default"
+  ],
   "remoteEnv": {
-    "DATABASE_URL": "sqlserver://host.docker.internal:1433;database=talkscout;user=sa;password=TalkScout!Demo2026;trustServerCertificate=true;encrypt=true",
+    "DATABASE_URL": "sqlserver://talkscout-mssql:1433;database=talkscout;user=sa;password=TalkScout!Demo2026;trustServerCertificate=true;encrypt=true",
     "OLLAMA_HOST": "http://host.docker.internal:11434",
     "EMBEDDING_MODEL": "nomic-embed-text",
     "EMBEDDING_DIM": "768"
@@ -41,7 +45,7 @@
   "postCreateCommand": "npm install && npx prisma generate",
   "hostRequirements": {
     "cpus": 4,
-    "memory": "8gb",
+    "memory": "6gb",
     "storage": "32gb"
   }
 }

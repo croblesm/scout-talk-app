@@ -39,3 +39,7 @@ services:
 
 volumes:
   mssql_data:
+
+networks:
+  default:
+    name: talkscout_default

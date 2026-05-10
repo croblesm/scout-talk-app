@@ -51,11 +51,21 @@ context: |
     host's Docker daemon. We avoid Docker-in-Docker because containerd 2.3 +
     the dind feature currently fail to start on M-series Macs (the dind
     feature's bundled containerd hangs at boot). Sibling-container is also
-    faster: no double emulation. From inside the dev container the database
-    is reached at `host.docker.internal:1433` (NOT localhost), and
-    `DATABASE_URL` in `.devcontainer/devcontainer.json` reflects this. The
-    project's root `docker-compose.yml` remains the one source of truth for
-    SQL Server config; the dev container does NOT define its own.
+    faster: no double emulation.
+  - To make container-to-container networking universal across Docker Desktop,
+    OrbStack, and Codespaces, the dev container and the SQL Server container
+    share an explicit Docker network named `talkscout_default`. The dev
+    container has `"runArgs": ["--network=talkscout_default"]` and an
+    `initializeCommand` that creates the network if it does not already exist.
+    `docker-compose.yml` declares the same network name as its default. Inside
+    the dev container, the database is reached by its container name:
+    `DATABASE_URL=sqlserver://talkscout-mssql:1433;...`. We do NOT use
+    `host.docker.internal` for the database because OrbStack does not route
+    container traffic through the host gateway to other containers' published
+    ports (only Docker Desktop does). On the host (no dev container), the
+    `.env` file uses `localhost:1433` because the container publishes the port.
+    The project's root `docker-compose.yml` remains the one source of truth
+    for SQL Server config; the dev container does NOT define its own.
 
   Project state:
   - Database: 91 events seeded from data/dev-events.html via prisma/seed.ts.
