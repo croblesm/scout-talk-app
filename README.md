@@ -160,7 +160,7 @@ Prerequisites: Docker (or OrbStack on Apple Silicon), VS Code, the **Dev Contain
 SQL Server runs as a **sibling container on the host's Docker** (launched by `docker compose up -d` from inside the dev container — the project's root `docker-compose.yml` is the one source of truth). The container is `platform: linux/amd64`, 2 GB / 2 CPU quota, runs under Rosetta on Apple Silicon. The dev container joins the same Docker network (`talkscout_default`, created automatically by `initializeCommand`), so the database is reached by container name: `talkscout-mssql:1433` (already wired in `DATABASE_URL`). This works the same way on Docker Desktop, OrbStack, and Codespaces.
 
 > [!NOTE]
-> When you add a connection in the **MSSQL VS Code extension** from inside the dev container, set the server to `talkscout-mssql,1433` (not `localhost,1433`).
+> When you add a connection in the **MSSQL VS Code extension** from inside the dev container, set the **Server** field to just `talkscout-mssql` (no port, no comma). The extension's connection wizard does not parse the SQL Server `host,port` shorthand the same way `.NET SqlClient` does, and the default port 1433 is correct for this project. Username `sa`, password `TalkScout!Demo2026`, **Trust server certificate** ON. If your VS Code Settings Sync carried over an older profile pointing at `localhost,1433` (or `host.docker.internal,1433`), edit it or add a new profile.
 
 VS Code extensions installed automatically: MSSQL, GitHub Copilot, GitHub Copilot Chat, Prisma, Tailwind CSS IntelliSense, ESLint, Prettier, Docker, OpenSpec.
 
