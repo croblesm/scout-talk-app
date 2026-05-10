@@ -210,11 +210,12 @@ ORDER BY name;</pre>
 </div>
 
 <div class="card">
-    <h3>🔹 Step 9: Live search, "type safety across the stack" (6:00 → 6:30)</h3>
-    <p class="voiceover">"One more. Type safety across the stack. I expect a tRPC or end-to-end TypeScript event, even though my query never says tRPC."</p>
+    <h3>🔹 Step 9: Second live search, "type safety across the stack" (6:00 → 6:30)</h3>
+    <p class="voiceover">"One more vocabulary-mismatch test. I am going to search for a topic I might want to speak about: type safety across the whole stack. Watch the top result. I will bet it is tRPC Conf or one of the JavaScript conferences with an end-to-end TypeScript track, even though my search never says the word 'TypeScript' or 'tRPC'."</p>
+    <p><em>📌 Where: same browser tab at <code>localhost:3000</code> as Step 8. Clear the previous query, type the new one, press Enter.</em></p>
     <pre id="code7">type safety across the stack</pre>
     <button class="copy-btn" onclick="copyToClipboard('code7')">Copy</button>
-    <p><strong>Expected:</strong> top result is a tRPC-flavored or end-to-end TypeScript event. CFP-open pill should be visible on at least one result.</p>
+    <p><strong>Expected:</strong> the top result is <code>tRPC Conf 2026</code> or another event whose topics include <code>end-to-end-typescript</code> / <code>contracts</code>. None of those words appear in the search box. At least one result has the CFP-open pill.</p>
 </div>
 
 <div class="card">
