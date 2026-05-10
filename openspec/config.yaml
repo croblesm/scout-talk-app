@@ -34,12 +34,16 @@ context: |
   - Container resource quotas: every SQL Server container is capped at 2 GB
     memory and 2 CPUs.
   - SQL Server 2025 image runs platform: linux/amd64 on Apple Silicon (Rosetta).
-  - Ollama runs on the host (not in a container) for the live demo to get
-    Metal acceleration. The dev container at .devcontainer/devcontainer.json
-    is the one exception: it runs Ollama inside the workspace container via
-    the `ghcr.io/prulloac/devcontainer-features/ollama:1` feature so first-time
-    users can repro the project without installing Ollama on their host.
-    Inside the dev container, `OLLAMA_HOST` is `http://localhost:11434`.
+  - Ollama runs on the host (not in a container) so it gets Metal acceleration
+    on Apple Silicon. This applies to local development AND to the dev container
+    workflow: dev container users install Ollama on their host first (the README
+    documents the four steps), and the dev container reaches it via
+    `OLLAMA_HOST=http://host.docker.internal:11434`. The `runArgs` in
+    `.devcontainer/devcontainer.json` adds `--add-host=host.docker.internal:host-gateway`
+    so the lookup resolves on OrbStack and Linux hosts too. We do NOT install
+    Ollama as a dev container feature: running it inside the Linux/amd64
+    workspace container would lose Metal acceleration and is what the
+    architectural choice exists to avoid.
   - The dev container uses Docker-in-Docker (`ghcr.io/devcontainers/features/docker-in-docker:2`)
     so the user can run the project's root `docker-compose.yml` from inside the
     container to start SQL Server. The dev container does NOT define its own

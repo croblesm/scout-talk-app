@@ -81,14 +81,15 @@ The dev container ships with:
 
 - Node.js 22 + npm + tsx + git (`mcr.microsoft.com/devcontainers/typescript-node:22-bookworm`, multi-arch)
 - Docker-in-Docker (so you can run the project's `docker-compose.yml` from inside the container)
-- Ollama installed inside the container (via `ghcr.io/prulloac/devcontainer-features/ollama:1`) so no host setup is required
 - VS Code extensions auto-installed: MSSQL, GitHub Copilot, GitHub Copilot Chat, Prisma, Tailwind, ESLint, Prettier, Docker, OpenSpec
-- `postCreateCommand` runs only `npm install && npx prisma generate` so the container build never fails on a missing service
+- `postCreateCommand` runs `npm install && npx prisma generate`
 
-After the container opens, follow the [Quick Start (in the container)](#quick-start-in-the-container) steps to start SQL Server, pull the embedding model, run migrations, and seed the catalog.
+Ollama still runs on your **host**, not in the container. The dev container reaches it via `OLLAMA_HOST=http://host.docker.internal:11434`. This keeps Metal acceleration on Apple Silicon (roughly 5 to 10 times faster than CPU-bound Linux Ollama) and avoids the broken zstd extraction in older Ollama dev container features.
 
-> [!NOTE]
-> Apple Silicon developers running the demo on the **host** (not in the dev container) get Metal-accelerated Ollama, roughly 5 to 10 times faster than the in-container Linux variant. The dev container is for repro convenience; the recording itself uses host Ollama. See the [Prerequisites](#prerequisites) above for host Ollama install steps.
+> [!IMPORTANT]
+> Complete the [Ollama section of Prerequisites](#2-ollama-host-install-not-containerized) **before** you open the dev container. The container assumes `ollama serve` is already running on your host with `nomic-embed-text` pulled.
+
+After the container opens, follow the [Quick Start (in the container)](#quick-start-in-the-container) steps to start SQL Server, run migrations, and seed the catalog.
 
 ## Quick Start (in the container)
 
@@ -99,15 +100,12 @@ After **"Dev Containers: Reopen in Container"** finishes and you see a terminal 
 docker compose up -d
 node scripts/wait-for-db.mjs
 
-# 2. Pull the embedding model into the container's Ollama
-ollama pull nomic-embed-text
-
-# 3. Apply migrations and seed the catalog (91 events with embeddings)
+# 2. Apply migrations and seed the catalog (91 events with embeddings via host Ollama)
 cp .env.example .env
 npx prisma migrate deploy
 npm run db:seed
 
-# 4. Start the dev server
+# 3. Start the dev server
 npm run dev
 ```
 
@@ -129,7 +127,7 @@ Open `http://localhost:3000`. Type a search like "agentic workflows for database
 
 ## Dev container (recommended for first-time users)
 
-The dev container packages **everything** the project needs: a Node.js workspace with the right version, SQL Server 2025 (AMD64-emulated where needed), Ollama with the embedding model, all VS Code extensions you should have installed, and an automatic post-create script that runs `npm install`, `prisma migrate deploy`, and `npm run db:seed`. No manual steps after the container is up.
+The dev container packages the Node.js workspace (correct version), Docker-in-Docker so you can launch SQL Server 2025 from inside it, and every VS Code extension this project uses. SQL Server runs from the project's `docker-compose.yml`. Ollama stays on your host (Metal acceleration) and the container reaches it at `host.docker.internal:11434`.
 
 ### Open in GitHub Codespaces (cloud, no local install)
 
@@ -145,24 +143,20 @@ The first launch takes 3 to 5 minutes (image pull + post-create). Subsequent lau
 
 Prerequisites: Docker (or OrbStack on Apple Silicon), VS Code, the **Dev Containers** extension (`ms-vscode-remote.remote-containers`).
 
-1. Click the **Open in Dev Containers** badge at the top of this README, OR clone the repo locally and run **"Dev Containers: Reopen in Container"** from the VS Code command palette.
-2. The first build pulls the workspace image, the SQL Server 2025 image, and the Ollama image. About 3 to 5 minutes.
-3. The post-create script runs `npm install`, `prisma generate`, `ollama pull nomic-embed-text`, `prisma migrate deploy`, and `npm run db:seed`.
-4. When the integrated terminal prints "TalkScout devcontainer ready", run:
-
-   ```bash
-   npm run dev
-   ```
-
-   The app is at `http://localhost:3000`. Port 3000 is auto-forwarded.
+1. Make sure you completed the [Ollama section of Prerequisites](#2-ollama-host-install-not-containerized) so `ollama serve` is running on your host with `nomic-embed-text` pulled.
+2. Click the **Open in Dev Containers** badge at the top of this README, OR clone the repo locally and run **"Dev Containers: Reopen in Container"** from the VS Code command palette.
+3. The first build pulls the workspace image. About 2 minutes. The post-create command then runs `npm install && npx prisma generate`.
+4. Follow [Quick Start (in the container)](#quick-start-in-the-container) to bring up SQL Server, migrate, seed, and start the dev server.
 
 ### What's inside the dev container
 
-| Service | Why | Notes |
+| Component | Why | Notes |
 |---|---|---|
 | `workspace` | Node 22 + npm + tsx + git | Multi-arch (`mcr.microsoft.com/devcontainers/typescript-node:22-bookworm`). Native on ARM and x86. |
-| `mssql` | SQL Server 2025 with native VECTOR(768) and VECTOR_DISTANCE | Pinned `platform: linux/amd64` so it runs under Rosetta on Apple Silicon. 2 GB / 2 CPU quota. |
-| `ollama` | Embedding model server (nomic-embed-text, 768-dim) | Multi-arch. Inside the container Ollama runs on CPU; the demo's Metal-acceleration optimization only applies to the host-Ollama setup. CPU is plenty for the 91-event seed and individual search queries. |
+| Docker-in-Docker feature | Lets you run the project's root `docker-compose.yml` from inside the container | One source of truth for SQL Server config. |
+| Host Ollama (not in container) | Embeddings server (nomic-embed-text, 768-dim) | Reached at `host.docker.internal:11434`. Metal-accelerated on Apple Silicon. Install on the host once via [Prerequisites](#2-ollama-host-install-not-containerized). |
+
+The SQL Server container is launched on demand by `docker compose up -d` from inside the dev container (see [Quick Start](#quick-start-in-the-container)). It is `platform: linux/amd64`, 2 GB / 2 CPU quota, runs under Rosetta on Apple Silicon.
 
 VS Code extensions installed automatically: MSSQL, GitHub Copilot, GitHub Copilot Chat, Prisma, Tailwind CSS IntelliSense, ESLint, Prettier, Docker, OpenSpec.
 
@@ -170,12 +164,12 @@ VS Code extensions installed automatically: MSSQL, GitHub Copilot, GitHub Copilo
 
 ```text
 .devcontainer/
-├── devcontainer.json         # VS Code config: services, ports, extensions, env vars
-├── docker-compose.yml        # 3 services: workspace, mssql, ollama
-└── post-create.sh            # Runs once after the container is built
+└── devcontainer.json         # VS Code config: image, features, ports, extensions, env vars
 ```
 
-To customize, edit `.devcontainer/devcontainer.json` (extensions, env vars) or `.devcontainer/docker-compose.yml` (services, resource limits). Rebuild with **"Dev Containers: Rebuild Container"**.
+A single file. SQL Server is defined in the project's root `docker-compose.yml` (the same one used by the manual quickstart) and brought up from inside the container via Docker-in-Docker.
+
+To customize, edit `.devcontainer/devcontainer.json` and rebuild with **"Dev Containers: Rebuild Container"**.
 
 ## Quickstart (manual)
 
@@ -237,9 +231,7 @@ npm run demo:reset       # tear down everything and rebuild from the
 
 ```text
 .devcontainer/
-├── devcontainer.json     # VS Code dev container config (services, extensions, env)
-├── docker-compose.yml    # workspace + mssql + ollama (multi-arch where possible)
-└── post-create.sh        # Runs once: npm install, prisma generate/migrate, seed
+└── devcontainer.json     # VS Code dev container config (image, features, ports, extensions, env)
 openspec/
 ├── config.yaml           # Project context + architectural rules + UI rules
 ├── specs/architecture.md # Mermaid architecture diagrams (search hot path + ingest)

@@ -2,8 +2,7 @@
   "name": "TalkScout",
   "image": "mcr.microsoft.com/devcontainers/typescript-node:22-bookworm",
   "features": {
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
-    "ghcr.io/prulloac/devcontainer-features/ollama:1": {}
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
   },
   "customizations": {
     "vscode": {
@@ -26,15 +25,15 @@
       }
     }
   },
-  "forwardPorts": [3000, 1433, 11434],
+  "forwardPorts": [3000, 1433],
   "portsAttributes": {
-    "3000":  { "label": "TalkScout (Next.js)", "onAutoForward": "openBrowser" },
-    "1433":  { "label": "SQL Server 2025",     "onAutoForward": "silent" },
-    "11434": { "label": "Ollama",              "onAutoForward": "silent" }
+    "3000": { "label": "TalkScout (Next.js)", "onAutoForward": "openBrowser" },
+    "1433": { "label": "SQL Server 2025",     "onAutoForward": "silent" }
   },
+  "runArgs": ["--add-host=host.docker.internal:host-gateway"],
   "remoteEnv": {
     "DATABASE_URL": "sqlserver://localhost:1433;database=talkscout;user=sa;password=TalkScout!Demo2026;trustServerCertificate=true;encrypt=true",
-    "OLLAMA_HOST": "http://localhost:11434",
+    "OLLAMA_HOST": "http://host.docker.internal:11434",
     "EMBEDDING_MODEL": "nomic-embed-text",
     "EMBEDDING_DIM": "768"
   },
