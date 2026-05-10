@@ -2,7 +2,7 @@
   "name": "TalkScout",
   "image": "mcr.microsoft.com/devcontainers/typescript-node:22-bookworm",
   "features": {
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
   },
   "customizations": {
     "vscode": {
@@ -32,7 +32,7 @@
   },
   "runArgs": ["--add-host=host.docker.internal:host-gateway"],
   "remoteEnv": {
-    "DATABASE_URL": "sqlserver://localhost:1433;database=talkscout;user=sa;password=TalkScout!Demo2026;trustServerCertificate=true;encrypt=true",
+    "DATABASE_URL": "sqlserver://host.docker.internal:1433;database=talkscout;user=sa;password=TalkScout!Demo2026;trustServerCertificate=true;encrypt=true",
     "OLLAMA_HOST": "http://host.docker.internal:11434",
     "EMBEDDING_MODEL": "nomic-embed-text",
     "EMBEDDING_DIM": "768"

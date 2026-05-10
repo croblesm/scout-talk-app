@@ -80,7 +80,7 @@ Click the badge above (or clone and run **"Dev Containers: Reopen in Container"*
 The dev container ships with:
 
 - Node.js 22 + npm + tsx + git (`mcr.microsoft.com/devcontainers/typescript-node:22-bookworm`, multi-arch)
-- Docker-in-Docker (so you can run the project's `docker-compose.yml` from inside the container)
+- Docker CLI wired to your **host's** Docker daemon (the `docker-outside-of-docker` feature mounts the host socket). Running `docker compose up` from inside the container launches SQL Server on the host as a sibling container.
 - VS Code extensions auto-installed: MSSQL, GitHub Copilot, GitHub Copilot Chat, Prisma, Tailwind, ESLint, Prettier, Docker, OpenSpec
 - `postCreateCommand` runs `npm install && npx prisma generate`
 
@@ -96,7 +96,8 @@ After the container opens, follow the [Quick Start (in the container)](#quick-st
 After **"Dev Containers: Reopen in Container"** finishes and you see a terminal in VS Code, run these in order. About 90 seconds total.
 
 ```bash
-# 1. Start SQL Server 2025 (uses Docker-in-Docker; pulls the image on first run)
+# 1. Start SQL Server 2025 on the host's Docker daemon (the dev container uses
+#    docker-outside-of-docker so this is the same SQL Server you'd run on the host)
 docker compose up -d
 node scripts/wait-for-db.mjs
 
@@ -127,7 +128,7 @@ Open `http://localhost:3000`. Type a search like "agentic workflows for database
 
 ## Dev container (recommended for first-time users)
 
-The dev container packages the Node.js workspace (correct version), Docker-in-Docker so you can launch SQL Server 2025 from inside it, and every VS Code extension this project uses. SQL Server runs from the project's `docker-compose.yml`. Ollama stays on your host (Metal acceleration) and the container reaches it at `host.docker.internal:11434`.
+The dev container packages the Node.js workspace (correct version) and every VS Code extension this project uses. The Docker CLI inside the container is wired to your **host's** Docker daemon (`docker-outside-of-docker`), so `docker compose up` launches SQL Server 2025 on the host as a sibling container — no nested Docker, no double emulation. Ollama also stays on the host (Metal acceleration). Both are reached from inside the container at `host.docker.internal`.
 
 ### Open in GitHub Codespaces (cloud, no local install)
 
@@ -153,10 +154,10 @@ Prerequisites: Docker (or OrbStack on Apple Silicon), VS Code, the **Dev Contain
 | Component | Why | Notes |
 |---|---|---|
 | `workspace` | Node 22 + npm + tsx + git | Multi-arch (`mcr.microsoft.com/devcontainers/typescript-node:22-bookworm`). Native on ARM and x86. |
-| Docker-in-Docker feature | Lets you run the project's root `docker-compose.yml` from inside the container | One source of truth for SQL Server config. |
+| `docker-outside-of-docker` feature | Mounts the host's `/var/run/docker.sock` into the container, so the `docker` CLI talks to your host's Docker daemon | Avoids the Docker-in-Docker / containerd 2.3 boot bug on Apple Silicon. Faster too (no nested VM). |
 | Host Ollama (not in container) | Embeddings server (nomic-embed-text, 768-dim) | Reached at `host.docker.internal:11434`. Metal-accelerated on Apple Silicon. Install on the host once via [Prerequisites](#2-ollama-host-install-not-containerized). |
 
-The SQL Server container is launched on demand by `docker compose up -d` from inside the dev container (see [Quick Start](#quick-start-in-the-container)). It is `platform: linux/amd64`, 2 GB / 2 CPU quota, runs under Rosetta on Apple Silicon.
+SQL Server runs as a **sibling container on the host's Docker** (launched by `docker compose up -d` from inside the dev container — the project's root `docker-compose.yml` is the one source of truth). The container is `platform: linux/amd64`, 2 GB / 2 CPU quota, runs under Rosetta on Apple Silicon. From inside the dev container, the database is reached at `host.docker.internal:1433` (already wired in `DATABASE_URL`).
 
 VS Code extensions installed automatically: MSSQL, GitHub Copilot, GitHub Copilot Chat, Prisma, Tailwind CSS IntelliSense, ESLint, Prettier, Docker, OpenSpec.
 

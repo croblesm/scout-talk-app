@@ -44,10 +44,18 @@ context: |
     Ollama as a dev container feature: running it inside the Linux/amd64
     workspace container would lose Metal acceleration and is what the
     architectural choice exists to avoid.
-  - The dev container uses Docker-in-Docker (`ghcr.io/devcontainers/features/docker-in-docker:2`)
-    so the user can run the project's root `docker-compose.yml` from inside the
-    container to start SQL Server. The dev container does NOT define its own
-    docker-compose.yml; one source of truth.
+  - The dev container uses Docker-outside-of-Docker
+    (`ghcr.io/devcontainers/features/docker-outside-of-docker:1`): the host's
+    Docker socket is mounted into the container, so `docker compose up` from
+    inside the dev container starts SQL Server as a sibling container on the
+    host's Docker daemon. We avoid Docker-in-Docker because containerd 2.3 +
+    the dind feature currently fail to start on M-series Macs (the dind
+    feature's bundled containerd hangs at boot). Sibling-container is also
+    faster: no double emulation. From inside the dev container the database
+    is reached at `host.docker.internal:1433` (NOT localhost), and
+    `DATABASE_URL` in `.devcontainer/devcontainer.json` reflects this. The
+    project's root `docker-compose.yml` remains the one source of truth for
+    SQL Server config; the dev container does NOT define its own.
 
   Project state:
   - Database: 91 events seeded from data/dev-events.html via prisma/seed.ts.
