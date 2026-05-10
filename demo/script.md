@@ -62,25 +62,28 @@ What appears, in roughly this order:
 
 Expected total time: 60 to 120 seconds. While files appear, narrate: "The agent is reading tasks.md and creating exactly the files it lists. No more, no less. The page.tsx hot-reloads in the browser when it lands."
 
-## 3:30 to 4:30, Marquee 1: Copilot inside searchEvents.sql
+## 3:30 to 4:30, Marquee 1: GitHub Copilot Chat edits searchEvents.sql
 
-> *Speaker notes: open the SQL file. Position cursor on the line immediately after the WHERE clause. Type a comment slowly so the camera catches it.*
+> *Speaker notes: open `prisma/sql/searchEvents.sql` so it is the active file. In GitHub Copilot Chat, attach the file as context (paperclip or `#searchEvents.sql`). Agent mode on.*
 
-Open `prisma/sql/searchEvents.sql`. Read aloud: "Eight lines. SQL Server 2025 has a native VECTOR(768) data type and a VECTOR_DISTANCE function. The query embedding arrives as a JSON array and is cast to a vector in place."
+Read aloud: "Eight lines. SQL Server 2025 has a native VECTOR(768) data type and a VECTOR_DISTANCE function. The query embedding arrives as a JSON array and is cast to a vector in place. Now watch GitHub Copilot Chat take an instruction in plain English and edit this file directly."
 
-Place cursor after `WHERE embedding IS NOT NULL`. Type the comment:
+In the chat input, type:
+
+> The search keeps returning events whose CFP is already closed or has not opened yet. Filter the search SQL so it only returns events with an open CFP right now.
+
+Press Enter. Wait for the diff.
+
+Expected: GitHub Copilot opens the file, shows a diff, and adds two conditions to the WHERE clause along these lines:
 
 ```sql
--- Filter to events whose CFP is still open today.
+AND cfpOpenDate <= GETDATE()
+AND cfpCloseDate >= GETDATE()
 ```
 
-Wait for Copilot inline suggestion. Press Tab to accept.
+Accept the change. Say: "Plain English in. Working SQL out. The file is the only place T-SQL lives in this project, and the agent respected that."
 
-Expected suggestion: `AND cfpCloseDate >= GETDATE() AND cfpOpenDate <= GETDATE()`
-
-Read the inserted line aloud, then say: "GitHub Copilot working inside a SQL file in my repo, against SQL Server 2025 syntax. No plugin tax. No copy and paste."
-
-> *Speaker notes: undo the change before moving on (Cmd+Z). We want the file clean for the next take.*
+> *Speaker notes: undo the change before moving on (Cmd+Z) so the file is clean for the next take.*
 
 ## 4:30 to 5:00, Clean TypeScript moment
 
@@ -102,7 +105,7 @@ Paste:
 SELECT TOP 3
     name,
     topics,
-    CAST(embedding AS NVARCHAR(80)) AS embedding_preview,
+    LEFT(CAST(embedding AS NVARCHAR(MAX)), 80) + '...' AS embedding_preview,
     VECTORPROPERTY(embedding, 'Dimensions') AS dims
 FROM Event
 ORDER BY name;

@@ -171,7 +171,7 @@ Add the user-facing semantic search UI to TalkScout. The repo already has the fo
     <h3>🔹 Step 5: GitHub Copilot Chat edits the SQL file (3:30 → 4:30)</h3>
     <p class="voiceover">"This is the only SQL file you will see today. Eight lines. SQL Server 2025 has a native VECTOR(768) column type and a VECTOR_DISTANCE function. Now watch GitHub Copilot Chat take an instruction in plain English and edit this file directly."</p>
     <p><em>📌 Setup: open <code>prisma/sql/searchEvents.sql</code> in the editor so it is the active file. In the GitHub Copilot Chat panel, attach the active file as context (paperclip icon, or type <code>#searchEvents.sql</code>). Make sure agent mode is enabled.</em></p>
-    <pre id="code3">Modify prisma/sql/searchEvents.sql so the result set is filtered to events whose CFP submission window is currently open: cfpOpenDate is in the past or today, AND cfpCloseDate is today or in the future. Add the conditions to the existing WHERE clause. Keep the file otherwise unchanged. The dialect is T-SQL on SQL Server 2025; use GETDATE() for the current date.</pre>
+    <pre id="code3">The search keeps returning events whose CFP is already closed or has not opened yet. Filter the search SQL so it only returns events with an open CFP right now.</pre>
     <button class="copy-btn" onclick="copyToClipboard('code3')">Copy</button>
     <p><strong>Expected:</strong> GitHub Copilot Chat opens the file, shows a diff, and adds two conditions to the WHERE clause:</p>
     <pre id="code4">AND cfpOpenDate &lt;= GETDATE()
@@ -193,7 +193,7 @@ AND cfpCloseDate &gt;= GETDATE()</pre>
     <pre id="code5">SELECT TOP 3
     name,
     topics,
-    CAST(embedding AS NVARCHAR(80)) AS embedding_preview,
+    LEFT(CAST(embedding AS NVARCHAR(MAX)), 80) + '...' AS embedding_preview,
     VECTORPROPERTY(embedding, 'Dimensions') AS dims
 FROM Event
 ORDER BY name;</pre>
