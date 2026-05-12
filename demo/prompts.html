@@ -260,33 +260,52 @@ ORDER BY name;</pre>
 </div>
 
 <div class="card">
-    <h3>🔹 Step 11: Closing statement (7:30 → 8:00)</h3>
-    <p class="voiceover">"That is TalkScout. Eight minutes from change proposal to working semantic search, end to end inside VS Code. SQL Server 2025 stored the vectors. Prisma kept the TypeScript clean. GitHub Copilot, with OpenSpec, drove the build. Repo and links are below. Thanks for watching."</p>
+    <h3>🔹 Step 11: Same agentic primitive, deployment layer (7:30 → 8:30)</h3>
+    <p class="voiceover">"OpenSpec drove the local build. The same primitive (the agent reads context, proposes, applies, I approve) works for infrastructure too. I ran this before tape rolled because a cold cloud deploy takes about five minutes. Let me scroll the chat so you can see what happened."</p>
+    <p><em>📌 Where: GitHub Copilot Chat panel in VS Code, on branch <code>002-azure-deploy</code>. Scroll to the saved <code>/opsx-apply add-azure-deployment</code> transcript. Highlight task 0 (the agent installs <code>microsoft/azure-skills</code> itself), then the <code>azure-prepare</code> → <code>azure-validate</code> → <code>azure-deploy</code> chain.</em></p>
+    <p class="voiceover">"Task zero is the plugin install. The agent picks up the OpenSpec change, sees it needs Azure skills, and installs them. Then it generates the Bicep, the Dockerfile, and the deploy plan. I approve each gate. Five minutes later, <code>azd up</code> finishes. Container Apps environment, Azure SQL Database on the free offer, an Ollama sidecar running the same <code>nomic-embed-text</code> model that runs on my Mac. Zero dollars on free-tier resources. No Azure OpenAI quota required."</p>
+    <p><strong>Expected:</strong> the saved chat shows the three approval gates, the generated <code>infra/main.bicep</code>, and the final live URL printed at the end of <code>azure-deploy</code>.</p>
+</div>
+
+<div class="card">
+    <h3>🔹 Step 12: Same app, in Azure (8:30 → 9:15)</h3>
+    <p class="voiceover">"And here it is in Azure. Same UI, same searches, same SQL Server vectors (now Azure SQL Database on the free offer), same embedding model (now running as a Container Apps sidecar instead of on my Mac). Different host, identical code."</p>
+    <p><em>📌 Where: a fresh browser tab on the cloud URL printed at the end of the deploy. <strong>Pre-warm the URL by hitting <code>/</code> a few minutes before tape</strong> so the free-tier SQL DB does not cold-resume on camera.</em></p>
+    <pre id="code9">type safety across the stack</pre>
+    <button class="copy-btn" onclick="copyToClipboard('code9')">Copy</button>
+    <p><strong>Expected:</strong> the cloud app returns the same kind of top result as the local app — a tRPC-flavored or end-to-end TypeScript event. CFP-open pill visible on at least one row. Roundtrip should complete in 2 to 4 seconds (Ollama on CPU is slower than Metal on the host).</p>
+    <p class="voiceover">"Two agentic flows. OpenSpec for the code, Azure skills for the platform. Both natural language, both inside VS Code, both backed by my repo's source of truth."</p>
+</div>
+
+<div class="card">
+    <h3>🔹 Step 13: Closing statement (9:15 → 9:45)</h3>
+    <p class="voiceover">"That is TalkScout. Spec-driven local development and agent-driven cloud deployment, end to end inside VS Code, in about ten minutes. SQL Server 2025 stored the vectors. Prisma kept the TypeScript clean. GitHub Copilot, with OpenSpec, drove the build. The same agent, with Azure skills, drove the deploy. Repo and links are below. Thanks for watching."</p>
 </div>
 
 <h2>🎯 What We Accomplished</h2>
 <div class="card">
-    <p>In this demo, we composed five tools inside VS Code to build an end-to-end semantic-search application:</p>
+    <p>In this demo, we composed six tools inside VS Code to build a semantic-search application and ship it to Azure:</p>
     <ul>
         <li>✅ Drove the entire workflow with <strong>OpenSpec</strong> slash commands (<code>/opsx-propose</code>, <code>/opsx-apply</code>) inside GitHub Copilot Chat</li>
         <li>✅ Showed <strong>GitHub Copilot Chat in agent mode</strong> editing a real SQL file and opening the MSSQL Schema Designer with full schema awareness</li>
         <li>✅ Used <strong>SQL Server 2025</strong>'s native <code>VECTOR(768)</code> data type and <code>VECTOR_DISTANCE</code> function, no separate vector database</li>
-        <li>✅ Used <strong>Ollama</strong> on the host with <code>nomic-embed-text</code> for embeddings, no cloud API key</li>
+        <li>✅ Used <strong>Ollama</strong> with <code>nomic-embed-text</code> for embeddings, host-Metal locally and as a Container Apps sidecar in Azure</li>
         <li>✅ Used <strong>Prisma 7</strong> with the <code>@prisma/adapter-mssql</code> driver to keep all SQL strings out of TypeScript</li>
         <li>✅ Used <strong>the MSSQL VS Code extension</strong> to inspect the <code>VECTOR(768)</code> column live and to render the Schema Designer</li>
         <li>✅ Demonstrated two semantic-search "magic moments" where the top result contained none of the query keywords</li>
+        <li>✅ Deployed the same app to <strong>Azure</strong> with <strong>microsoft/azure-skills</strong>: Container Apps + Azure SQL Database free offer + Ollama sidecar, $0 on a free Azure account, no Azure OpenAI quota required</li>
     </ul>
     <p><strong>Key takeaways:</strong></p>
     <ul>
-        <li>SQL Server 2025's <code>VECTOR</code> type brings AI capabilities directly into your database, no external vector store required</li>
-        <li>Ollama makes local embedding models simple to manage without API keys or cloud dependencies</li>
+        <li>SQL Server 2025's <code>VECTOR</code> type brings AI capabilities directly into your database, no external vector store required, and works on every Azure SQL tier including free</li>
+        <li>Ollama works the same way locally and in Azure: a Container Apps sidecar gives you a free, key-less embedding endpoint with internal-only DNS</li>
         <li>Prisma + a runtime SQL loader keeps application TypeScript free of T-SQL string literals</li>
-        <li>GitHub Copilot, in VS Code, with OpenSpec, lets one developer go from idea to shipped feature in a coherent workflow</li>
+        <li>The same agentic primitive that drove local development also drove cloud deployment: read the spec, propose, apply, approve. OpenSpec for the code, microsoft/azure-skills for the platform</li>
     </ul>
 </div>
 
 <h2>🎯 Closing Statement</h2>
-<p class="voiceover">"In about eight minutes, we proposed a change with OpenSpec, watched GitHub Copilot apply it, edited a real SQL file with the agent, and ran semantic search against SQL Server 2025's native vectors, all without leaving VS Code and without writing a single line of SQL string literal in our application code. The whole stack is local. The whole demo is reproducible."</p>
+<p class="voiceover">"In about ten minutes, we proposed a change with OpenSpec, watched GitHub Copilot apply it, edited a real SQL file with the agent, ran semantic search against SQL Server 2025's native vectors, and deployed the same app to Azure with microsoft/azure-skills, all without leaving VS Code and without writing a single line of SQL string literal in our application code. The local stack is reproducible with one command. The cloud stack costs zero dollars on a free Azure account."</p>
 
 <h2>📚 Resources</h2>
 <div class="card">
