@@ -351,6 +351,74 @@ git tag pre-recording-$(date +%Y%m%d)
 
 This preserves the exact state that aired, so a future bug report can be reproduced.
 
+## Deploy to Azure (free tier)
+
+You can deploy this same app to Azure with one prompt in GitHub Copilot Chat. The deployment is driven by the [`microsoft/azure-skills`](https://github.com/microsoft/azure-skills) plugin, invoked by the OpenSpec `add-azure-deployment` change. The repo does not vendor the plugin; the agent installs it as the first task of the change.
+
+**Cost: $0** on a free Azure account. The architecture uses:
+
+- Azure Container Apps consumption tier (free monthly grant) for two revisions: `talkscout-web` (Next.js) and `talkscout-ollama` (the same `nomic-embed-text` model that runs locally).
+- Azure SQL Database free offer (serverless General Purpose, 32 GB) for the data and the 768-dim vectors. Vector type is supported on every Azure SQL tier including free.
+- System-assigned managed identity for app to SQL; no API keys, no passwords on the deployed revision.
+
+No Azure OpenAI quota approval is required. The cloud stack mirrors the local stack 1:1 in code, model, and embedding dimension.
+
+### Prerequisites for an audience reproducer
+
+- An Azure subscription (free trial, Azure for Students, or pay-as-you-go).
+- Azure CLI 2.60 or later and Azure Developer CLI (`azd`) 1.10 or later. Or use Azure Cloud Shell.
+- GitHub Copilot subscription. The `azure-skills` plugin is installed by the agent at apply-time; you do not install it manually.
+
+### Three commands to authenticate
+
+```bash
+az login
+az account set --subscription "<id-or-name>"
+azd auth login
+```
+
+### One prompt to deploy
+
+In GitHub Copilot Chat (agent mode), with the repo open:
+
+```
+/opsx-apply add-azure-deployment
+```
+
+The agent reads `openspec/changes/add-azure-deployment/tasks.md`, installs the `azure-skills` plugin, generates the Bicep / `azure.yaml` / Dockerfile, and runs the `azure-prepare` → `azure-validate` → `azure-deploy` chain. Approve each gate. First-time `azd up` takes roughly 5 minutes. Subsequent code deploys take 60 to 90 seconds.
+
+The live URL is returned at the end. The same searches that work locally (`agentic workflows for databases`, `type safety across the stack`) work in the cloud.
+
+### Opt in to Azure OpenAI
+
+The default cloud deploy uses Ollama for embeddings. To use Azure OpenAI `text-embedding-3-small` instead, after you have Azure OpenAI quota set:
+
+```bash
+EMBEDDING_PROVIDER=azure-openai
+EMBEDDING_DIM=1536
+AZURE_OPENAI_ENDPOINT=https://<your-account>.openai.azure.com
+AZURE_OPENAI_DEPLOYMENT=<your-deployment-name>
+```
+
+This requires a fresh database created at 1536 dimensions because the embedding dimension is immutable per database. The default 768-dim deploy is unaffected.
+
+### Audit your spend
+
+After a deploy, confirm the workload is genuinely free:
+
+```bash
+az consumption usage list \
+  --start-date "$(date -u -v-1d +%Y-%m-%dT00:00:00Z)" \
+  --end-date   "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+  -g <your-rg-name>
+```
+
+Expected: zero billed line items.
+
+### Architecture diagram
+
+See `openspec/specs/architecture.md` for the Mermaid diagram of the cloud topology (web app, Ollama sidecar, Azure SQL DB free offer, seed Job, managed identity).
+
 ## Architecture summary
 
 ```

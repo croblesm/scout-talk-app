@@ -67,6 +67,63 @@ context: |
     The project's root `docker-compose.yml` remains the one source of truth
     for SQL Server config; the dev container does NOT define its own.
 
+  Cloud deployment rules (apply when generating Azure-related code or infra):
+  - The cloud target must be reproducible on a free Azure account with no
+    quota approvals required. Cost target: literal $0 for the demo workload.
+  - Compute is Azure Container Apps (ACA) consumption tier. The same ACA
+    environment hosts two revisions:
+    - `talkscout-web`: built from the repo's `Dockerfile` (multi-stage,
+      `node:22-bookworm-slim`, Next.js `output: 'standalone'`,
+      `EXPOSE 3000`, runs `node server.js`). External ingress on 3000.
+    - `talkscout-ollama`: image `ollama/ollama:latest`, internal-only
+      ingress on 11434. A startup hook runs `ollama pull nomic-embed-text`
+      before serving traffic; the revision has a readinessProbe so ACA
+      does not route requests until the model is loaded.
+  - Database is Azure SQL Database, **free offer** (serverless General
+    Purpose, 32 GB, 100k vCore-seconds/month). `VECTOR(N)` and
+    `VECTOR_DISTANCE` are supported on all tiers including free.
+  - Embedding model is `nomic-embed-text` (768-dim) in both local and
+    cloud. Cloud just changes `OLLAMA_HOST` from
+    `http://host.docker.internal:11434` to `http://talkscout-ollama:11434`
+    (ACA internal DNS). Schema dimension is identical across local and
+    cloud; no SQL templating is required.
+  - `src/lib/embed.ts` is a thin dispatcher selected by
+    `EMBEDDING_PROVIDER` (default `ollama`). `embed-ollama.ts` is the only
+    implementation required for the default cloud deploy.
+    `embed-azure-openai.ts` exists as an opt-in alternative for users
+    with Azure OpenAI quota; it returns 1536-dim vectors and is NOT part
+    of the default deploy. Schema dim stays 768 unless a user explicitly
+    provisions a new 1536-dim DB.
+  - Service-to-service auth uses managed identity. The `talkscout-web`
+    Container App's system-assigned identity has the SQL roles it needs
+    (`db_datareader + db_datawriter`, plus `db_owner` for the first-run
+    seed Job). `DATABASE_URL` on the deployed revision uses
+    `Authentication=Active Directory Default` rather than a password.
+    No API keys or passwords in environment variables on the deployed
+    revision.
+  - Azure Key Vault is used only if the seed Job needs a transient SQL
+    admin password during the very first bootstrap (before managed
+    identity grants are in place). The web app itself does not read
+    Key Vault.
+  - Cloud DB schema is bootstrapped by an Azure Container Apps **Job**
+    that runs `npx prisma migrate deploy` followed by `npm run db:seed`.
+    The same migrations work cloud and local because the schema dimension
+    is constant. The Job is idempotent.
+  - The `microsoft/azure-skills` plugin is installed by the agent at
+    apply-time (task 0 of the deployment change's `tasks.md`). The repo
+    does NOT vendor the plugin code; it is a runtime prerequisite
+    declared in the spec.
+  - The Dockerfile is multi-stage (deps → build → runtime) using
+    `node:22-bookworm-slim`. `.dockerignore` excludes `.next`,
+    `node_modules`, `.devcontainer`, `openspec/changes`, and
+    `data/dev-events.html` (the large fixture is regenerated at build
+    time from `data/events.json`).
+  - Alternatives considered and rejected: Azure App Service F1 / Azure
+    Static Web Apps do not cleanly host the Ollama sidecar in the same
+    environment with internal-only DNS-by-service-name. Azure OpenAI as
+    primary embeddings requires quota approval and breaks
+    first-time-audience reproducibility.
+
   Project state:
   - Database: 91 events seeded from data/dev-events.html via prisma/seed.ts.
   - Search hot path: Browser to Server Action to embed(query) via Ollama, then
@@ -174,3 +231,19 @@ rules:
     - Each task names exactly one deliverable file (or a small tight group).
     - Use a Conventional Commits prefix as the task title's verb.
     - Tasks must be independently testable; typecheck and build are the gates.
+  deployment:
+    - The first task of any Azure-deployment change MUST be installing the
+      microsoft/azure-skills plugin via `/plugin install
+      azure@claude-plugins-official`. The repo does not vendor the plugin.
+    - One resource group per environment. Bicep must be idempotent; re-running
+      `azd up` against an existing RG produces no drift.
+    - No literal passwords or API keys on the deployed web revision. Use
+      managed identity for app->Azure SQL DB. Key Vault is only acceptable for
+      transient bootstrap secrets used by the seed Job.
+    - The Bicep must declare both ACA revisions (talkscout-web external,
+      talkscout-ollama internal) in the same environment so they share
+      internal DNS. talkscout-ollama runs `ollama pull nomic-embed-text` at
+      startup and has a readinessProbe gating ingress until the pull
+      completes.
+    - Cost target is $0 on the Azure free offer + ACA consumption grant.
+      Validate after deploy with `az consumption usage list`.
