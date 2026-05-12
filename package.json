@@ -20,7 +20,11 @@
     "db:reset": "prisma migrate reset --force && npm run db:seed",
     "ingest": "tsx scripts/parse-dev-events.ts",
     "ingest:live": "tsx scripts/fetch-dev-events.ts && npm run ingest",
-    "demo:reset": "tsx scripts/demo-reset.ts"
+    "demo:reset": "tsx scripts/demo-reset.ts",
+    "azure:reset": "tsx scripts/azure-reset.ts",
+    "cloud:up": "azd up",
+    "cloud:down": "azd down --force --purge",
+    "cloud:deploy": "azd deploy"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",
