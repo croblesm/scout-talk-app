@@ -7,7 +7,7 @@ export default function Home() {
       <p className="max-w-prose text-center text-lg text-zinc-600 dark:text-zinc-400">
         Find the next dev conference worth pitching your talk to.
       </p>
-      <p className="text-sm text-zinc-500">Search UI lands when you run <code className="rounded bg-zinc-800 px-1.5 py-0.5 font-mono text-xs text-zinc-300">/opsx-apply</code>.</p>
+      <p className="text-sm text-zinc-500">Search UI lands when you run <code className="rounded bg-zinc-800 px-1.5 py-0.5 font-mono text-xs text-zinc-300">/opsx-propose</code> and then <code className="rounded bg-zinc-800 px-1.5 py-0.5 font-mono text-xs text-zinc-300">/opsx-apply</code>.</p>
     </main>
   )
 }
