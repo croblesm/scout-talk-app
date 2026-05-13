@@ -62,6 +62,14 @@ What appears, in roughly this order:
 
 Expected total time: 60 to 120 seconds. While files appear, narrate: "The agent is reading tasks.md and creating exactly the files it lists. No more, no less. The page.tsx hot-reloads in the browser when it lands."
 
+> *Speaker notes (off-camera operator action, ~5 seconds): when `/opsx-apply` finishes, the auto-reloaded page at `localhost:3000` may render unstyled (plain serif heading, raw browser input). This is a Tailwind v4 hot-reload quirk on Apple Silicon when many class names are introduced in one drop. Open a new terminal in VS Code and run:*
+>
+> ```bash
+> npm run dev:restart
+> ```
+>
+> *This kills the background `next dev` started by `demo:reset`, deletes `.next/`, and starts a fresh dev server in the foreground of the new terminal. Tailwind re-scans every newly created file; the page hot-reloads with proper styling. Do this BEFORE switching to the SQL file for Step 5.*
+
 ## 3:30 to 4:30, Marquee 1: GitHub Copilot Chat edits searchEvents.sql
 
 > *Speaker notes: open `prisma/sql/searchEvents.sql` so it is the active file. In GitHub Copilot Chat, attach the file as context (paperclip or `#searchEvents.sql`). Agent mode on.*

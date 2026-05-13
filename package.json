@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "next dev",
+    "dev:restart": "pkill -f 'next dev' ; pkill -f 'next-server' ; rm -rf .next ; npm run dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

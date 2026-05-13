@@ -164,7 +164,11 @@ Add the user-facing semantic search UI to TalkScout. The repo already has the fo
     <p><em>📌 Where: same GitHub Copilot Chat panel as Step 3. Same input box.</em></p>
     <pre id="code2">/opsx-apply add-semantic-search-ui</pre>
     <button class="copy-btn" onclick="copyToClipboard('code2')">Copy</button>
-    <p><strong>Expected:</strong> 5 files appear in the Explorer: <code>src/lib/cfp-status.ts</code>, <code>src/app/actions.ts</code>, <code>src/components/CfpStatusPill.tsx</code>, <code>src/components/EventCard.tsx</code>, <code>src/components/SearchInput.tsx</code>. <code>src/app/page.tsx</code> is modified (not new). Total time 60 to 120 seconds. Browser tab on <code>localhost:3000</code> hot-reloads automatically and the search UI appears.</p>
+    <p><strong>Expected:</strong> 5 files appear in the Explorer: <code>src/lib/cfp-status.ts</code>, <code>src/app/actions.ts</code>, <code>src/components/CfpStatusPill.tsx</code>, <code>src/components/EventCard.tsx</code>, <code>src/components/SearchInput.tsx</code>. <code>src/app/page.tsx</code> is modified (not new). Total time 60 to 120 seconds.</p>
+    <p><strong>📌 Operator action (before continuing to Step 5):</strong> Tailwind v4's class scanner sometimes misses many-file-at-once drops on Apple Silicon, so the auto-reloaded page may render unstyled (plain serif heading, raw input). Open a new terminal in VS Code and run the dev-server restart below. About 5 seconds.</p>
+    <pre id="code2b">npm run dev:restart</pre>
+    <button class="copy-btn" onclick="copyToClipboard('code2b')">Copy</button>
+    <p><em>What it does: <code>pkill</code> the existing background <code>next dev</code> (started by <code>demo:reset</code>), wipes <code>.next/</code>, and starts a fresh dev server in the foreground of the new terminal so Tailwind re-scans every newly created file. The browser auto-reloads with proper styling.</em></p>
 </div>
 
 <div class="card">
