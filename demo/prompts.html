@@ -199,86 +199,70 @@ Add the user-facing semantic search UI to TalkScout. The repo already has the fo
 </div>
 
 <div class="card">
-    <h3>🔹 Step 5: GitHub Copilot Chat edits the SQL file (3:30 → 4:30)</h3>
-    <p class="voiceover">"This is the only SQL file you will see today. Eight lines. SQL Server 2025 has a native VECTOR(768) column type and a VECTOR_DISTANCE function. Now watch GitHub Copilot Chat take an instruction in plain English and edit this file directly."</p>
-    <p><em>📌 Setup: open <code>prisma/sql/searchEvents.sql</code> in the editor so it is the active file. In the GitHub Copilot Chat panel, attach the active file as context (paperclip icon, or type <code>#searchEvents.sql</code>). Make sure agent mode is enabled.</em></p>
-    <pre id="code3">The search keeps returning events whose CFP is already closed or has not opened yet. Filter the search SQL so it only returns events with an open CFP right now.</pre>
+    <h3>🔹 Step 5: First live search — discover the closed-CFP problem (4:30 → 5:00)</h3>
+    <p class="voiceover">"The app is alive. Let me type a topic I want to speak about and see what comes back." (pause for results) "Five conferences ranked by semantic match. But look at these pills — some of these CFPs are already closed. I cannot submit to those. The search needs to filter on the CFP window."</p>
+    <p><em>📌 Where: browser tab on <code>localhost:3000</code>. The styled search UI from Step 4. Click into the input, type the query below, press Enter.</em></p>
+    <pre id="code3">agentic workflows for databases</pre>
     <button class="copy-btn" onclick="copyToClipboard('code3')">Copy</button>
-    <p><strong>Expected:</strong> GitHub Copilot Chat opens the file, shows a diff, and adds two conditions to the WHERE clause:</p>
-    <pre id="code4">AND cfpOpenDate &lt;= GETDATE()
-AND cfpCloseDate &gt;= GETDATE()</pre>
+    <p><strong>Expected:</strong> 5 results render in 1-2 seconds. At least one result shows a <strong>"CFP closed"</strong> pill (the seed has events with <code>cfpCloseDate</code> in the past). Read aloud the title of one closed-CFP result and point at the pill so the audience sees the problem on screen.</p>
+</div>
+
+<div class="card">
+    <h3>🔹 Step 6: GitHub Copilot Chat fixes the SQL file (5:00 → 5:30)</h3>
+    <p class="voiceover">"This is the only SQL file in the entire project. Eight lines. SQL Server 2025 has a native VECTOR(768) column type and a VECTOR_DISTANCE function. Watch GitHub Copilot Chat take a plain-English instruction and edit this file directly to fix what we just saw."</p>
+    <p><em>📌 Setup: open <code>prisma/sql/searchEvents.sql</code> so it is the active file. In GitHub Copilot Chat, attach the file as context (paperclip icon or type <code>#searchEvents.sql</code>). Agent mode on.</em></p>
+    <pre id="code4">The search keeps returning events whose CFP is already closed or has not opened yet. Filter the search SQL so it only returns events with an open CFP right now.</pre>
     <button class="copy-btn" onclick="copyToClipboard('code4')">Copy</button>
+    <p><strong>Expected:</strong> Copilot shows a diff, adding two conditions to the WHERE clause:</p>
+    <pre id="code5">AND cfpOpenDate &lt;= GETDATE()
+AND cfpCloseDate &gt;= GETDATE()</pre>
+    <button class="copy-btn" onclick="copyToClipboard('code5')">Copy</button>
     <p class="voiceover">"Plain English in. Working SQL out. The file is the only place T-SQL lives in this project, and the agent respected that."</p>
 </div>
 
 <div class="card">
-    <h3>🔹 Step 6: Open actions.ts (4:30 → 5:00)</h3>
-    <p class="voiceover">"And here is what the application code sees. A handful of lines of business logic. One embed call, one parameterized query. No SQL strings. The .sql file is loaded once at module load by <code>src/lib/sql.ts</code> and passed in. Type safety stays end-to-end."</p>
-    <p><em>📌 Show: open <code>src/app/actions.ts</code>. Point at the <code>SEARCH_EVENTS_SQL</code> import. Hover the <code>results</code> variable to show the typed return shape.</em></p>
+    <h3>🔹 Step 7: Inspect the schema with the MSSQL extension (5:30 → 6:00)</h3>
+    <p class="voiceover">"Let me prove the database side is just as clean. The MSSQL extension for VS Code talks to my SQL Server 2025 container. I will open the Schema Designer right here, no leaving the IDE."</p>
+    <p><em>📌 Show: click the MSSQL extension icon in the activity bar. The saved <code>talkscout</code> connection (Server <code>talkscout-mssql</code>, sa, TalkScout!Demo2026) should already be there. Right-click the <code>Event</code> table → <strong>Schema Designer</strong>. Linger 10-15 seconds on the visual layout.</em></p>
+    <p><strong>Expected:</strong> the visual table view opens showing the <code>Event</code> columns: id, slug, name, dates, topics, and the <code>embedding</code> column typed as <code>VECTOR(768)</code> alongside the relational fields.</p>
+    <p class="voiceover">"One table. Relational columns and a native 768-dim vector column side by side in SQL Server 2025. No external vector store, no syncing two systems."</p>
 </div>
 
 <div class="card">
-    <h3>🔹 Step 7: Inspect the VECTOR column with the MSSQL extension (5:00 → 5:30)</h3>
-    <p class="voiceover">"Let me prove the VECTOR column is real. The MSSQL extension for VS Code talks to my local SQL Server 2025 container. I will connect, run a quick SELECT, and you can see the vector data sitting in the row alongside the relational fields."</p>
-    <p><em>📌 Show: click the MSSQL extension icon. Use the saved <code>talkscout</code> connection (sa, TalkScout!Demo2026). Open a new query window. Paste. Press F5.</em></p>
-    <pre id="code5">SELECT TOP 3
-    name,
-    topics,
-    LEFT(CAST(embedding AS NVARCHAR(MAX)), 80) + '...' AS embedding_preview,
-    VECTORPROPERTY(embedding, 'Dimensions') AS dims
-FROM Event
-ORDER BY name;</pre>
-    <button class="copy-btn" onclick="copyToClipboard('code5')">Copy</button>
-    <p><strong>Expected:</strong> results grid with three rows; <code>dims = 768</code> on each; <code>embedding_preview</code> shows the first 80 chars of the vector.</p>
-</div>
-
-<div class="card">
-    <h3>🔹 Step 8: Live search, "agentic workflows for databases" (5:30 → 6:00)</h3>
-    <p class="voiceover">"Now to the actual app. The browser is already open at localhost:3000. I will type a topic I want to speak about. Watch: the top result will not contain the word 'agentic' anywhere in its title or description. That is semantic search at work, not keyword matching."</p>
+    <h3>🔹 Step 8: Re-run the search — the fix worked + the magic moment (6:00 → 6:30)</h3>
+    <p class="voiceover">"Back to the app. Same query, same database, but now the agent's SQL fix is live. Watch the closed-CFP results disappear. And while we are here, notice something else: the word 'agentic' is not in any of these titles or descriptions. The embedding model and SQL Server's vector distance figured out what I meant."</p>
+    <p><em>📌 Where: browser tab on <code>localhost:3000</code>. Clear the input, type the same query, press Enter.</em></p>
     <pre id="code6">agentic workflows for databases</pre>
     <button class="copy-btn" onclick="copyToClipboard('code6')">Copy</button>
-    <p><strong>Expected:</strong> top result is an event tagged with topics like "AI agents", "MCP", or "autonomous tooling". Verify by reading the title aloud and pointing out that the word "agentic" appears nowhere.</p>
+    <p><strong>Expected:</strong> 5 results, every one with a CFP-open pill. Top result is an event tagged with topics like "AI agents", "MCP", or "autonomous tooling". The word "agentic" appears nowhere in the visible titles.</p>
 </div>
 
 <div class="card">
-    <h3>🔹 Step 9: Second live search, "type safety across the stack" (6:00 → 6:30)</h3>
-    <p class="voiceover">"One more vocabulary-mismatch test. I am going to search for a topic I might want to speak about: type safety across the whole stack. Watch the top result. I will bet it is tRPC Conf or one of the JavaScript conferences with an end-to-end TypeScript track, even though my search never says the word 'TypeScript' or 'tRPC'."</p>
-    <p><em>📌 Where: same browser tab at <code>localhost:3000</code> as Step 8. Clear the previous query, type the new one, press Enter.</em></p>
-    <pre id="code7">type safety across the stack</pre>
-    <button class="copy-btn" onclick="copyToClipboard('code7')">Copy</button>
-    <p><strong>Expected:</strong> the top result is <code>tRPC Conf 2026</code> or another event whose topics include <code>end-to-end-typescript</code> / <code>contracts</code>. None of those words appear in the search box. At least one result has the CFP-open pill.</p>
+    <h3>🔹 Step 9: Open actions.ts — the clean TypeScript moment (6:30 → 7:00)</h3>
+    <p class="voiceover">"Here is what the application code sees. A handful of lines of business logic. One embed call, one parameterized query. No SQL strings. The .sql file is loaded once at module load by <code>src/lib/sql.ts</code> and passed in. Type safety stays end-to-end."</p>
+    <p><em>📌 Show: open <code>src/app/actions.ts</code>. Point at the <code>SEARCH_EVENTS_SQL</code> import. Hover the <code>results</code> variable to surface the inferred return type briefly.</em></p>
 </div>
 
 <div class="card">
-    <h3>🔹 Step 10: Ask GitHub Copilot to open the Schema Designer (6:30 → 7:30)</h3>
-    <p class="voiceover">"Let me close the loop on GitHub Copilot in this stack. The MSSQL extension has a visual Schema Designer. I do not need to right-click and hunt menus. Agent mode can open it for me."</p>
-    <p><em>📌 Where: GitHub Copilot Chat panel in VS Code, in <strong>Agent mode</strong>. The MSSQL extension must be loaded with the <code>talkscout</code> connection active.</em></p>
-    <pre id="code8">Open the Schema Designer for the Event table in the talkscout database.</pre>
-    <button class="copy-btn" onclick="copyToClipboard('code8')">Copy</button>
-    <p><strong>Expected:</strong> the agent picks the MSSQL extension's Schema Designer tool on its own, invokes it, and the table view opens with the <code>Event</code> table laid out, including the <code>VECTOR(768)</code> embedding column.</p>
-    <p class="voiceover">"GitHub Copilot drove the spec. The same agent generated the code. The same agent wrote the SQL filter. And the same agent opened the Schema Designer. One assistant, every surface in this demo."</p>
-</div>
-
-<div class="card">
-    <h3>🔹 Step 11: Same agentic primitive, deployment layer (7:30 → 8:30)</h3>
-    <p class="voiceover">"OpenSpec drove the local build. The same primitive (the agent reads context, proposes, applies, I approve) works for infrastructure too. I ran this before tape rolled because a cold cloud deploy takes about five minutes. Let me scroll the chat so you can see what happened."</p>
-    <p><em>📌 Where: GitHub Copilot Chat panel in VS Code, on branch <code>002-azure-deploy</code>. Scroll to the saved <code>/opsx-apply add-azure-deployment</code> transcript. Highlight task 0 (the agent installs <code>microsoft/azure-skills</code> itself), then the <code>azure-prepare</code> → <code>azure-validate</code> → <code>azure-deploy</code> chain.</em></p>
+    <h3>🔹 Step 10: Same agentic primitive, deployment layer (7:00 → 8:00)</h3>
+    <p class="voiceover">"OpenSpec drove the local build. The same primitive — agent reads context, proposes, applies, I approve — works for infrastructure too. I ran this before tape because a cold cloud deploy takes about five minutes. Let me scroll the chat so you can see what happened."</p>
+    <p><em>📌 Where: GitHub Copilot Chat panel. Scroll to the saved <code>/opsx-apply add-azure-deployment</code> transcript. Highlight task 0 (the agent installs <code>microsoft/azure-skills</code> itself), then the <code>azure-prepare</code> → <code>azure-validate</code> → <code>azure-deploy</code> chain.</em></p>
     <p class="voiceover">"Task zero is the plugin install. The agent picks up the OpenSpec change, sees it needs Azure skills, and installs them. Then it generates the Bicep, the Dockerfile, and the deploy plan. I approve each gate. Five minutes later, <code>azd up</code> finishes. Container Apps environment, Azure SQL Database on the free offer, an Ollama sidecar running the same <code>nomic-embed-text</code> model that runs on my Mac. Zero dollars on free-tier resources. No Azure OpenAI quota required."</p>
     <p><strong>Expected:</strong> the saved chat shows the three approval gates, the generated <code>infra/main.bicep</code>, and the final live URL printed at the end of <code>azure-deploy</code>.</p>
 </div>
 
 <div class="card">
-    <h3>🔹 Step 12: Same app, in Azure (8:30 → 9:15)</h3>
+    <h3>🔹 Step 11: Same app, in Azure (8:00 → 8:45)</h3>
     <p class="voiceover">"And here it is in Azure. Same UI, same searches, same SQL Server vectors (now Azure SQL Database on the free offer), same embedding model (now running as a Container Apps sidecar instead of on my Mac). Different host, identical code."</p>
     <p><em>📌 Where: a fresh browser tab on the cloud URL printed at the end of the deploy. <strong>Pre-warm the URL by hitting <code>/</code> a few minutes before tape</strong> so the free-tier SQL DB does not cold-resume on camera.</em></p>
-    <pre id="code9">type safety across the stack</pre>
-    <button class="copy-btn" onclick="copyToClipboard('code9')">Copy</button>
-    <p><strong>Expected:</strong> the cloud app returns the same kind of top result as the local app — a tRPC-flavored or end-to-end TypeScript event. CFP-open pill visible on at least one row. Roundtrip should complete in 2 to 4 seconds (Ollama on CPU is slower than Metal on the host).</p>
+    <pre id="code7">type safety across the stack</pre>
+    <button class="copy-btn" onclick="copyToClipboard('code7')">Copy</button>
+    <p><strong>Expected:</strong> the cloud app returns <code>tRPC Conf 2026</code> or another end-to-end-typescript / contracts event. CFP-open pill visible on at least one row. Roundtrip 2-4 seconds (Ollama on CPU is slower than Metal on the host).</p>
     <p class="voiceover">"Two agentic flows. OpenSpec for the code, Azure skills for the platform. Both natural language, both inside VS Code, both backed by my repo's source of truth."</p>
 </div>
 
 <div class="card">
-    <h3>🔹 Step 13: Closing statement (9:15 → 9:45)</h3>
+    <h3>🔹 Step 12: Closing statement (8:45 → 9:15)</h3>
     <p class="voiceover">"That is TalkScout. Spec-driven local development and agent-driven cloud deployment, end to end inside VS Code, in about ten minutes. SQL Server 2025 stored the vectors. Prisma kept the TypeScript clean. GitHub Copilot, with OpenSpec, drove the build. The same agent, with Azure skills, drove the deploy. Repo and links are below. Thanks for watching."</p>
 </div>
 

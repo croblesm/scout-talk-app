@@ -407,26 +407,26 @@
     </div>
 
     <div class="step live">
-      <div class="node"><span class="icon">🛠️</span><span class="num">05</span></div>
+      <div class="node"><span class="icon">🔎</span><span class="num">05</span></div>
       <div class="content">
         <div class="content-header">
-          <h3>Edited SQL with GitHub Copilot Chat</h3>
-          <span class="timing">3:30 → 4:30</span>
-          <span class="tag tag-live">Marquee #1</span>
+          <h3>First search — found the closed-CFP problem</h3>
+          <span class="timing">4:30 → 5:00</span>
+          <span class="tag tag-hands">Hands-on</span>
         </div>
-        <p>Asked Copilot in plain English to filter the search query to events whose CFP is currently open. The agent edited <code>prisma/sql/searchEvents.sql</code> directly with correct T-SQL syntax for SQL Server 2025.</p>
+        <p>Searched the live UI for "agentic workflows for databases". Results rendered but some had the <em>CFP closed</em> pill. Pointed at the problem on screen as motivation for the next step.</p>
       </div>
     </div>
 
-    <div class="step narrate">
-      <div class="node"><span class="icon">🧬</span><span class="num">06</span></div>
+    <div class="step hands">
+      <div class="node"><span class="icon">🛠️</span><span class="num">06</span></div>
       <div class="content">
         <div class="content-header">
-          <h3>Showed the clean TypeScript</h3>
-          <span class="timing">4:30 → 5:00</span>
-          <span class="tag tag-narrate">Narrate</span>
+          <h3>GitHub Copilot Chat fixed the SQL</h3>
+          <span class="timing">5:00 → 5:30</span>
+          <span class="tag tag-live">Marquee #1</span>
         </div>
-        <p>Opened <code>src/app/actions.ts</code>: a few lines of business logic, one embed call, one parameterized query through <code>$queryRawUnsafe</code>. No T-SQL string literals in the application code.</p>
+        <p>Asked Copilot in plain English to filter the search to events with an open CFP right now. The agent edited <code>prisma/sql/searchEvents.sql</code> directly with correct T-SQL syntax for SQL Server 2025.</p>
       </div>
     </div>
 
@@ -434,11 +434,11 @@
       <div class="node"><span class="icon">🗄️</span><span class="num">07</span></div>
       <div class="content">
         <div class="content-header">
-          <h3>Inspected vectors in MSSQL Extension</h3>
-          <span class="timing">5:00 → 5:30</span>
+          <h3>MSSQL Schema Designer — table + VECTOR(768)</h3>
+          <span class="timing">5:30 → 6:00</span>
           <span class="tag tag-hands">Marquee #2</span>
         </div>
-        <p>Connected to the local SQL Server 2025 container, ran a SELECT against <code>Event</code>, and saw the <code>VECTOR(768)</code> column rendered live with <code>VECTORPROPERTY</code> dimensions.</p>
+        <p>Opened the MSSQL extension's Schema Designer on the <code>Event</code> table. Visual layout showed the relational columns and the native <code>VECTOR(768)</code> embedding column side by side. No external vector store.</p>
       </div>
     </div>
 
@@ -446,44 +446,32 @@
       <div class="node"><span class="icon">✨</span><span class="num">08</span></div>
       <div class="content">
         <div class="content-header">
-          <h3>Searched: agentic workflows</h3>
-          <span class="timing">5:30 → 6:00</span>
-          <span class="tag tag-hands">Magic moment #1</span>
-        </div>
-        <p>Typed "agentic workflows for databases" into the browser. Top result was a relevant event whose title and description never used the word "agentic". Vocabulary mismatch handled by semantic search.</p>
-      </div>
-    </div>
-
-    <div class="step hands">
-      <div class="node"><span class="icon">🎯</span><span class="num">09</span></div>
-      <div class="content">
-        <div class="content-header">
-          <h3>Searched: type safety across the stack</h3>
+          <h3>Re-ran the search — fix landed + magic moment</h3>
           <span class="timing">6:00 → 6:30</span>
-          <span class="tag tag-hands">Magic moment #2</span>
+          <span class="tag tag-hands">Magic moment</span>
         </div>
-        <p>Typed "type safety across the stack". Top results were tRPC and end-to-end TypeScript events. Same trick, different topic.</p>
-      </div>
-    </div>
-
-    <div class="step cameo">
-      <div class="node"><span class="icon">📐</span><span class="num">10</span></div>
-      <div class="content">
-        <div class="content-header">
-          <h3>Schema Designer via GitHub Copilot Chat (agent)</h3>
-          <span class="timing">6:30 → 7:30</span>
-          <span class="tag tag-cameo">Cross-tool</span>
-        </div>
-        <p>Asked GitHub Copilot Chat in agent mode to open the MSSQL Schema Designer for the <code>Event</code> table. The visual layout opened, showing the <code>VECTOR(768)</code> column alongside the relational fields. Same agent that drove the spec, the code, and the SQL edit.</p>
+        <p>Same query, same database, but now only open-CFP events came back. And the top result still did not contain the word "agentic" anywhere — vocabulary mismatch handled by semantic search.</p>
       </div>
     </div>
 
     <div class="step narrate">
-      <div class="node"><span class="icon">☁️</span><span class="num">11</span></div>
+      <div class="node"><span class="icon">🧬</span><span class="num">09</span></div>
+      <div class="content">
+        <div class="content-header">
+          <h3>Showed the clean TypeScript</h3>
+          <span class="timing">6:30 → 7:00</span>
+          <span class="tag tag-narrate">Narrate</span>
+        </div>
+        <p>Opened <code>src/app/actions.ts</code>: a few lines of business logic, one embed call, one parameterized query through <code>$queryRawUnsafe</code>. No T-SQL string literals in the application code.</p>
+      </div>
+    </div>
+
+    <div class="step narrate">
+      <div class="node"><span class="icon">☁️</span><span class="num">10</span></div>
       <div class="content">
         <div class="content-header">
           <h3>Same primitive, deployment layer</h3>
-          <span class="timing">7:30 → 8:30</span>
+          <span class="timing">7:00 → 8:00</span>
           <span class="tag tag-cameo">Cross-tool</span>
         </div>
         <p>Scrolled the saved <code>/opsx-apply add-azure-deployment</code> chat. The agent installed <code>microsoft/azure-skills</code> (task 0), then drove <code>azure-prepare → azure-validate → azure-deploy</code> with three approval gates. Output: Container Apps env, Azure SQL DB free offer, Ollama sidecar, all on free tier.</p>
@@ -491,23 +479,23 @@
     </div>
 
     <div class="step narrate">
-      <div class="node"><span class="icon">🌍</span><span class="num">12</span></div>
+      <div class="node"><span class="icon">🌍</span><span class="num">11</span></div>
       <div class="content">
         <div class="content-header">
           <h3>Same app, in Azure</h3>
-          <span class="timing">8:30 → 9:15</span>
+          <span class="timing">8:00 → 8:45</span>
           <span class="tag tag-marquee">Marquee 4</span>
         </div>
-        <p>Hit the live cloud URL. Same UI, same query (<em>type safety across the stack</em>), same kind of top result as the local search. Different host, identical code.</p>
+        <p>Hit the live cloud URL. Same UI, query <em>type safety across the stack</em>, same kind of top result as the local search. Different host, identical code.</p>
       </div>
     </div>
 
     <div class="step narrate">
-      <div class="node"><span class="icon">🎬</span><span class="num">13</span></div>
+      <div class="node"><span class="icon">🎬</span><span class="num">12</span></div>
       <div class="content">
         <div class="content-header">
           <h3>Wrap</h3>
-          <span class="timing">9:15 → 9:45</span>
+          <span class="timing">8:45 → 9:15</span>
           <span class="tag tag-narrate">Closing</span>
         </div>
         <p>Recap the stack: SQL Server 2025 native vectors, Prisma raw queries, GitHub Copilot, OpenSpec for the code, microsoft/azure-skills for the platform, all inside VS Code, all reproducible on a free Azure account.</p>
