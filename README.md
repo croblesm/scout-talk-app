@@ -206,18 +206,29 @@ If anything fails, see [Troubleshooting](#troubleshooting).
 
 ### After the first run
 
-Once the project is set up and the `pre-implement` git tag is present locally (it ships with the repo, so a fresh clone gets it from `git fetch --tags`), the fastest way to return to a known-good state is:
+Once the project is set up and the `pre-implement` git tag is present locally (it ships with the repo, so a fresh clone gets it from `git fetch --tags`), reset to a known-good state in **two terminals**:
 
 ```bash
+# Terminal A
 npm run demo:reset
+
+# Terminal B (new tab/split, Cmd+\)
+npm run dev
 ```
 
-This rewinds the working tree to `pre-implement`, tears down and recreates the Docker volume, re-applies migrations, re-seeds, and starts the dev server. About 90 seconds. Useful for re-rehearsing the demo or recovering after a botched experiment. Aborts loudly if the `pre-implement` tag is missing or `docker compose` is not available.
+`demo:reset` rewinds the working tree to `pre-implement`, tears down and recreates the Docker volume, re-applies migrations, and re-seeds the database. It does NOT start the dev server. You run `npm run dev` manually in a separate terminal so it stays in the foreground where you can see logs and Ctrl+C cleanly. Total time: ~45-60s for reset, ~5s for `Ready` on the dev server.
+
+Useful for re-rehearsing the demo or recovering after a botched experiment. `demo:reset` aborts loudly if the `pre-implement` tag is missing or `docker compose` is not available.
+
+After `/opsx-apply` finishes during a rehearsal, **Ctrl+C the dev server in Terminal B** and run `npm run dev:restart` there to wipe `.next/` and start fresh — Tailwind v4's class scanner sometimes misses many-file drops on Apple Silicon.
 
 ## Day-to-day commands
 
 ```bash
-npm run dev              # Next.js dev server on :3000
+npm run dev              # Next.js dev server on :3000 (foreground; Ctrl+C to stop)
+npm run dev:restart      # kill anything on :3000, wipe .next/, start fresh dev
+                         # (run this in Terminal B after /opsx-apply lands new files
+                         #  so Tailwind v4 re-scans every class name)
 npm run typecheck        # tsc --noEmit
 npm run build            # production build (static optimization)
 npm run db:up            # docker compose up -d (idempotent)
@@ -226,9 +237,10 @@ npm run db:seed          # re-ingest events.json and embed any changed rows
 npm run db:reset         # drop + recreate DB, re-seed (destructive)
 npm run ingest           # parse data/dev-events.html → data/events.json
 npm run ingest:live      # re-fetch dev.events (off-demo path)
-npm run demo:reset       # tear down everything and rebuild from the
-                         # `pre-implement` git tag, ending with a working
-                         # app on :3000 in under 90 seconds
+npm run demo:reset       # rewind to `pre-implement` tag, recreate Docker
+                         # volume, migrate, seed. Does NOT start the dev
+                         # server (you do that manually in Terminal B).
+                         # Aborts on dirty tree or missing pre-implement tag.
 ```
 
 ## Project layout
@@ -270,7 +282,8 @@ scripts/
 ├── wait-for-db.mjs       # Waits for SQL Server (uses docker healthcheck on host, TCP probe in container)
 ├── parse-dev-events.ts   # HTML fixture → events.json
 ├── fetch-dev-events.ts   # Live re-capture (off-demo)
-└── demo-reset.ts         # The repeatable-demo entry point
+├── dev-restart.mjs       # Kill anything on :3000, wipe .next/, exec `npm run dev`
+└── demo-reset.ts         # Between-takes reset (does NOT start dev server)
 docker-compose.yml        # Top-level (host setup): just SQL Server (when you don't use the devcontainer)
 ```
 
@@ -295,22 +308,32 @@ code .
 #   - Open demo/prompts.html in a separate browser window on a second monitor
 ```
 
-### Between takes (every retake, ~90 seconds)
+### Between takes (every retake, ~60 seconds)
+
+Two terminals:
 
 ```bash
+# Terminal A
 npm run demo:reset
+
+# Terminal B (new tab/split, Cmd+\)
+npm run dev
 ```
 
-This script:
-1. Verifies the working tree is clean (aborts loudly if not)
-2. Verifies the `pre-implement` git tag exists (aborts if missing)
-3. Resets the working tree to that tag (`git reset --hard pre-implement`)
-4. Tears down Docker (`docker compose down -v`) and removes `.next/`
-5. Brings the SQL Server container back up
-6. Applies migrations and re-seeds
-7. Starts `npm run dev` in the background
+`demo:reset` does in order:
+1. Verifies the `pre-implement` git tag exists (aborts if missing)
+2. Reports any dirty working tree (continues after 3-second warning)
+3. Kills anything bound to `:3000` and `next-server` workers
+4. `git switch 001-talkscout && reset --hard pre-implement && clean -fd`
+5. Deletes `openspec/changes/<name>/` directories (live-created during the demo)
+6. Wipes `.next/`
+7. `docker compose down -v && up -d`, waits for SQL Server health
+8. `prisma migrate deploy && npm run db:seed`
+9. Exits. Prints the manual next step.
 
-When it exits, `localhost:3000` is live and you can hit Record.
+Then in Terminal B you run `npm run dev`. Wait for `✓ Ready in Ns`. Open `localhost:3000`: the placeholder must render before you start the take. The dev server stays in Terminal B (foreground, logs visible) through the whole take so you always know its state and can Ctrl+C to stop it cleanly.
+
+After `/opsx-apply` finishes during the take, **Ctrl+C the dev server in Terminal B and run `npm run dev:restart`** there so Tailwind picks up the new component class names.
 
 ### During the take
 

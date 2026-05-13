@@ -82,8 +82,16 @@ context: |
 
   Demo:
   - 8-minute Data Exposed YouTube recording, 2026-05-11 (Monday).
-  - Repeatable via npm run demo:reset (rewinds to pre-implement, reseeds DB,
-    starts dev server in under 90 seconds).
+  - Repeatable across takes via TWO terminals:
+    - Terminal A: `npm run demo:reset` (rewinds to pre-implement, recreates
+      Docker volume, migrates, seeds). Does NOT start the dev server.
+    - Terminal B: `npm run dev` (foreground; you control it, Ctrl+C stops it).
+    After `/opsx-apply`, Ctrl+C Terminal B and run `npm run dev:restart`
+    there so Tailwind v4 picks up the new class names from the freshly
+    created component files.
+  - The previous demo:reset that auto-started the dev server in background
+    was removed because the script-managed dev server caused recording-day
+    failures (silent kills, no recovery path, log noise).
   - Two scripted on-camera search queries: "agentic workflows for databases"
     and "type safety across the stack". Both demonstrate vocabulary mismatch.
 
