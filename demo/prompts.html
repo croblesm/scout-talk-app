@@ -160,15 +160,31 @@ Add the user-facing semantic search UI to TalkScout. The repo already has the fo
 
 <div class="card">
     <h3>🔹 Step 4: Apply the change with /opsx-apply (3:00 → 4:30)</h3>
-    <p class="voiceover">"Now I tell OpenSpec to execute the tasks file. GitHub Copilot will create the Server Action, the three components, the cfp-status utility, and wire it all into the page. Live."</p>
+    <p class="voiceover">"Now I tell OpenSpec to execute the tasks file. GitHub Copilot will create the Server Action, the three components, the cfp-status utility, and replace the placeholder page so the UI shows up. Live."</p>
     <p><em>📌 Where: same GitHub Copilot Chat panel as Step 3. Same input box.</em></p>
     <pre id="code2">/opsx-apply add-semantic-search-ui</pre>
     <button class="copy-btn" onclick="copyToClipboard('code2')">Copy</button>
-    <p><strong>Expected:</strong> 5 files appear in the Explorer: <code>src/lib/cfp-status.ts</code>, <code>src/app/actions.ts</code>, <code>src/components/CfpStatusPill.tsx</code>, <code>src/components/EventCard.tsx</code>, <code>src/components/SearchInput.tsx</code>. <code>src/app/page.tsx</code> is modified (not new). Total time 60 to 120 seconds.</p>
-    <p><strong>📌 Operator action (before continuing to Step 5):</strong> Tailwind v4's class scanner sometimes misses many-file-at-once drops on Apple Silicon, so the auto-reloaded page may render unstyled (plain serif heading, raw input). Open a new terminal in VS Code and run the dev-server restart below. About 5 seconds.</p>
+
+    <p><strong>Expected file changes (approve EACH as it appears, ~60-120s total):</strong></p>
+    <ul>
+        <li>🆕 <code>src/lib/cfp-status.ts</code></li>
+        <li>🆕 <code>src/app/actions.ts</code></li>
+        <li>🆕 <code>src/components/cfp-status-pill.tsx</code></li>
+        <li>🆕 <code>src/components/event-card.tsx</code></li>
+        <li>🆕 <code>src/components/search-input.tsx</code></li>
+        <li>✏️ <strong><code>src/app/page.tsx</code> — MODIFIED, the placeholder must be replaced.</strong> Easy to miss because it asks for a separate approval gate; do not click past it.</li>
+    </ul>
+
+    <p><strong>📌 Verify BEFORE running dev:restart:</strong> open <code>src/app/page.tsx</code>. It MUST start with <code>'use client'</code> and import <code>SearchInput</code> and <code>EventCard</code>. If you still see the placeholder line <code>Search UI lands when you run /opsx-propose and then /opsx-apply</code>, the agent skipped the modification. Paste this into the SAME Copilot Chat to recover:</p>
+    <pre id="code2a" style="white-space: pre-wrap;">You did not modify src/app/page.tsx. Per openspec/changes/add-semantic-search-ui/tasks.md, the placeholder Home component must be REPLACED with one that uses the new SearchInput and EventCard components and manages search state with useState. Apply that change now, then show me the diff.</pre>
+    <button class="copy-btn" onclick="copyToClipboard('code2a')">Copy</button>
+
+    <p><strong>📌 Then restart the dev server</strong> (Tailwind v4 misses many-file class drops on Apple Silicon). Open a new terminal in VS Code and run:</p>
     <pre id="code2b">npm run dev:restart</pre>
     <button class="copy-btn" onclick="copyToClipboard('code2b')">Copy</button>
-    <p><em>What it does: <code>pkill</code> the existing background <code>next dev</code> (started by <code>demo:reset</code>), wipes <code>.next/</code>, and starts a fresh dev server in the foreground of the new terminal so Tailwind re-scans every newly created file. The browser auto-reloads with proper styling.</em></p>
+    <p><em>Kills whatever is on :3000, wipes <code>.next/</code>, starts a fresh dev server in the foreground of the new terminal. The browser hot-reloads with the proper styled UI: gradient-bordered search input, dark backgrounds, placeholder cycling.</em></p>
+
+    <p><strong>Final check before Step 5:</strong> refresh <code>localhost:3000</code>. You should see the styled search input centered on the page, not the placeholder text. If you still see the placeholder, redo the Verify step above.</p>
 </div>
 
 <div class="card">

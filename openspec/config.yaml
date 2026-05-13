@@ -93,6 +93,16 @@ context: |
   - Short, direct sentences. Conventional Commits.
 
   UI styling rules (apply when generating components or page composition):
+  - When a change introduces React components, the tasks.md MUST include
+    an explicit task to REPLACE `src/app/page.tsx`. The pre-implement
+    `page.tsx` is a one-paragraph placeholder Home component. Without
+    replacing it, none of the new components render even though they
+    exist on disk. The task title should be "feat(page): replace
+    placeholder with composed search UI" (or equivalent Conventional
+    Commits prefix). List `src/app/page.tsx` under MODIFIED files in the
+    proposal, NOT under NEW files. /opsx-apply MUST surface a diff for
+    `src/app/page.tsx`; if the diff is empty or absent, the apply is
+    incomplete.
   - Force dark mode. In src/app/layout.tsx the html tag MUST have
     `className="font-sans dark"` and `style={{ colorScheme: "dark" }}`.
     The body MUST be `bg-zinc-950 text-zinc-100 antialiased` with NO `dark:`

@@ -52,23 +52,33 @@ Open `openspec/changes/add-semantic-search-ui/tasks.md` briefly. Scroll through 
 
 Type into GitHub Copilot Chat: `/opsx-apply add-semantic-search-ui`
 
-What appears, in roughly this order:
-- `src/lib/cfp-status.ts`
-- `src/app/actions.ts`
-- `src/components/CfpStatusPill.tsx`
-- `src/components/EventCard.tsx`
-- `src/components/SearchInput.tsx`
-- `src/app/page.tsx` (modified to wire components)
+What appears, in roughly this order. **Approve each one as it appears in the diff panel — do not click past anything:**
+- 🆕 `src/lib/cfp-status.ts`
+- 🆕 `src/app/actions.ts`
+- 🆕 `src/components/cfp-status-pill.tsx`
+- 🆕 `src/components/event-card.tsx`
+- 🆕 `src/components/search-input.tsx`
+- ✏️ `src/app/page.tsx` (MODIFIED — the placeholder is REPLACED; needs its own approval gate, easy to miss)
 
-Expected total time: 60 to 120 seconds. While files appear, narrate: "The agent is reading tasks.md and creating exactly the files it lists. No more, no less. The page.tsx hot-reloads in the browser when it lands."
+Expected total time: 60 to 120 seconds. While files appear, narrate: "The agent is reading tasks.md and creating exactly the files it lists. No more, no less. The page.tsx is the wiring layer; that is what makes the UI show up."
 
-> *Speaker notes (off-camera operator action, ~5 seconds): when `/opsx-apply` finishes, the auto-reloaded page at `localhost:3000` may render unstyled (plain serif heading, raw browser input). This is a Tailwind v4 hot-reload quirk on Apple Silicon when many class names are introduced in one drop. Open a new terminal in VS Code and run:*
+> *Speaker notes — VERIFY before continuing (~5 seconds, off-camera-friendly): when /opsx-apply finishes, open `src/app/page.tsx`. It must start with `'use client'` and import SearchInput + EventCard. If you still see the placeholder paragraph ("Search UI lands when you run /opsx-propose and then /opsx-apply"), the agent skipped the page.tsx modification (this is the most common live failure). Paste this into the SAME Copilot Chat to recover:*
+>
+> ```
+> You did not modify src/app/page.tsx. Per openspec/changes/add-semantic-search-ui/tasks.md, the placeholder Home component must be REPLACED with one that uses the new SearchInput and EventCard components and manages search state with useState. Apply that change now, then show me the diff.
+> ```
+>
+> *Wait for the diff. Approve it. Then continue with the dev:restart below.*
+
+> *Speaker notes — dev:restart (~5 seconds, off-camera-friendly): the auto-reloaded page at `localhost:3000` may render unstyled (plain serif heading, raw browser input). This is a Tailwind v4 hot-reload quirk on Apple Silicon when many class names are introduced in one drop. Open a new terminal in VS Code and run:*
 >
 > ```bash
 > npm run dev:restart
 > ```
 >
-> *This kills the background `next dev` started by `demo:reset`, deletes `.next/`, and starts a fresh dev server in the foreground of the new terminal. Tailwind re-scans every newly created file; the page hot-reloads with proper styling. Do this BEFORE switching to the SQL file for Step 5.*
+> *This kills whatever is on :3000, deletes `.next/`, and starts a fresh dev server in the foreground of the new terminal. Tailwind re-scans every newly created file; the page hot-reloads with proper styling.*
+
+> *Speaker notes — final check before Step 5: refresh `localhost:3000`. You should see the styled search input centered on the page, NOT the placeholder text. If still placeholder, redo the Verify step above.*
 
 ## 3:30 to 4:30, Marquee 1: GitHub Copilot Chat edits searchEvents.sql
 
