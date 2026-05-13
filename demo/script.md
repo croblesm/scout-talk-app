@@ -95,11 +95,25 @@ Expected total time: 60 to 120 seconds. While files appear, narrate: "The agent 
 
 > *Speaker notes — final check before Step 5: refresh `localhost:3000`. You should see the styled search input centered on the page, NOT the placeholder text. If still placeholder, redo the Verify step above.*
 
-## 3:30 to 4:30, Marquee 1: GitHub Copilot Chat edits searchEvents.sql
+## 4:30 to 5:00, First live search — discover the closed-CFP problem
+
+> *Speaker notes: switch to the browser tab on localhost:3000. The styled UI from Step 4 should be alive. Click into the search input.*
+
+Type: `agentic workflows for databases`
+
+Press Enter. Wait 1-2 seconds for results to render.
+
+Read the top result aloud. Then point at the CFP-status pills:
+
+> *"Five conferences ranked by semantic match. But look at these pills — some of these CFPs are already closed. I cannot submit to those. The search needs to filter on the CFP window."*
+
+Note the closed-CFP result you pointed at; that is what Step 6 will fix.
+
+## 5:00 to 5:30, Marquee 1: GitHub Copilot Chat fixes searchEvents.sql
 
 > *Speaker notes: open `prisma/sql/searchEvents.sql` so it is the active file. In GitHub Copilot Chat, attach the file as context (paperclip or `#searchEvents.sql`). Agent mode on.*
 
-Read aloud: "Eight lines. SQL Server 2025 has a native VECTOR(768) data type and a VECTOR_DISTANCE function. The query embedding arrives as a JSON array and is cast to a vector in place. Now watch GitHub Copilot Chat take an instruction in plain English and edit this file directly."
+Read aloud: "This is the only SQL file in the entire project. Eight lines. SQL Server 2025 has a native VECTOR(768) data type and a VECTOR_DISTANCE function. Watch GitHub Copilot Chat take a plain-English instruction and edit this file directly to fix what we just saw."
 
 In the chat input, type:
 
@@ -107,7 +121,7 @@ In the chat input, type:
 
 Press Enter. Wait for the diff.
 
-Expected: GitHub Copilot opens the file, shows a diff, and adds two conditions to the WHERE clause along these lines:
+Expected: Copilot adds two conditions to the WHERE clause:
 
 ```sql
 AND cfpOpenDate <= GETDATE()
@@ -116,73 +130,39 @@ AND cfpCloseDate >= GETDATE()
 
 Accept the change. Say: "Plain English in. Working SQL out. The file is the only place T-SQL lives in this project, and the agent respected that."
 
-> *Speaker notes: undo the change before moving on (Cmd+Z) so the file is clean for the next take.*
+## 5:30 to 6:00, Marquee 2: MSSQL Schema Designer
 
-## 4:30 to 5:00, Clean TypeScript moment
+> *Speaker notes: switch to the MSSQL VS Code extension panel. The saved `talkscout` connection (Server `talkscout-mssql`, sa, TalkScout!Demo2026) should already be there.*
 
-> *Speaker notes: open actions.ts. Hover the searchEvents import.*
+Right-click the `Event` table → **Schema Designer**. The visual table view opens showing the `Event` columns: id, slug, name, dates, topics, and the `embedding` column typed as `VECTOR(768)` alongside the relational fields. Linger 10-15 seconds.
+
+Say:
+
+> *"One table. Relational columns and a native 768-dim vector column side by side in SQL Server 2025. No external vector store, no syncing two systems."*
+
+## 6:00 to 6:30, Re-run the search — the fix worked + the magic moment
+
+> *Speaker notes: switch back to the browser at localhost:3000. Clear the input.*
+
+Type: `agentic workflows for databases` (same query as Step 5).
+
+Press Enter.
+
+Read the top result aloud. Then say:
+
+> *"Same query, same database, but the agent's SQL fix is live. The closed-CFP results are gone. And while we are here, notice something else: the word 'agentic' is not in any of these titles or descriptions. The embedding model and SQL Server's vector distance figured out what I meant."*
+
+Expected: every result has a CFP-open pill. Top result is tagged with topics like "AI agents", "MCP", or "autonomous tooling".
+
+## 6:30 to 7:00, Clean TypeScript moment
+
+> *Speaker notes: open actions.ts. Hover the SEARCH_EVENTS_SQL import.*
 
 Open `src/app/actions.ts`. Read aloud: "A handful of lines of business logic. One embed call, one parameterized query via prisma.$queryRawUnsafe. The .sql file is loaded once at module load by src/lib/sql.ts and passed in. Application code never sees a T-SQL string."
 
 Hover the import for `SEARCH_EVENTS_SQL` from `@/lib/sql`. Show the inferred type briefly, then close.
 
-## 5:00 to 5:30, Marquee 2: MSSQL extension query editor
-
-> *Speaker notes: switch to MSSQL VS Code extension panel. The talkscout connection should already be saved.*
-
-Click the connect icon on the saved `talkscout` connection. Open a new query window.
-
-Paste:
-
-```sql
-SELECT TOP 3
-    name,
-    topics,
-    LEFT(CAST(embedding AS NVARCHAR(MAX)), 80) + '...' AS embedding_preview,
-    VECTORPROPERTY(embedding, 'Dimensions') AS dims
-FROM Event
-ORDER BY name;
-```
-
-Press F5. Read aloud: "Three rows. The embedding column is real, dimension 768, just sitting there in SQL Server. No extension. No external service. Native."
-
-## 5:30 to 6:00, Magic moment 1
-
-> *Speaker notes: switch to the browser at localhost:3000. The page should be clean. Click into the search input.*
-
-Type: `agentic workflows for databases`
-
-Press Enter. Wait roughly 1 to 2 seconds for results to render.
-
-Read the top result name aloud. Then say: "The word 'agentic' is not in the title. Not in the topics. Not in the description. The embedding model and SQL Server's vector distance figured out this is what I meant."
-
-## 6:00 to 6:30, Magic moment 2
-
-> *Speaker notes: clear the input. The placeholder should resume cycling.*
-
-Type: `type safety across the stack`
-
-Press Enter. Wait for results.
-
-Read the top result name aloud. Say: "Same trick, different topic. Vocabulary mismatch handled by semantic search."
-
-## 6:30 to 7:30, Schema Designer via GitHub Copilot Chat (agent mode)
-
-> *Speaker notes: GitHub Copilot Chat panel must be in Agent mode. The MSSQL extension must be loaded with the talkscout connection. Skip if running short.*
-
-Paste into GitHub Copilot Chat (agent mode, natural language; the agent picks the right tool):
-
-```
-Open the Schema Designer for the Event table in the talkscout database.
-```
-
-The agent picks the MSSQL extension's Schema Designer tool on its own and invokes it. The visual table view opens, showing the `Event` columns including the `VECTOR(768)` embedding column. Linger 10 to 20 seconds.
-
-Say:
-
-> *"GitHub Copilot drove the spec. The same agent generated the code. The same agent wrote the SQL filter. And the same agent opened the Schema Designer for me. One assistant, every surface in this demo."*
-
-## 7:30 to 8:30, Marquee 3: same agentic primitive, deployment layer
+## 7:00 to 8:00, Marquee 3: same agentic primitive, deployment layer
 
 > *Speaker notes: stay on the Copilot Chat panel. Switch to branch `002-azure-deploy` (or whichever branch carries the saved deploy transcript). Scroll to the saved `/opsx-apply add-azure-deployment` exchange. Use the scrollbar smoothly so the audience can read.*
 
@@ -198,7 +178,7 @@ Scroll past the `azure-prepare` → `azure-validate` → `azure-deploy` chain. P
 
 > *"Five minutes later, `azd up` finishes. Container Apps environment, Azure SQL Database on the free offer, an Ollama sidecar running the same `nomic-embed-text` model that runs on my Mac. Zero dollars on free-tier resources. No Azure OpenAI quota required."*
 
-## 8:30 to 9:15, Marquee 4: same app, in Azure
+## 8:00 to 8:45, Marquee 4: same app, in Azure
 
 > *Speaker notes: switch to the browser tab with the cloud URL. The DB was pre-warmed before tape so this is fast. If you forgot to pre-warm, the first query may take 30-60 seconds while the free-tier serverless DB resumes — keep talking.*
 
@@ -212,7 +192,7 @@ Then close the laptop lid metaphorically:
 
 > *"Two agentic flows. OpenSpec for the code, Azure skills for the platform. Both natural language, both inside VS Code, both backed by my repo's source of truth."*
 
-## 9:15 to 9:45, Wrap
+## 8:45 to 9:15, Wrap
 
 > *Speaker notes: back to camera. Voice up. Smile.*
 
