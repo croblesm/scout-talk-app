@@ -124,6 +124,18 @@
 
 <h2>🚀 Step-by-Step Walkthrough</h2>
 
+<div class="card" style="border-left-color: #dc2626; background-color: #fef2f2;">
+    <h3>🛑 Pre-flight check (BEFORE Step 1, off-camera)</h3>
+    <p><strong>After <code>npm run demo:reset</code> finishes, verify the dev server is up BEFORE you touch Copilot Chat:</strong></p>
+    <ol>
+        <li>Open <code>http://localhost:3000</code> in your browser (host or VS Code Simple Browser).</li>
+        <li>You MUST see the placeholder: <em>"TalkScout — Find the next dev conference worth pitching your talk to. Search UI lands when you run /opsx-propose and then /opsx-apply."</em></li>
+        <li>If the browser shows <code>ERR_CONNECTION_REFUSED</code> or the page never loads, the dev server didn't come up. Recovery: open a new terminal and run <code>npm run dev</code> (foreground). Wait for <code>✓ Ready in Ns</code>. Reload the page.</li>
+    </ol>
+    <p><strong>Why this matters:</strong> the placeholder is the "BEFORE" state you show on camera. After Step 4 (<code>/opsx-apply</code>) modifies <code>src/app/page.tsx</code>, the placeholder is gone forever for this take. Lose the dev server before Step 4 and you cannot show the before/after contrast.</p>
+    <p><strong>Do NOT run <code>npm run dev:restart</code> at this point.</strong> That command is for AFTER <code>/opsx-apply</code> finishes (see Step 4). Running it now would just restart the same placeholder.</p>
+</div>
+
 <div class="card">
     <h3>🔹 Step 1: Frame the project (0:00 → 0:30)</h3>
     <p class="voiceover">"Let me show you what is in the repo before we add anything."</p>

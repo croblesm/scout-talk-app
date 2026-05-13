@@ -4,6 +4,17 @@ The on-camera teleprompter is `demo/prompts.html`. This file is the timed versio
 
 Times are wall-clock from when recording starts. The total budget is 8:00 with at least 30 seconds of buffer (SC-004).
 
+## Pre-flight check (BEFORE Step 1, off-camera)
+
+After `npm run demo:reset` finishes, you MUST verify the dev server is up before touching Copilot Chat. Open `http://localhost:3000` in your browser.
+
+- If the page renders with the placeholder ("Search UI lands when you run /opsx-propose and then /opsx-apply"), you are good.
+- If the browser shows `ERR_CONNECTION_REFUSED` or never loads, the background `next dev` failed to start. Recovery: open a new terminal and run `npm run dev` (foreground). Wait for `✓ Ready in Ns`. Reload the page.
+
+Why this matters: the placeholder is your BEFORE state. After Step 4 modifies `src/app/page.tsx`, the placeholder is gone for this take. Lose the dev server before Step 4 and you cannot show the before/after contrast.
+
+Do NOT run `npm run dev:restart` at this point. That command is for AFTER `/opsx-apply` (see the Marquee 1 section below). Running it now just restarts the same placeholder.
+
 ## 0:00 to 0:30, Hook
 
 > *Speaker notes: smile, voice up. Look at camera, not at screen. Open with the problem statement.*
