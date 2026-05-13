@@ -3,19 +3,27 @@
  * clean recording take. Aborts loudly on any prerequisite failure.
  *
  * Sequence:
- *   1. Verify the working tree is clean (or fail with a clear message).
- *   2. Verify the `pre-implement` git tag exists.
- *   3. git reset --hard pre-implement.
- *   4. docker compose down -v, then up -d, wait for health.
- *   5. prisma migrate deploy.
- *   6. npm run db:seed.
- *   7. Start `next dev` in the background and wait for /api health.
+ *   1. Verify the `pre-implement` git tag exists.
+ *   2. Verify (or warn about) working tree state.
+ *   3. Kill any running next dev / next-server process and free :3000.
+ *   4. git switch + reset --hard + clean -fd; wipe openspec/changes/*.
+ *   5. docker compose down -v && up -d, wait for SQL Server health.
+ *   6. prisma migrate deploy.
+ *   7. npm run db:seed.
+ *
+ * NOTE: this script does NOT start the dev server. The operator runs
+ * `npm run dev` manually in a foreground terminal after demo-reset
+ * finishes. The script-controlled background dev server caused
+ * recording-day grief: it could be killed accidentally, it streamed
+ * logs into the operator terminal, and recovering it required knowing
+ * the right pkill incantation. Foreground dev is explicit, visible,
+ * and Ctrl+C cleanly stops it.
  *
  * Usage: npm run demo:reset
  *
- * Target wall clock under 90 seconds (SC-003).
+ * Target wall clock under 60 seconds (no dev-server wait).
  */
-import { spawn, spawnSync } from 'node:child_process'
+import { spawnSync } from 'node:child_process'
 import { existsSync, readdirSync, rmSync } from 'node:fs'
 import { resolve } from 'node:path'
 
@@ -67,49 +75,39 @@ function checkTagExists() {
   }
 }
 
-async function waitForHttp(url: string, timeoutMs = 60_000) {
-  const started = Date.now()
-  while (Date.now() - started < timeoutMs) {
-    try {
-      const res = await fetch(url)
-      if (res.ok) return
-    } catch {
-      /* not ready yet */
-    }
-    await new Promise((r) => setTimeout(r, 500))
-  }
-  throw new Error(`timed out waiting for ${url}`)
-}
-
 async function main() {
   const startedAt = Date.now()
 
-  console.log(`[1/7] verifying ${TAG} tag`)
+  console.log(`[1/6] verifying ${TAG} tag`)
   checkTagExists()
 
-  console.log('[2/7] checking working tree')
+  console.log('[2/6] checking working tree')
   const wasDirty = reportDirtyState()
   if (wasDirty) await new Promise((r) => setTimeout(r, 3000))
 
-  console.log('[3/7] killing any stale next dev processes and freeing :3000')
-  // pkill returns 1 when no process matches; allowFail: true keeps us running
-  run('pkill', ['-f', 'next dev'], { allowFail: true })
+  console.log('[3/6] killing any running dev server (frees :3000)')
+  // pkill returns 1 when no process matches; allowFail keeps us running.
+  // We kill next-server (the worker) by name. We do NOT pkill -f 'next dev'
+  // because that pattern can self-match a shell whose command line contains
+  // the literal string 'next dev'.
   run('pkill', ['-f', 'next-server'], { allowFail: true })
-  // Belt and suspenders: anything still bound to port 3000
+  // Belt and suspenders: anything still bound to port 3000.
   const lsofResult = spawnSync('lsof', ['-ti', ':3000'], { encoding: 'utf8' })
   if (lsofResult.status === 0 && lsofResult.stdout.trim()) {
     const pids = lsofResult.stdout.trim().split('\n')
-    console.log(`       killing PIDs still on :3000 → ${pids.join(', ')}`)
+    console.log(`       killing PIDs on :3000 → ${pids.join(', ')}`)
     run('kill', ['-9', ...pids], { allowFail: true })
+  } else {
+    console.log('       no processes on :3000')
   }
   await new Promise((r) => setTimeout(r, 500))
 
-  console.log(`       git switch ${BRANCH} && reset --hard ${TAG} && clean -fd`)
+  console.log(`[4/6] git switch ${BRANCH} && reset --hard ${TAG} && clean -fd`)
   run('git', ['switch', BRANCH])
   run('git', ['reset', '--hard', TAG])
   run('git', ['clean', '-fd'])
 
-  // openspec/changes/<change-name>/ is created live on camera by /opsx:propose.
+  // openspec/changes/<change-name>/ is created live on camera by /opsx-propose.
   // Delete any stale change directories so each take starts with no change.
   const changesDir = resolve(ROOT, 'openspec/changes')
   if (existsSync(changesDir)) {
@@ -122,32 +120,34 @@ async function main() {
     }
   }
 
-  console.log('[4/7] docker compose down -v && up -d (with wait)')
+  // Wipe .next so the next manual `npm run dev` rebuilds Tailwind cleanly.
   if (existsSync(resolve(ROOT, '.next'))) {
     rmSync(resolve(ROOT, '.next'), { recursive: true, force: true })
+    console.log('       removed stale .next/')
   }
+
+  console.log('[5/6] docker compose down -v && up -d (with wait)')
   run('docker', ['compose', 'down', '-v'])
   run('docker', ['compose', 'up', '-d'])
   run('node', ['scripts/wait-for-db.mjs'])
 
-  console.log('[5/7] prisma migrate deploy')
+  console.log('[6/6] prisma migrate deploy && db:seed')
   await runWithRetry('npx', ['prisma', 'migrate', 'deploy'], 3, 3000)
-
-  console.log('[6/7] db:seed')
   await runWithRetry('npm', ['run', 'db:seed'], 2, 2000)
 
-  console.log('[7/7] starting Next.js dev server')
-  const dev = spawn('npm', ['run', 'dev'], {
-    cwd: ROOT,
-    stdio: 'inherit',
-    detached: true,
-  })
-  dev.unref()
-  await waitForHttp('http://localhost:3000', 60_000)
-
   const elapsed = ((Date.now() - startedAt) / 1000).toFixed(1)
-  console.log(`\n  Demo reset complete in ${elapsed}s. Open http://localhost:3000.`)
-  console.log('  The dev server runs in the background. Stop it with: pkill -f "next dev"\n')
+  console.log(`\n  Demo reset complete in ${elapsed}s.\n`)
+  console.log('  NEXT STEP (you do this manually):')
+  console.log('    npm run dev')
+  console.log('')
+  console.log('  Wait for "Ready in Ns", then open http://localhost:3000.')
+  console.log('  You must see the placeholder ("Search UI lands when you run')
+  console.log('  /opsx-propose and then /opsx-apply") BEFORE you proceed to')
+  console.log('  Step 1 of the demo. This is your on-camera "before" state.')
+  console.log('')
+  console.log('  After /opsx-apply finishes, stop this dev server (Ctrl+C),')
+  console.log('  then run `npm run dev:restart` from a fresh terminal to get')
+  console.log('  Tailwind to re-scan the new files.\n')
 }
 
 main().catch((err) => {

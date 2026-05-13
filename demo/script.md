@@ -4,16 +4,20 @@ The on-camera teleprompter is `demo/prompts.html`. This file is the timed versio
 
 Times are wall-clock from when recording starts. The total budget is 8:00 with at least 30 seconds of buffer (SC-004).
 
-## Pre-flight check (BEFORE Step 1, off-camera)
+## Pre-flight setup (BEFORE Step 1, off-camera)
 
-After `npm run demo:reset` finishes, you MUST verify the dev server is up before touching Copilot Chat. Open `http://localhost:3000` in your browser.
+`npm run demo:reset` does NOT start the dev server anymore. You start it manually in a foreground terminal so you have full control over it across the take.
 
-- If the page renders with the placeholder ("Search UI lands when you run /opsx-propose and then /opsx-apply"), you are good.
-- If the browser shows `ERR_CONNECTION_REFUSED` or never loads, the background `next dev` failed to start. Recovery: open a new terminal and run `npm run dev` (foreground). Wait for `✓ Ready in Ns`. Reload the page.
+Two terminals:
 
-Why this matters: the placeholder is your BEFORE state. After Step 4 modifies `src/app/page.tsx`, the placeholder is gone for this take. Lose the dev server before Step 4 and you cannot show the before/after contrast.
+- **Terminal A**: `npm run demo:reset`. Wait for "Demo reset complete in Ns".
+- **Terminal B** (new tab/split, Cmd+\\): `npm run dev`. Wait for `✓ Ready in Ns`.
 
-Do NOT run `npm run dev:restart` at this point. That command is for AFTER `/opsx-apply` (see the Marquee 1 section below). Running it now just restarts the same placeholder.
+Then open `http://localhost:3000`. You MUST see the placeholder ("Search UI lands when you run /opsx-propose and then /opsx-apply"). If not, the dev server has a problem — fix it before you touch Copilot Chat.
+
+Why this design: the dev server is your BEFORE state on camera. Keeping it in a visible foreground terminal means you always know whether it is running, and Ctrl+C stops it cleanly. The previous script-managed background dev server caused recording-day grief (silent kills, no recovery path) and is gone.
+
+Keep Terminal B alive through Steps 1, 2, 3, and 4. After `/opsx-apply` finishes (end of Step 4), Ctrl+C Terminal B and run `npm run dev:restart` there. That picks up the new Tailwind classes and gives you the AFTER state.
 
 ## 0:00 to 0:30, Hook
 
@@ -81,13 +85,13 @@ Expected total time: 60 to 120 seconds. While files appear, narrate: "The agent 
 >
 > *Wait for the diff. Approve it. Then continue with the dev:restart below.*
 
-> *Speaker notes — dev:restart (~5 seconds, off-camera-friendly): the auto-reloaded page at `localhost:3000` may render unstyled (plain serif heading, raw browser input). This is a Tailwind v4 hot-reload quirk on Apple Silicon when many class names are introduced in one drop. Open a new terminal in VS Code and run:*
+> *Speaker notes — dev:restart (~5 seconds, off-camera-friendly): the auto-reloaded page at `localhost:3000` may render unstyled (plain serif heading, raw browser input). This is a Tailwind v4 hot-reload quirk on Apple Silicon when many class names are introduced in one drop. Go to Terminal B (the one running `npm run dev` from pre-flight setup), press Ctrl+C to stop the server, then in the SAME Terminal B run:*
 >
 > ```bash
 > npm run dev:restart
 > ```
 >
-> *This kills whatever is on :3000, deletes `.next/`, and starts a fresh dev server in the foreground of the new terminal. Tailwind re-scans every newly created file; the page hot-reloads with proper styling.*
+> *This wipes `.next/` and starts a fresh dev server in the foreground of Terminal B. Tailwind re-scans every newly created file; the page hot-reloads with proper styling.*
 
 > *Speaker notes — final check before Step 5: refresh `localhost:3000`. You should see the styled search input centered on the page, NOT the placeholder text. If still placeholder, redo the Verify step above.*
 
