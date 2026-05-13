@@ -135,7 +135,7 @@ Decision: does the Azure beat ship in tomorrow's recording?
 **Ships if and only if:**
 - Step 4 verification passed (cloud URL responds 200 and both searches return sensible results)
 - Step 5 confirmed `$0` spend
-- Local stack still works on `002-azure-deploy` (run `npm run demo:reset` and confirm)
+- Local stack still works on `002-azure-deploy` (Terminal A: `npm run demo:reset`; Terminal B: `npm run dev`; confirm placeholder at localhost:3000)
 - Copilot Chat transcript on this branch contains the full propose → apply → deploy chain
 
 If all four hold:
@@ -157,12 +157,18 @@ If any of the four fail, **do not merge**. Record from `001-talkscout` unchanged
 
 ## Step 8: pre-warm checklist (T-15min)
 
-Last thing before tape:
+Last thing before tape, in two terminals:
 
 ```bash
-# Local stack ready
+# Terminal A — local reset
 npm run demo:reset
 # Wait for "Demo reset complete in Ns"
+
+# Terminal B — local dev server in foreground
+npm run dev
+# Wait for "✓ Ready in Ns"
+
+# Confirm placeholder at http://localhost:3000
 
 # Cloud stack warm
 open "https://<live-url>/"
