@@ -220,17 +220,18 @@ npm run dev
 
 Useful for re-rehearsing the demo or recovering after a botched experiment. `demo:reset` aborts loudly if the `pre-implement` tag is missing or `docker compose` is not available.
 
-After `/opsx-apply` finishes during a rehearsal, **Ctrl+C the dev server in Terminal B** and run `npm run dev:restart` there to wipe `.next/` and start fresh — Tailwind v4's class scanner sometimes misses many-file drops on Apple Silicon.
+After `/opsx-apply` finishes during a rehearsal, manually restart the dev server in Terminal B: **Ctrl+C → `rm -rf .next` → `npm run dev`** (three commands typed by hand). Tailwind v4's class scanner sometimes misses many-file drops on Apple Silicon. No helper script — an earlier `npm run dev:restart` killed by port and broke VS Code's port-forwarding agent inside dev containers.
 
 ## Day-to-day commands
 
 ```bash
 npm run dev              # Next.js dev server on :3000 (foreground; Ctrl+C to stop)
-npm run dev:restart      # wipe .next/, start fresh `npm run dev` in this terminal.
-                         # Does NOT kill processes — Ctrl+C the prior `npm run dev`
-                         # yourself FIRST (killing by port tore down VS Code's port-
-                         # forwarding agent inside dev containers and broke the
-                         # session, so the kill step was removed).
+                         # (no dev:restart helper — when Tailwind needs a re-scan
+                         #  after /opsx-apply, do it manually: Ctrl+C the dev
+                         #  server, `rm -rf .next`, then `npm run dev` again.
+                         #  Three typed commands. Don't put a helper here again —
+                         #  killing by port tore down VS Code's port-forwarding
+                         #  agent inside dev containers.)
                          # (run this in Terminal B after /opsx-apply lands new files
                          #  so Tailwind v4 re-scans every class name)
 npm run typecheck        # tsc --noEmit
@@ -286,7 +287,6 @@ scripts/
 ├── wait-for-db.mjs       # Waits for SQL Server (uses docker healthcheck on host, TCP probe in container)
 ├── parse-dev-events.ts   # HTML fixture → events.json
 ├── fetch-dev-events.ts   # Live re-capture (off-demo)
-├── dev-restart.mjs       # Kill anything on :3000, wipe .next/, exec `npm run dev`
 └── demo-reset.ts         # Between-takes reset (does NOT start dev server)
 docker-compose.yml        # Top-level (host setup): just SQL Server (when you don't use the devcontainer)
 ```
@@ -337,7 +337,7 @@ npm run dev
 
 Then in Terminal B you run `npm run dev`. Wait for `✓ Ready in Ns`. Open `localhost:3000`: the placeholder must render before you start the take. The dev server stays in Terminal B (foreground, logs visible) through the whole take so you always know its state and can Ctrl+C to stop it cleanly.
 
-After `/opsx-apply` finishes during the take, **Ctrl+C the dev server in Terminal B and run `npm run dev:restart`** there so Tailwind picks up the new component class names.
+After `/opsx-apply` finishes during the take, in Terminal B: **Ctrl+C the dev server → `rm -rf .next` → `npm run dev`** (three commands typed by hand) so Tailwind picks up the new component class names.
 
 ### During the take
 

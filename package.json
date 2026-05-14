@@ -8,7 +8,6 @@
   },
   "scripts": {
     "dev": "next dev",
-    "dev:restart": "node scripts/dev-restart.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

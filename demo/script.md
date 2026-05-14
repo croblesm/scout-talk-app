@@ -17,7 +17,7 @@ Then open `http://localhost:3000`. You MUST see the placeholder ("Search UI land
 
 Why this design: the dev server is your BEFORE state on camera. Keeping it in a visible foreground terminal means you always know whether it is running, and Ctrl+C stops it cleanly. The previous script-managed background dev server caused recording-day grief (silent kills, no recovery path) and is gone.
 
-Keep Terminal B alive through Steps 1, 2, 3, and 4. After `/opsx-apply` finishes (end of Step 4), Ctrl+C Terminal B and run `npm run dev:restart` there. That picks up the new Tailwind classes and gives you the AFTER state.
+Keep Terminal B alive through Steps 1, 2, 3, and 4. After `/opsx-apply` finishes (end of Step 4), manually restart the dev server in Terminal B: Ctrl+C → `rm -rf .next` → `npm run dev`. Three commands typed by hand. That picks up the new Tailwind classes and gives you the AFTER state. No helper script — earlier `npm run dev:restart` killed by port and tore down VS Code's port-forwarding agent in dev containers.
 
 ## 0:00 to 0:30, Hook
 
@@ -89,15 +89,17 @@ Expected total time: 60 to 120 seconds. While files appear, narrate: "The agent 
 > The build is failing with: "A 'use server' file can only export async functions, found object" at src/app/actions.ts. Move any non-async-function export (constant, object, schema, default export) out of src/app/actions.ts into src/lib/types.ts. Keep actions.ts containing only 'use server' and `export async function searchEvents(...)`. Update imports in src/app/page.tsx and any component that consumed the moved export. Then show me the diff for all three files.
 > ```
 >
-> *Wait for the diff. Approve it. Then continue with the dev:restart below.*
+> *Wait for the diff. Approve it. Then continue with the manual dev restart below.*
 
-> *Speaker notes — dev:restart (~5 seconds, off-camera-friendly): the auto-reloaded page at `localhost:3000` may render unstyled (plain serif heading, raw browser input). Tailwind v4 hot-reload quirk on Apple Silicon when many class names land at once. Go to Terminal B (running `npm run dev`), press **Ctrl+C** to stop the server cleanly, wait for the prompt to return, THEN in the same Terminal B run:*
+> *Speaker notes — manual dev restart (~10 seconds, off-camera-friendly): the auto-reloaded page at `localhost:3000` may render unstyled (plain serif heading, raw browser input). Tailwind v4 hot-reload quirk on Apple Silicon when many class names land at once. In Terminal B (running `npm run dev`), three commands typed by hand:*
 >
 > ```bash
-> npm run dev:restart
+> # 1. Ctrl+C to stop the dev server, wait for prompt
+> rm -rf .next
+> npm run dev
 > ```
 >
-> *The script only wipes `.next/` and execs `npm run dev` — it does NOT kill processes. Killing by port would kill VS Code's port-forwarding agent inside the dev container, which breaks the container session. Your Ctrl+C is the only kill step. Tailwind re-scans; page hot-reloads styled.*
+> *No helper script. Earlier we had `npm run dev:restart` that killed by port; inside a VS Code dev container it killed VS Code's own port-forwarding agent and broke the session. Manual is safer.*
 
 > *Speaker notes — final check before Step 5: refresh `localhost:3000`. You should see the styled search input centered on the page, NOT the placeholder text. If still placeholder, redo the Verify step above.*
 

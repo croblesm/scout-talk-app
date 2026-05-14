@@ -140,7 +140,7 @@
     <button class="copy-btn" onclick="copyToClipboard('prep1b')">Copy</button>
     <p>Wait for <code>✓ Ready in Ns</code>. Open <code>http://localhost:3000</code> in your host browser. You MUST see the placeholder ("Search UI lands when you run /opsx-propose and then /opsx-apply"). This is your on-camera "BEFORE" state.</p>
 
-    <p><strong>After Step 4 (the live /opsx-apply)</strong>: Ctrl+C Terminal B, then <code>npm run dev:restart</code> there to pick up new Tailwind classes. The Step 4 card has this in its operator-action block.</p>
+    <p><strong>After Step 4 (the live /opsx-apply)</strong>: in Terminal B, manually Ctrl+C → <code>rm -rf .next</code> → <code>npm run dev</code>. Three commands typed by hand. The Step 4 card has the same instruction in its operator-action block. No helper script.</p>
 
     <p><strong>Pre-warm the cloud</strong> (if you are recording PART 2): open the cloud URL in another host browser tab, run any search, close. Repeat. The free-tier SQL DB cold-pauses after ~1h of idle.</p>
 
@@ -159,12 +159,7 @@ az account set --subscription "&lt;id-or-name&gt;"
 azd auth login</pre>
     <button class="copy-btn" onclick="copyToClipboard('ot1')">Copy</button>
 
-    <p><strong>Prereq B — Clean local baseline so the spec build has empty changes/ to write to</strong> (run inside the dev container):</p>
-    <pre id="ot2">npm run demo:reset
-npm run dev      # in a second terminal, leave running</pre>
-    <button class="copy-btn" onclick="copyToClipboard('ot2')">Copy</button>
-
-    <p><strong>Prereq C — Run PART 1 of the demo end-to-end in this SAME Copilot Chat session first</strong>. Use the Step 3, Step 4, and Step 6 prompts from the cards below (<code>/opsx-propose add-semantic-search-ui</code> with the full inline prompt → <code>/opsx-apply add-semantic-search-ui</code> → the CFP filter prompt). Approve every diff. Restart the dev server (<code>npm run dev:restart</code>) and confirm <code>localhost:3000</code> shows the working app with the CFP filter applied. <strong>The next prompts below need this code to exist in the working tree.</strong> Do NOT clear the chat between PART 1 and the Azure prompts.</p>
+    <p><strong>Prereq B — Run PART 1 of the demo end-to-end in this SAME Copilot Chat session first</strong>. Use the Step 3, Step 4, and Step 6 prompts from the cards below (<code>/opsx-propose add-semantic-search-ui</code> with the full inline prompt → <code>/opsx-apply add-semantic-search-ui</code> → the CFP filter prompt). Approve every diff. After Step 4 finishes, restart the dev server manually in Terminal B (Ctrl+C → <code>rm -rf .next</code> → <code>npm run dev</code>) so Tailwind re-scans the new files. Confirm <code>localhost:3000</code> shows the working app with the CFP filter applied. <strong>The next prompts below need this code to exist in the working tree.</strong> Do NOT clear the chat between PART 1 and the Azure prompts.</p>
 
     <p><strong>Now propose the Azure deployment</strong> (same chat session):</p>
     <pre id="ot6" style="white-space: pre-wrap;">/opsx-propose add-azure-deployment
@@ -264,10 +259,13 @@ Add the user-facing semantic search UI to TalkScout. The repo already has the fo
     <pre id="code2c" style="white-space: pre-wrap;">The build is failing with: "A 'use server' file can only export async functions, found object" at src/app/actions.ts. Move any non-async-function export (constant, object, schema, default export) out of src/app/actions.ts into src/lib/types.ts. Keep actions.ts containing only 'use server' and `export async function searchEvents(...)`. Update imports in src/app/page.tsx and any component that consumed the moved export. Then show me the diff for all three files.</pre>
     <button class="copy-btn" onclick="copyToClipboard('code2c')">Copy</button>
 
-    <p><strong>📌 Then restart the dev server</strong> (Tailwind v4 misses many-file class drops on Apple Silicon). <strong>In Terminal B (the one running <code>npm run dev</code>), press Ctrl+C to stop the server.</strong> Wait until the prompt returns. Then in the SAME Terminal B run:</p>
-    <pre id="code2b">npm run dev:restart</pre>
-    <button class="copy-btn" onclick="copyToClipboard('code2b')">Copy</button>
-    <p><em>The script only does two things now: wipes <code>.next/</code>, then runs <code>npm run dev</code> in the foreground. It does NOT kill anything — that is your job via Ctrl+C above. (The previous version killed by port and tore down VS Code's port-forwarding agent in the dev container; do not let any future version add killing back.) The browser hot-reloads with the proper styled UI.</em></p>
+    <p><strong>📌 Then restart the dev server manually</strong> (Tailwind v4 misses many-file class drops on Apple Silicon). In Terminal B (the one running <code>npm run dev</code>), three commands typed by hand:</p>
+    <ol>
+        <li>Press <strong>Ctrl+C</strong> to stop the server. Wait for the prompt to return.</li>
+        <li>Run <code>rm -rf .next</code> so Tailwind re-scans every newly created file.</li>
+        <li>Run <code>npm run dev</code> to start a fresh dev server in the same terminal.</li>
+    </ol>
+    <p><em>No helper script here on purpose. Earlier we had <code>npm run dev:restart</code> that killed by port; inside a VS Code dev container that hit VS Code's own port-forwarding agent and broke the session. Manual Ctrl+C + rm + npm run dev is safer.</em></p>
 
     <p><strong>Final check before Step 5:</strong> refresh <code>localhost:3000</code>. You should see the styled search input centered on the page, not the placeholder text. If you still see the placeholder, redo the Verify step above.</p>
 </div>
