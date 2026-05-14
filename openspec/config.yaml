@@ -277,12 +277,3 @@ rules:
       completes.
     - Cost target is $0 on the Azure free offer + ACA consumption grant.
       Validate after deploy with `az consumption usage list`.
-    - All Azure resources created by this change MUST carry these tags:
-        createdBy: roblescarlos
-        Owner: roblescarlos
-      Apply via a `tags` parameter at the top of `main.bicep`, default
-      value the two key/value pairs above, propagated to the resource
-      group AND to every resource declared in the template. Use the
-      Bicep pattern `tags: tags` on every resource. Do NOT hardcode the
-      values inline on individual resources; the operator should be
-      able to override via `azd env set TAGS_OWNER=...` if needed.
