@@ -40,40 +40,29 @@
             margin-top: 0.5rem;
         }
         .voiceover {
-            position: relative;
-            margin: 0.75rem 0 1rem;
-            padding: 0.85rem 1rem 0.85rem 3.2rem;
-            background: #eef2ff;
-            border-left: 4px solid #4f46e5;
-            border-radius: 6px;
-            font-size: 1.05rem;
-            line-height: 1.55;
-            color: #1e1b4b;
-            font-style: normal;
-        }
-        .voiceover::before {
-            content: "🎤 Voiceover";
-            position: absolute;
-            top: 0.55rem;
-            left: 0.9rem;
-            font-size: 0.65rem;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: #4f46e5;
-        }
-        .voiceover { padding-top: 1.8rem; padding-left: 1rem; }
-        .show {
+            font-style: italic;
             margin: 0.4rem 0 0.9rem;
-            padding-left: 0.6rem;
-            border-left: 2px solid #cbd5e1;
-            font-size: 0.92rem;
-            color: #475569;
+            color: #555;
+            line-height: 1.55;
         }
-        .show::before {
-            content: "📌 Show: ";
+        .voiceover .label {
+            font-style: normal;
+            font-weight: 700;
+            color: #4f46e5;
+            margin-right: 0.25rem;
+        }
+        .show {
+            font-style: italic;
+            margin: 0.3rem 0 0.8rem;
+            color: #555;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+        .show .label {
+            font-style: normal;
             font-weight: 600;
-            color: #334155;
+            color: #4f46e5;
+            margin-right: 0.25rem;
         }
         code {
             background-color: #e9ecef;
@@ -125,19 +114,16 @@
         }
 
         body.dark .voiceover {
-            background: #1e1b4b;
-            border-left-color: #818cf8;
-            color: #e0e7ff;
+            color: #bbb;
         }
-        body.dark .voiceover::before {
-            color: #c7d2fe;
+        body.dark .voiceover .label {
+            color: #a5b4fc;
         }
         body.dark .show {
-            border-left-color: #475569;
-            color: #cbd5e1;
+            color: #aaa;
         }
-        body.dark .show::before {
-            color: #e2e8f0;
+        body.dark .show .label {
+            color: #a5b4fc;
         }
 
         body.dark #toast {
@@ -163,7 +149,7 @@
     <li><strong>GitHub Copilot</strong> with <strong>OpenSpec</strong> drives the build itself, from change proposal to implementation</li>
 </ul>
 
-<p class="voiceover">"For this demo, the environment is ready. Docker is running with SQL Server 2025. Ollama is up on the host with the embedding model pulled. The repo is at the pre-implement git tag: foundation in place, no search UI yet. OpenSpec is installed but no change has been proposed. That happens live, on camera, in a moment."</p>
+<p class="voiceover"><span class="label">🎤 Voiceover:</span> "For this demo, the environment is ready. Docker is running with SQL Server 2025. Ollama is up on the host with the embedding model pulled. The repo is at the pre-implement git tag: foundation in place, no search UI yet. OpenSpec is installed but no change has been proposed. That happens live, on camera, in a moment."</p>
 
 <h2>🚀 Step-by-Step Walkthrough</h2>
 
@@ -188,64 +174,67 @@
 
 <div class="card">
     <h3>🔹 Step 1: The goal — what we are building (0:00 → 0:30)</h3>
-    <p class="show">browser tab on <code>http://localhost:3000</code> — placeholder ("Search UI lands when you run /opsx-propose and then /opsx-apply") is on screen. Linger 3-5 seconds, then switch back to VS Code.</p>
-    <p class="voiceover">"I am Carlos Robles, Principal PM for SQL developer experiences at Microsoft. Every developer who speaks at conferences hits the same problem: where should I submit this talk? Listings sites organize events by date and region, never by topical fit. I am building TalkScout — a CFP finder. Type a plain-English description of a talk, get the upcoming conferences whose CFPs match. End to end inside VS Code. In about nine minutes."</p>
+    <p class="show"><span class="label">📌 Show:</span> browser tab on <code>http://localhost:3000</code> — placeholder ("Search UI lands when you run /opsx-propose and then /opsx-apply") is on screen. Linger 3-5 seconds, then switch back to VS Code.</p>
+    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "I am Carlos Robles, Principal PM for SQL developer experiences at Microsoft. Every developer who speaks at conferences hits the same problem: where should I submit this talk? Listings sites organize events by date and region, never by topical fit. I am building TalkScout — a CFP finder. Type a plain-English description of a talk, get the upcoming conferences whose CFPs match. End to end inside VS Code. In about nine minutes."</p>
 </div>
 
 <div class="card">
     <h3>🔹 Step 2: The plan — how I got here (0:30 → 1:30)</h3>
 
-    <p class="show">stay in VS Code. Open <code>docs/plan.md</code>, press <strong>Cmd+K V</strong> for side-by-side preview. Scroll top to bottom as you talk.</p>
-    <p class="voiceover">"Before I add anything to my app, let me show you the plan I wrote when I started this project. One page. It captures the goal, the stack, the data model, and what is left to build."</p>
+    <p class="show"><span class="label">📌 Show:</span> stay in VS Code. Open <code>docs/plan.md</code>, press <strong>Cmd+K V</strong> for side-by-side preview. Scroll top to bottom as you talk.</p>
+    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "Before I add anything to my app, let me show you the plan I wrote when I started this project. One page. It captures the goal, the stack, the data model, and what is left to build."</p>
 
-    <p class="show">scroll to the <strong>intro paragraph</strong> at the top.</p>
-    <p class="voiceover">"The goal: a CFP finder. Plain-English in, ranked conferences out. End to end inside VS Code. No external vector store, no cloud embedding API."</p>
+    <p class="show"><span class="label">📌 Show:</span> scroll to the <strong>Overview</strong> at the top.</p>
+    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "A semantic CFP finder. A speaker types a plain-English description of a talk; the app returns the upcoming conferences whose CFPs match by topic. End to end on my Mac, inside VS Code. No external vector store, no cloud embedding API, no API keys."</p>
 
-    <p class="show">scroll to <strong>Stack</strong>. Trace the rows.</p>
-    <p class="voiceover">"SQL Server 2025 for the database, because it has a native vector type and a vector-distance function. Ollama on my Mac for embeddings, free, no API keys. Prisma 7 as the typed bridge. Every T-SQL statement lives in one folder, <code>prisma/sql</code>. And the UI itself is a Next.js Server Action with a few React components."</p>
+    <p class="show"><span class="label">📌 Show:</span> scroll to the <strong>Architecture</strong> Mermaid diagram.</p>
+    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "Three processes total. Browser, Next.js Server Action, and SQL Server 2025. The Server Action embeds the query through host Ollama, runs one ranked query through Prisma, gets back the top five. That's the whole hot path."</p>
 
-    <p class="show">scroll to <strong>Data model</strong>. Point at <code>Unsupported("VECTOR(768)")</code>.</p>
-    <p class="voiceover">"One table. Relational columns plus one native vector column. Prisma carries it through migrations with this Unsupported hint; the actual CAST to VECTOR happens in T-SQL."</p>
+    <p class="show"><span class="label">📌 Show:</span> scroll to <strong>Stack and rationale</strong>. Trace the rows.</p>
+    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "SQL Server 2025 because the vector type is native — no Pinecone alongside Postgres, no sync problem. Ollama on the host with nomic-embed-text, 768 dimensions, free. Prisma 7 as the typed bridge. And one rule: every T-SQL statement lives in <code>prisma/sql</code>, never as a string in TypeScript."</p>
 
-    <p class="show">scroll to <strong>Seed</strong>.</p>
-    <p class="voiceover">"That table is already seeded — 91 conferences, each one already embedded via Ollama, MERGE-ed into SQL Server. Done."</p>
+    <p class="show"><span class="label">📌 Show:</span> scroll to <strong>Data model</strong>. Point at <code>Unsupported("VECTOR(768)")</code>.</p>
+    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "One table. Relational columns plus one native vector column. Prisma carries it through migrations with this Unsupported hint; the actual CAST to VECTOR happens in T-SQL."</p>
 
-    <p class="show">scroll to <strong>Search</strong> (the last section).</p>
-    <p class="voiceover">"What is NOT done yet is this last section: the search itself. A Server Action that embeds the query, runs the ranked SQL, and three React components that render the result. That is what I am going to build next."</p>
+    <p class="show"><span class="label">📌 Show:</span> scroll to <strong>Seed pipeline</strong>.</p>
+    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "That table is already seeded. 91 conferences. Each one embedded via Ollama. Content-hash gated so re-runs are no-ops."</p>
 
-    <p class="show">close the preview.</p>
+    <p class="show"><span class="label">📌 Show:</span> scroll to <strong>UI plan (what's left to build)</strong>.</p>
+    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "What is NOT done yet is the UI. A Server Action, three React components, a page composition that replaces the placeholder. The plan calls it out as the remaining work. That is what I am going to build next."</p>
+
+    <p class="show"><span class="label">📌 Show:</span> close the preview.</p>
 </div>
 
 <div class="card">
     <h3>🔹 Step 3: Meet OpenSpec — the surface, the context, the data (1:30 → 2:45)</h3>
 
-    <p class="voiceover">"My plan said: from here, agentic. So let me show you what that means in practice. Three things, all inside VS Code, all right next to my code: the surface where I drive the agent, the file that tells the agent about THIS project, and the data layer the agent will work against."</p>
+    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "My plan said: from here, agentic. So let me show you what that means in practice. Three things, all inside VS Code, all right next to my code: the surface where I drive the agent, the file that tells the agent about THIS project, and the data layer the agent will work against."</p>
 
-    <p class="show">(a) Open the <strong>Agents</strong> view (new top-left panel in VS Code Insiders).</p>
-    <p class="voiceover">"First, the surface. This is the new Agents view in VS Code Insiders. Three sub-panels."</p>
+    <p class="show"><span class="label">📌 Show:</span> (a) Open the <strong>Agents</strong> view (new top-left panel in VS Code Insiders).</p>
+    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "First, the surface. This is the new Agents view in VS Code Insiders. Three sub-panels."</p>
 
-    <p class="show">point at the <strong>Skills</strong> panel: <code>openspec-propose</code>, <code>openspec-apply</code>, <code>openspec-explore</code>, <code>openspec-archive</code>.</p>
-    <p class="voiceover">"Skills. Four of them, one per phase of a change. The agent loads them from this workspace automatically. I will use propose and apply in a minute."</p>
+    <p class="show"><span class="label">📌 Show:</span> point at the <strong>Skills</strong> panel: <code>openspec-propose</code>, <code>openspec-apply</code>, <code>openspec-explore</code>, <code>openspec-archive</code>.</p>
+    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "Skills. Four of them, one per phase of a change. The agent loads them from this workspace automatically. I will use propose and apply in a minute."</p>
 
-    <p class="show">point at the <strong>Changes</strong> panel (currently empty).</p>
-    <p class="voiceover">"Changes. Currently empty. Every file the agent writes lands here as a diff, with its own approval gate."</p>
+    <p class="show"><span class="label">📌 Show:</span> point at the <strong>Changes</strong> panel (currently empty).</p>
+    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "Changes. Currently empty. Every file the agent writes lands here as a diff, with its own approval gate."</p>
 
-    <p class="show">point at the <strong>chat input</strong> at the bottom.</p>
-    <p class="voiceover">"And the chat. Plain English in, agent actions out. This is the only thing I type for the next five minutes."</p>
+    <p class="show"><span class="label">📌 Show:</span> point at the <strong>chat input</strong> at the bottom.</p>
+    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "And the chat. Plain English in, agent actions out. This is the only thing I type for the next five minutes."</p>
 
-    <p class="show">(b) Open <code>openspec/config.yaml</code>. Scroll to the <code>context:</code> block.</p>
-    <p class="voiceover">"Second, the project context. The agent does not operate in a vacuum. This file is where I tell it about this project. Architectural rules in plain English — all T-SQL only in <code>prisma/sql/</code>, embeddings done in Node not T-SQL, container limits at 2 GB and 2 CPUs. Every time I run slash-opsx-propose, the agent reads this first. That is how the spec it generates ends up matching the rest of the repo."</p>
+    <p class="show"><span class="label">📌 Show:</span> (b) Open <code>openspec/config.yaml</code>. Scroll to the <code>context:</code> block.</p>
+    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "Second, the project context. The agent does not operate in a vacuum. This file is where I tell it about this project. Architectural rules in plain English — all T-SQL only in <code>prisma/sql/</code>, embeddings done in Node not T-SQL, container limits at 2 GB and 2 CPUs. Every time I run slash-opsx-propose, the agent reads this first. That is how the spec it generates ends up matching the rest of the repo."</p>
 
-    <p class="show">(c) Open <code>prisma/schema.prisma</code>. Scroll to the <code>Event</code> model. Point at <code>embedding Unsupported("VECTOR(768)")?</code>.</p>
-    <p class="voiceover">"Third, the data. This is what the agent will work against. One table. One native vector column. Same column we will see live in the database later."</p>
+    <p class="show"><span class="label">📌 Show:</span> (c) Open <code>prisma/schema.prisma</code>. Scroll to the <code>Event</code> model. Point at <code>embedding Unsupported("VECTOR(768)")?</code>.</p>
+    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "Third, the data. This is what the agent will work against. One table. One native vector column. Same column we will see live in the database later."</p>
 
-    <p class="show">close <code>schema.prisma</code> and <code>config.yaml</code>. Focus back on the Agents chat input.</p>
+    <p class="show"><span class="label">📌 Show:</span> close <code>schema.prisma</code> and <code>config.yaml</code>. Focus back on the Agents chat input.</p>
 </div>
 
 <div class="card">
     <h3>🔹 Step 4: Propose the change with /opsx-propose (2:45 → 4:00)</h3>
-    <p class="voiceover">"OpenSpec calls the unit of work a 'change.' I am going to propose adding the search UI as a change. Watch the agent invoke the <code>openspec-propose</code> skill — the one we saw in the Skills panel a minute ago. Three artifacts in one shot: a proposal, a design, and a tasks file. Live."</p>
-    <p class="show">the Agents chat panel (agentic mode, model selector shows your agent). Make the Skills panel visible if possible so the audience sees <code>openspec-propose</code> lighting up as the agent calls it.</p>
+    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "OpenSpec calls the unit of work a 'change.' I am going to propose adding the search UI as a change. Watch the agent invoke the <code>openspec-propose</code> skill — the one we saw in the Skills panel a minute ago. Three artifacts in one shot: a proposal, a design, and a tasks file. Live."</p>
+    <p class="show"><span class="label">📌 Show:</span> the Agents chat panel (agentic mode, model selector shows your agent). Make the Skills panel visible if possible so the audience sees <code>openspec-propose</code> lighting up as the agent calls it.</p>
     <pre id="code1">/opsx-propose add-semantic-search-ui
 
 Add the user-facing semantic search UI to TalkScout. The repo already has the foundation (Prisma schema, migrations applied, src/lib/db.ts, src/lib/embed.ts wrapping host Ollama, src/lib/sql.ts loading prisma/sql/searchEvents.sql, the database seeded with 91 events including embeddings, and the placeholder page at src/app/page.tsx). What is missing: a Server Action that embeds the user's query and runs prisma.$queryRawUnsafe(SEARCH_EVENTS_SQL, ...), three React components (SearchInput with gradient border and placeholder cycling, EventCard with clickable CFP link, CfpStatusPill with five visual states), a pure-function cfp-status utility, and the page composition that wires it all together. The two scripted on-camera queries are "agentic workflows for databases" and "type safety across the stack". Honor the architectural and UI rules in openspec/config.yaml.</pre>
@@ -255,8 +244,8 @@ Add the user-facing semantic search UI to TalkScout. The repo already has the fo
 
 <div class="card">
     <h3>🔹 Step 5: Apply the change with /opsx-apply (4:00 → 5:30)</h3>
-    <p class="voiceover">"Now I tell OpenSpec to execute the tasks file. Same agent, same chat, different skill — this time <code>openspec-apply</code>. Watch the Changes panel on the right fill up with every file the agent writes. I approve each diff as it appears."</p>
-    <p class="show">same Agents chat panel as Step 4. <strong>Pin the Changes panel open</strong> so the audience sees the diffs land in real time. The Skills panel can stay visible too so they see <code>openspec-apply</code> being invoked.</p>
+    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "Now I tell OpenSpec to execute the tasks file. Same agent, same chat, different skill — this time <code>openspec-apply</code>. Watch the Changes panel on the right fill up with every file the agent writes. I approve each diff as it appears."</p>
+    <p class="show"><span class="label">📌 Show:</span> same Agents chat panel as Step 4. <strong>Pin the Changes panel open</strong> so the audience sees the diffs land in real time. The Skills panel can stay visible too so they see <code>openspec-apply</code> being invoked.</p>
     <pre id="code2">/opsx-apply add-semantic-search-ui</pre>
     <button class="copy-btn" onclick="copyToClipboard('code2')">Copy</button>
 
@@ -291,8 +280,8 @@ Add the user-facing semantic search UI to TalkScout. The repo already has the fo
 
 <div class="card">
     <h3>🔹 Step 6: First live search — discover the closed-CFP problem (5:30 → 6:00)</h3>
-    <p class="voiceover">"The app is alive. Let me type a topic I want to speak about and see what comes back." (pause for results) "Five conferences ranked by semantic match. But look at these pills — some of these CFPs are already closed. I cannot submit to those. The search needs to filter on the CFP window."</p>
-    <p class="show">browser tab on <code>localhost:3000</code>. The styled search UI from Step 5. Click into the input, type the query below, press Enter.</p>
+    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "The app is alive. Let me type a topic I want to speak about and see what comes back." (pause for results) "Five conferences ranked by semantic match. But look at these pills — some of these CFPs are already closed. I cannot submit to those. The search needs to filter on the CFP window."</p>
+    <p class="show"><span class="label">📌 Show:</span> browser tab on <code>localhost:3000</code>. The styled search UI from Step 5. Click into the input, type the query below, press Enter.</p>
     <pre id="code3">agentic workflows for databases</pre>
     <button class="copy-btn" onclick="copyToClipboard('code3')">Copy</button>
     <p><strong>Expected:</strong> 5 results render in 1-2 seconds. At least one result shows a <strong>"CFP closed"</strong> pill (the seed has events with <code>cfpCloseDate</code> in the past). Read aloud the title of one closed-CFP result and point at the pill so the audience sees the problem on screen.</p>
@@ -300,29 +289,29 @@ Add the user-facing semantic search UI to TalkScout. The repo already has the fo
 
 <div class="card">
     <h3>🔹 Step 7: GitHub Copilot Chat fixes the SQL file (6:00 → 6:30)</h3>
-    <p class="voiceover">"This is the only SQL file in the entire project. Eight lines. SQL Server 2025 has a native VECTOR(768) column type and a VECTOR_DISTANCE function. Watch GitHub Copilot Chat take a plain-English instruction and edit this file directly to fix what we just saw."</p>
-    <p class="show">open <code>prisma/sql/searchEvents.sql</code> so it is the active file. In GitHub Copilot Chat, attach the file as context (paperclip icon or type <code>#searchEvents.sql</code>). Agent mode on.</p>
+    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "This is the only SQL file in the entire project. Eight lines. SQL Server 2025 has a native VECTOR(768) column type and a VECTOR_DISTANCE function. Watch GitHub Copilot Chat take a plain-English instruction and edit this file directly to fix what we just saw."</p>
+    <p class="show"><span class="label">📌 Show:</span> open <code>prisma/sql/searchEvents.sql</code> so it is the active file. In GitHub Copilot Chat, attach the file as context (paperclip icon or type <code>#searchEvents.sql</code>). Agent mode on.</p>
     <pre id="code4">The search keeps returning events whose CFP is already closed or has not opened yet. Filter the search SQL so it only returns events with an open CFP right now.</pre>
     <button class="copy-btn" onclick="copyToClipboard('code4')">Copy</button>
     <p><strong>Expected:</strong> Copilot shows a diff, adding two conditions to the WHERE clause:</p>
     <pre id="code5">AND cfpOpenDate &lt;= GETDATE()
 AND cfpCloseDate &gt;= GETDATE()</pre>
     <button class="copy-btn" onclick="copyToClipboard('code5')">Copy</button>
-    <p class="voiceover">"Plain English in. Working SQL out. The file is the only place T-SQL lives in this project, and the agent respected that."</p>
+    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "Plain English in. Working SQL out. The file is the only place T-SQL lives in this project, and the agent respected that."</p>
 </div>
 
 <div class="card">
     <h3>🔹 Step 8: Inspect the live database — MSSQL Schema Designer (6:30 → 7:00)</h3>
-    <p class="voiceover">"You saw the <code>VECTOR(768)</code> column in <code>schema.prisma</code> earlier. Here is the same column, live, in the running database. The MSSQL extension for VS Code is connected to my SQL Server 2025 container. Schema Designer opens right in the IDE."</p>
-    <p class="show">click the MSSQL extension icon in the activity bar. The saved <code>talkscout</code> connection (Server <code>talkscout-mssql</code>, sa, TalkScout!Demo2026) should already be there. Right-click the <code>Event</code> table → <strong>Schema Designer</strong>. Linger 10-15 seconds on the visual layout.</p>
+    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "You saw the <code>VECTOR(768)</code> column in <code>schema.prisma</code> earlier. Here is the same column, live, in the running database. The MSSQL extension for VS Code is connected to my SQL Server 2025 container. Schema Designer opens right in the IDE."</p>
+    <p class="show"><span class="label">📌 Show:</span> click the MSSQL extension icon in the activity bar. The saved <code>talkscout</code> connection (Server <code>talkscout-mssql</code>, sa, TalkScout!Demo2026) should already be there. Right-click the <code>Event</code> table → <strong>Schema Designer</strong>. Linger 10-15 seconds on the visual layout.</p>
     <p><strong>Expected:</strong> the visual table view opens showing the <code>Event</code> columns: id, slug, name, dates, topics, and the <code>embedding</code> column typed as <code>VECTOR(768)</code> alongside the relational fields.</p>
-    <p class="voiceover">"One table. Relational columns and a native 768-dim vector column side by side in SQL Server 2025. No external vector store, no syncing two systems."</p>
+    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "One table. Relational columns and a native 768-dim vector column side by side in SQL Server 2025. No external vector store, no syncing two systems."</p>
 </div>
 
 <div class="card">
     <h3>🔹 Step 9: Re-run the search — the fix worked + the magic moment (7:00 → 7:30)</h3>
-    <p class="voiceover">"Back to the app. Same query, same database, but now the agent's SQL fix is live. Watch the closed-CFP results disappear. And while we are here, notice something else: the word 'agentic' is not in any of these titles or descriptions. The embedding model and SQL Server's vector distance figured out what I meant."</p>
-    <p class="show">browser tab on <code>localhost:3000</code>. Clear the input, type the same query, press Enter.</p>
+    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "Back to the app. Same query, same database, but now the agent's SQL fix is live. Watch the closed-CFP results disappear. And while we are here, notice something else: the word 'agentic' is not in any of these titles or descriptions. The embedding model and SQL Server's vector distance figured out what I meant."</p>
+    <p class="show"><span class="label">📌 Show:</span> browser tab on <code>localhost:3000</code>. Clear the input, type the same query, press Enter.</p>
     <pre id="code6">agentic workflows for databases</pre>
     <button class="copy-btn" onclick="copyToClipboard('code6')">Copy</button>
     <p><strong>Expected:</strong> 5 results, every one with a CFP-open pill. Top result is an event tagged with topics like "AI agents", "MCP", or "autonomous tooling". The word "agentic" appears nowhere in the visible titles.</p>
@@ -330,14 +319,14 @@ AND cfpCloseDate &gt;= GETDATE()</pre>
 
 <div class="card">
     <h3>🔹 Step 10: Open actions.ts — the clean TypeScript moment (7:30 → 8:00)</h3>
-    <p class="voiceover">"Here is what the application code sees. A handful of lines of business logic. One embed call, one parameterized query. No SQL strings. The .sql file is loaded once at module load by <code>src/lib/sql.ts</code> and passed in. Type safety stays end-to-end."</p>
-    <p class="show">open <code>src/app/actions.ts</code>. Point at the <code>SEARCH_EVENTS_SQL</code> import. Hover the <code>results</code> variable to surface the inferred return type briefly.</p>
+    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "Here is what the application code sees. A handful of lines of business logic. One embed call, one parameterized query. No SQL strings. The .sql file is loaded once at module load by <code>src/lib/sql.ts</code> and passed in. Type safety stays end-to-end."</p>
+    <p class="show"><span class="label">📌 Show:</span> open <code>src/app/actions.ts</code>. Point at the <code>SEARCH_EVENTS_SQL</code> import. Hover the <code>results</code> variable to surface the inferred return type briefly.</p>
 </div>
 
 <div class="card">
     <h3>🔹 Step 11: Closing statement (8:00 → 9:00)</h3>
-    <p class="voiceover">"That is TalkScout. I started with a one-page plan — that got me a typed schema, a 768-dim vector column, and a seeded database. From there, I switched to OpenSpec, and every change since has been: propose in plain English, agent generates the spec, agent applies it, I approve. Spec-driven semantic search end to end inside VS Code Insiders. SQL Server 2025 stored the vectors. Prisma kept the TypeScript clean. GitHub Copilot, with OpenSpec, drove the build. One agent, every surface in this demo. Repo and links are below. Thanks for watching."</p>
-    <p class="show">during the wrap, open the closing recap slide in your host browser at <code>file:///Users/carlos/scout-talk-app/demo/walkthrough-slide.html</code> (dark, click-to-advance). It walks through the 11-step timeline as you talk through the summary.</p>
+    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "That is TalkScout. I started with a one-page plan — that got me a typed schema, a 768-dim vector column, and a seeded database. From there, I switched to OpenSpec, and every change since has been: propose in plain English, agent generates the spec, agent applies it, I approve. Spec-driven semantic search end to end inside VS Code Insiders. SQL Server 2025 stored the vectors. Prisma kept the TypeScript clean. GitHub Copilot, with OpenSpec, drove the build. One agent, every surface in this demo. Repo and links are below. Thanks for watching."</p>
+    <p class="show"><span class="label">📌 Show:</span> during the wrap, open the closing recap slide in your host browser at <code>file:///Users/carlos/scout-talk-app/demo/walkthrough-slide.html</code> (dark, click-to-advance). It walks through the 11-step timeline as you talk through the summary.</p>
 </div>
 
 <h2>🎯 What We Accomplished</h2>
@@ -363,7 +352,7 @@ AND cfpCloseDate &gt;= GETDATE()</pre>
 </div>
 
 <h2>🎯 Closing Statement</h2>
-<p class="voiceover">"In under nine minutes, we walked from a one-page foundation plan to a working semantic-search app. The plan got us a typed schema and a seeded database. OpenSpec took it from there: proposed the change, applied it, approved diff by diff. We edited a real SQL file with the agent in plain English, and ran semantic search against SQL Server 2025's native vectors. All without leaving VS Code Insiders. Without writing a single line of SQL string literal in our application code. And the local stack is reproducible with one command."</p>
+<p class="voiceover"><span class="label">🎤 Voiceover:</span> "In under nine minutes, we walked from a one-page foundation plan to a working semantic-search app. The plan got us a typed schema and a seeded database. OpenSpec took it from there: proposed the change, applied it, approved diff by diff. We edited a real SQL file with the agent in plain English, and ran semantic search against SQL Server 2025's native vectors. All without leaving VS Code Insiders. Without writing a single line of SQL string literal in our application code. And the local stack is reproducible with one command."</p>
 
 <h2>📚 Resources</h2>
 <div class="card">

@@ -45,14 +45,16 @@ Open the segment:
 
 > *"Before I add anything to my app, let me show you the plan I wrote when I started this project. One page. It captures the goal, the stack, the data model, and what is left to build."*
 
-Scroll through the preview as you talk:
-- **Intro paragraph** — goal, scope, the "no external vector store / no cloud embedding API" guardrails (10s).
-- **Stack** — SQL Server 2025 native vectors, Ollama on host, Prisma 7, `prisma/sql/` boundary, Next.js Server Action + components for the UI (15s).
-- **Data model** — point at `Unsupported("VECTOR(768)")`. "One table. CAST happens in T-SQL." (10s).
-- **Seed** — "Already done. 91 conferences, embedded, MERGE-ed in." (10s).
-- **Search** — read the section header. Then:
+Scroll through the preview as you talk. The plan has real sections; do not blow past them:
 
-> *"What is NOT done yet is this last section: the search itself. A Server Action that embeds the query, runs the ranked SQL, and three React components that render the result. That is what I am going to build next."*
+- **Overview** (10s) — goal, the "no external vector store / no cloud embedding API" guardrails.
+- **Architecture diagram** (10s) — three processes: browser, Server Action, SQL Server. Embedding via host Ollama; ranking via VECTOR_DISTANCE.
+- **Stack and rationale** (15s) — SQL Server 2025 (native vector), Ollama (free, no key), Prisma 7 (typed bridge), and the SQL boundary rule.
+- **Data model** (10s) — point at `Unsupported("VECTOR(768)")`. "One table. CAST happens in T-SQL."
+- **Seed pipeline** (5s) — "Already done. 91 conferences. Content-hash gated."
+- **UI plan (what's left to build)** (10s) — Server Action + three components + page composition. Read the table heading.
+
+> *"What is NOT done yet is the UI itself. A Server Action, three React components, a page composition that replaces the placeholder. The plan calls it out as the remaining work. That is what I am going to build next."*
 
 Close the preview.
 
