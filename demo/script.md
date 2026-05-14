@@ -77,10 +77,16 @@ What appears, in roughly this order. **Approve each one as it appears in the dif
 
 Expected total time: 60 to 120 seconds. While files appear, narrate: "The agent is reading tasks.md and creating exactly the files it lists. No more, no less. The page.tsx is the wiring layer; that is what makes the UI show up."
 
-> *Speaker notes — VERIFY before continuing (~5 seconds, off-camera-friendly): when /opsx-apply finishes, open `src/app/page.tsx`. It must start with `'use client'` and import SearchInput + EventCard. If you still see the placeholder paragraph ("Search UI lands when you run /opsx-propose and then /opsx-apply"), the agent skipped the page.tsx modification (this is the most common live failure). Paste this into the SAME Copilot Chat to recover:*
+> *Speaker notes — VERIFY 1: page.tsx replaced (~5 seconds): open `src/app/page.tsx`. It must start with `'use client'` and import SearchInput + EventCard. If you still see the placeholder paragraph, paste this into the SAME Copilot Chat to recover:*
 >
 > ```
 > You did not modify src/app/page.tsx. Per openspec/changes/add-semantic-search-ui/tasks.md, the placeholder Home component must be REPLACED with one that uses the new SearchInput and EventCard components and manages search state with useState. Apply that change now, then show me the diff.
+> ```
+
+> *Speaker notes — VERIFY 2: actions.ts has only async exports (~5 seconds): open `src/app/actions.ts`. It must start with `'use server'`. Every export must be `export async function` OR `export type`/`export interface`. NO `export const`, NO `export default {...}`, NO exported schemas. If the dev-server logs show `A "use server" file can only export async functions, found object`, paste this into the SAME Copilot Chat:*
+>
+> ```
+> The build is failing with: "A 'use server' file can only export async functions, found object" at src/app/actions.ts. Move any non-async-function export (constant, object, schema, default export) out of src/app/actions.ts into src/lib/types.ts. Keep actions.ts containing only 'use server' and `export async function searchEvents(...)`. Update imports in src/app/page.tsx and any component that consumed the moved export. Then show me the diff for all three files.
 > ```
 >
 > *Wait for the diff. Approve it. Then continue with the dev:restart below.*

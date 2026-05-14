@@ -168,6 +168,24 @@ context: |
     proposal, NOT under NEW files. /opsx-apply MUST surface a diff for
     `src/app/page.tsx`; if the diff is empty or absent, the apply is
     incomplete.
+  - Server Action file rules (NON-NEGOTIABLE): when a file has
+    `'use server'` at the top, EVERY export must be an `async function`.
+    Next.js rejects any other export at compile time with: "A 'use
+    server' file can only export async functions, found object."
+    Specifically:
+    - `export type Foo = ...` and `export interface Foo` are OK
+      (types are erased at compile time).
+    - `export const FOO = ...`, `export default {...}`, exported Zod
+      schemas, exported non-async functions are all FORBIDDEN.
+    - If the Server Action needs to share a type with a client
+      component (e.g., `SearchResult` shared between `actions.ts` and
+      `search-input.tsx`), put the type in `src/lib/types.ts` (or a
+      similar non-`'use server'` file) and import it from both sides.
+      DO NOT define it inside `actions.ts`.
+    The /opsx-propose tasks.md MUST name `src/lib/types.ts` as a
+    separate task whenever the Server Action's signature involves a
+    custom return type. /opsx-apply MUST NOT inline non-function
+    exports into any `'use server'` file.
   - Force dark mode. In src/app/layout.tsx the html tag MUST have
     `className="font-sans dark"` and `style={{ colorScheme: "dark" }}`.
     The body MUST be `bg-zinc-950 text-zinc-100 antialiased` with NO `dark:`

@@ -446,6 +446,8 @@ Embeddings are produced in Node, not in T-SQL. The original brief considered usi
 | `prisma migrate dev` fails with "table exists" | Stale state from a prior run | `npm run db:reset` (destructive) |
 | `/opsx-apply` does nothing in GitHub Copilot Chat | OpenSpec prompts not loaded | Verify `.github/prompts/opsx-*.prompt.md` exist; reload the VS Code window |
 | Search returns 0 results | Embeddings never computed | `SELECT COUNT(*) FROM Event WHERE embedding IS NULL` in the MSSQL extension; if non-zero, re-run `npm run db:seed` |
+| Dev server logs: `A "use server" file can only export async functions, found object` | `/opsx-apply` put a non-async-function export (constant, object, schema, default export) in `src/app/actions.ts` alongside the async `searchEvents`. Next.js Server Actions forbid that. | Move the non-function export out of `actions.ts` into `src/lib/types.ts`. `actions.ts` must contain only `'use server'` + `export async function`. Recovery prompt to paste into Copilot Chat is in `demo/prompts.html` Step 4 Verify 2. Permanent rule lives in `openspec/config.yaml` so future `/opsx-propose` runs won't reproduce this. |
+| `src/app/page.tsx` still shows the placeholder after `/opsx-apply` | The agent created all the new files but skipped the page.tsx modification gate | Open page.tsx; if it does not start with `'use client'` and import `SearchInput`/`EventCard`, paste the recovery prompt in `demo/prompts.html` Step 4 Verify 1. |
 
 ## Spec, plan, tasks, principles
 
