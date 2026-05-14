@@ -1,6 +1,6 @@
 # TalkScout — Foundation plan
 
-This is the one-page plan I worked from before any agent touched the repo. It scaffolded the data layer, the embedding pipeline, and the SQL boundary. After this point the next layer (the search UI) is delivered as an OpenSpec change, not a hand-coded step.
+This is the one-page plan I wrote before starting. It locks in the data layer, the embedding pipeline, and the SQL boundary — the parts I want done before any agent gets involved. The search UI itself comes later, and not from a plan like this: as an OpenSpec change.
 
 ## Goal
 
@@ -51,19 +51,9 @@ model Event {
 
 Why not Prisma TypedSQL? TypedSQL does not support the `sqlserver` provider as of Prisma 7.x. The load-at-startup pattern is the SQL Server workaround.
 
-## What is in the repo at this point
+## What this gets me
 
-- `docker-compose.yml` — SQL Server 2025 container, capped at 2 GB / 2 CPUs
-- `prisma/schema.prisma` — the `Event` model above
-- `prisma/migrations/` — initial table + indexes
-- `prisma/sql/upsertEvents.sql` — the MERGE
-- `prisma/sql/searchEvents.sql` — vector-distance ranking, top 5
-- `src/lib/embed.ts` — thin wrapper around Ollama's `/api/embeddings`
-- `src/lib/sql.ts` — the runtime SQL loader
-- `prisma/seed.ts` — the seed pipeline above
-- `src/app/page.tsx` — placeholder page (no search UI yet)
-
-`npm run demo:reset` brings the whole stack up to this point in ~30 seconds.
+A seeded local stack with 91 events, each with a 768-dim embedding, queryable by `VECTOR_DISTANCE` against the user's embedded query. The placeholder page at `src/app/page.tsx` is intentionally inert — the search UI is the next layer, and the first layer I want delivered agentically.
 
 ## Next
 
