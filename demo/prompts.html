@@ -124,16 +124,14 @@
 
 <h2>🚀 Step-by-Step Walkthrough</h2>
 
-<p style="text-align: center; padding: 0.5rem 1rem; background: #fef9c3; border-radius: 6px; margin: 1rem 0;">The on-camera demo splits into <strong>PART 1 (Steps 1-9, live spec-driven build)</strong> and <strong>PART 2 (Steps 10-12, Azure skills deployment shown via saved chat + live cloud URL)</strong>. Off-camera setup has two cards below: <strong>Pre-take setup</strong> (per take, ~60s) and <strong>One-time Azure deploy</strong> (run ONCE before the first tape, ~15 min — the cloud and the chat history persist across all subsequent takes).</p>
-
 <div class="card" style="border-left-color: #dc2626; background-color: #fef2f2;">
-    <h3>🛑 Pre-take setup — Local stack (off-camera, immediately before each take, ~60s)</h3>
-    <p>Two commands in two terminals. This wipes back to the pre-implement placeholder so Steps 3-9 can do their spec-driven work LIVE on camera.</p>
+    <h3>🛑 Pre-take setup (off-camera, immediately before each take, ~60s)</h3>
+    <p>Two commands in two terminals. Wipes back to the pre-implement placeholder so Steps 3-9 can do their spec-driven work LIVE on camera.</p>
 
     <p><strong>Terminal A — clean local baseline</strong>:</p>
     <pre id="prep1a">npm run demo:reset</pre>
     <button class="copy-btn" onclick="copyToClipboard('prep1a')">Copy</button>
-    <p>Wait for "Demo reset complete in Ns". Wipes working tree back to <code>pre-implement</code>, drops <code>openspec/changes/*</code>, recreates Docker, re-migrates, re-seeds. Does NOT touch the Copilot Chat panel or the Azure deployment.</p>
+    <p>Wait for "Demo reset complete in Ns". Wipes working tree back to <code>pre-implement</code>, drops <code>openspec/changes/*</code>, recreates Docker, re-migrates, re-seeds. Does NOT touch the Copilot Chat panel.</p>
 
     <p><strong>Terminal B — foreground dev server</strong> (new tab/split, Cmd+\):</p>
     <pre id="prep1b">npm run dev</pre>
@@ -142,72 +140,19 @@
 
     <p><strong>After Step 4 (the live /opsx-apply)</strong>: in Terminal B, manually Ctrl+C → <code>rm -rf .next</code> → <code>npm run dev</code>. Three commands typed by hand. The Step 4 card has the same instruction in its operator-action block. No helper script.</p>
 
-    <p><strong>Pre-warm the cloud</strong> (if you are recording PART 2): open the cloud URL in another host browser tab, run any search, close. Repeat. The free-tier SQL DB cold-pauses after ~1h of idle.</p>
-
-    <p><strong>Last check before hitting record</strong>: scroll to the top of the Copilot Chat panel and confirm the saved <code>/opsx-apply add-azure-deployment</code> transcript is still there. If it is missing, your chat history was cleared — you must rerun the One-time Azure deploy below before recording PART 2.</p>
+    <p><strong>Open the Agents UI in VS Code Insiders BEFORE Step 1</strong> so the audience can see the Skills panel (workspace-level <code>openspec-*</code> skills), the Changes panel (empty), and the agentic-mode chat panel ready to receive input. These three panels are the visual identity of the demo.</p>
 </div>
-
-<div class="card" style="border-left-color: #dc2626; background-color: #fef2f2;">
-    <h3>🛑 One-time Azure deploy (off-camera, run ONCE before your first tape, ~15 min)</h3>
-    <p>This produces the assets PART 2 of the demo references on camera: a saved Copilot Chat transcript scrolled in Step 10, and a live cloud URL hit in Step 11. <strong>The cloud and the chat history survive across all rehearsals and takes</strong>, so you only repeat this if you intentionally tear down the Azure stack (<code>azd down --force --purge</code>) or if the Copilot Chat history gets cleared.</p>
-
-    <p>The agent runs the whole local spec build + Azure deploy in ONE chat session. The local-spec build is what your tape will later show LIVE in PART 1; running it here off-camera produces the working-tree code that the Azure deploy packages.</p>
-
-    <p><strong>Prereq A — Auth on the host</strong> (host terminal, NOT the dev container):</p>
-    <pre id="ot1">az login
-az account set --subscription "&lt;id-or-name&gt;"
-azd auth login</pre>
-    <button class="copy-btn" onclick="copyToClipboard('ot1')">Copy</button>
-
-    <p><strong>Prereq B — Run PART 1 of the demo end-to-end in this SAME Copilot Chat session first</strong>. Use the Step 3, Step 4, and Step 6 prompts from the cards below (<code>/opsx-propose add-semantic-search-ui</code> with the full inline prompt → <code>/opsx-apply add-semantic-search-ui</code> → the CFP filter prompt). Approve every diff. After Step 4 finishes, restart the dev server manually in Terminal B (Ctrl+C → <code>rm -rf .next</code> → <code>npm run dev</code>) so Tailwind re-scans the new files. Confirm <code>localhost:3000</code> shows the working app with the CFP filter applied. <strong>The next prompts below need this code to exist in the working tree.</strong> Do NOT clear the chat between PART 1 and the Azure prompts.</p>
-
-    <p><strong>Now propose the Azure deployment</strong> (same chat session):</p>
-    <pre id="ot6" style="white-space: pre-wrap;">/opsx-propose add-azure-deployment
-
-Deploy TalkScout to Azure Container Apps with Azure SQL Database (free tier) and a sibling Ollama container for embeddings (same nomic-embed-text 768-dim model as local). Use system-assigned managed identity for app to DB. The agentic deployment depends on the microsoft/azure-skills plugin; installing it is the first task in tasks.md.</pre>
-    <button class="copy-btn" onclick="copyToClipboard('ot6')">Copy</button>
-
-    <p><strong>Then apply</strong> (same chat):</p>
-    <pre id="ot7">/opsx-apply add-azure-deployment</pre>
-    <button class="copy-btn" onclick="copyToClipboard('ot7')">Copy</button>
-    <p>The agent runs the tasks from <code>tasks.md</code> in order. Tasks 0.1 and 0.2 are the GitHub Copilot plugin install — the agent prompts YOU to paste them into the Copilot Chat input because <code>/plugin</code> is a chat slash command, not something the agent can self-execute. Paste each when prompted:</p>
-    <pre id="ot7a">/plugin marketplace add microsoft/azure-skills</pre>
-    <button class="copy-btn" onclick="copyToClipboard('ot7a')">Copy</button>
-    <pre id="ot7b">/plugin install azure@azure-skills</pre>
-    <button class="copy-btn" onclick="copyToClipboard('ot7b')">Copy</button>
-    <p>After the install lands, <code>azure-prepare</code>, <code>azure-validate</code>, and <code>azure-deploy</code> become available as agent tools. The agent continues: generates Dockerfile, Bicep, azure.yaml → invokes <code>azure-prepare</code> → <code>azure-validate</code> → <code>azure-deploy</code> (<code>azd up</code>, ~5 min cold start). Approve each gate.</p>
-    <p><em>Source for the install commands: <a href="https://github.com/microsoft/azure-skills#github-copilot-cli">microsoft/azure-skills README — GitHub Copilot CLI section</a>.</em></p>
-
-    <p><strong>Verify the live URL</strong>:</p>
-    <pre id="ot8">curl -sI "https://&lt;your-live-url&gt;/"
-# expect: HTTP/2 200</pre>
-    <button class="copy-btn" onclick="copyToClipboard('ot8')">Copy</button>
-    <p>Hit it in a host browser, run both scripted queries, confirm sane results. <strong>If 500s, fix before tape.</strong></p>
-
-    <p><strong>Confirm $0 spend</strong>:</p>
-    <pre id="ot9">az consumption usage list \
-  --start-date "$(date -u -v-1d +%Y-%m-%dT00:00:00Z)" \
-  --end-date   "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-  -g &lt;your-rg-name&gt; -o table</pre>
-    <button class="copy-btn" onclick="copyToClipboard('ot9')">Copy</button>
-    <p>Expected: zero billed line items.</p>
-
-    <p><strong>Result:</strong> Azure resources are live. The Copilot Chat session holds the full propose+apply for both the local spec and the Azure deploy. PART 2 of the recording scrolls past the Azure portion of that chat (Step 10) and hits the live URL (Step 11). <strong>DO NOT CLEAR THIS CHAT.</strong></p>
-
-    <p>To re-deploy from scratch (rarely needed): <code>azd down --force --purge</code> then rerun this card from the top.</p>
-</div>
-
-<h2 style="background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; padding: 1rem 1.5rem; border-radius: 8px; margin: 2.5rem 0 1.5rem;">🎬 PART 1 — Specs (live on camera, Steps 1-9, 0:00 → 7:00)</h2>
-<p style="margin: -0.5rem 0 1.5rem; color: #555; font-style: italic;">Spec-driven local development via OpenSpec and GitHub Copilot. Every step in this part happens live — the audience watches the agent propose the change, apply it, fix the SQL, and reveal the magic moment.</p>
 
 <div class="card">
-    <h3>🔹 Step 1: Frame the project (0:00 → 0:30)</h3>
-    <p class="voiceover">"Let me show you what is in the repo before we add anything."</p>
-    <p><em>📌 Show: VS Code Explorer panel.</em></p>
+    <h3>🔹 Step 1: Frame the project + the Agents UI (0:00 → 0:30)</h3>
+    <p class="voiceover">"Let me show you what is in the repo before we add anything, and the brand-new Agents UI in VS Code Insiders that drives the whole demo."</p>
+    <p><em>📌 Show: VS Code Insiders <strong>Agents</strong> view (the new top-left panel). Then the Explorer.</em></p>
     <ol>
-        <li>Expand <code>openspec/</code>. Point out the empty <code>changes/</code> directory and <code>config.yaml</code>. Say: "OpenSpec's structure. No change has been proposed yet."</li>
-        <li>Expand <code>.github/prompts/</code>. Hover over the four <code>opsx-*.prompt.md</code> files. Say: "These are the slash commands OpenSpec installed for GitHub Copilot Chat: /opsx-propose, /opsx-apply, /opsx-explore, /opsx-archive."</li>
-        <li>Expand <code>prisma/sql/</code>. Hover over <code>searchEvents.sql</code> and <code>upsertEvents.sql</code>. Say: "The only T-SQL in this entire repo lives in these two files."</li>
+        <li>Open the <strong>Agents UI</strong>. Show the <strong>Skills</strong> panel: workspace-level skills include <code>openspec-propose</code>, <code>openspec-apply</code>, <code>openspec-explore</code>, <code>openspec-archive</code>. Say: "These are the OpenSpec skills sitting right in my workspace, alongside the project. The agent loads them at session start."</li>
+        <li>Show the <strong>Changes</strong> panel — currently empty. Say: "Empty for now. In a moment we will propose and apply a change, and watch this panel fill up with diffs the agent generates."</li>
+        <li>Show the <strong>agentic-mode chat input</strong> at the bottom. Note the model picker (Claude Opus / GPT, whatever you have selected). Say: "Plain English in, agent actions out. This is where the whole demo runs."</li>
+        <li>Switch to the Explorer. Expand <code>openspec/</code> — empty <code>changes/</code>, <code>config.yaml</code>. Say: "OpenSpec's structure. No change has been proposed yet."</li>
+        <li>Expand <code>prisma/sql/</code> — hover <code>searchEvents.sql</code> and <code>upsertEvents.sql</code>. Say: "The only T-SQL in this entire repo lives in these two files."</li>
     </ol>
 </div>
 
@@ -225,8 +170,8 @@ Deploy TalkScout to Azure Container Apps with Azure SQL Database (free tier) and
 
 <div class="card">
     <h3>🔹 Step 3: Propose the change with /opsx-propose (1:30 → 3:00)</h3>
-    <p class="voiceover">"OpenSpec calls the unit of work a 'change.' I am going to propose adding the search UI as a change. The slash command creates three artifacts in one shot: a proposal, a design, and a tasks file. Live in GitHub Copilot Chat."</p>
-    <p><em>📌 Where: the GitHub Copilot Chat panel inside VS Code (Cmd+Ctrl+I, or click the speech-bubble icon in the Activity Bar).</em></p>
+    <p class="voiceover">"OpenSpec calls the unit of work a 'change.' I am going to propose adding the search UI as a change. Watch the agent invoke the <code>openspec-propose</code> skill — the one we saw in the Skills panel a minute ago. Three artifacts in one shot: a proposal, a design, and a tasks file. Live."</p>
+    <p><em>📌 Where: the Agents chat panel (agentic mode, model selector shows your agent). Make the Skills panel visible if possible so the audience sees <code>openspec-propose</code> lighting up as the agent calls it.</em></p>
     <pre id="code1">/opsx-propose add-semantic-search-ui
 
 Add the user-facing semantic search UI to TalkScout. The repo already has the foundation (Prisma schema, migrations applied, src/lib/db.ts, src/lib/embed.ts wrapping host Ollama, src/lib/sql.ts loading prisma/sql/searchEvents.sql, the database seeded with 91 events including embeddings, and the placeholder page at src/app/page.tsx). What is missing: a Server Action that embeds the user's query and runs prisma.$queryRawUnsafe(SEARCH_EVENTS_SQL, ...), three React components (SearchInput with gradient border and placeholder cycling, EventCard with clickable CFP link, CfpStatusPill with five visual states), a pure-function cfp-status utility, and the page composition that wires it all together. The two scripted on-camera queries are "agentic workflows for databases" and "type safety across the stack". Honor the architectural and UI rules in openspec/config.yaml.</pre>
@@ -236,8 +181,8 @@ Add the user-facing semantic search UI to TalkScout. The repo already has the fo
 
 <div class="card">
     <h3>🔹 Step 4: Apply the change with /opsx-apply (3:00 → 4:30)</h3>
-    <p class="voiceover">"Now I tell OpenSpec to execute the tasks file. GitHub Copilot will create the Server Action, the three components, the cfp-status utility, and replace the placeholder page so the UI shows up. Live."</p>
-    <p><em>📌 Where: same GitHub Copilot Chat panel as Step 3. Same input box.</em></p>
+    <p class="voiceover">"Now I tell OpenSpec to execute the tasks file. Same agent, same chat, different skill — this time <code>openspec-apply</code>. Watch the Changes panel on the right fill up with every file the agent writes. I approve each diff as it appears."</p>
+    <p><em>📌 Where: same Agents chat panel as Step 3. <strong>Pin the Changes panel open</strong> so the audience sees the diffs land in real time. The Skills panel can stay visible too so they see <code>openspec-apply</code> being invoked.</em></p>
     <pre id="code2">/opsx-apply add-semantic-search-ui</pre>
     <button class="copy-btn" onclick="copyToClipboard('code2')">Copy</button>
 
@@ -315,58 +260,35 @@ AND cfpCloseDate &gt;= GETDATE()</pre>
     <p><em>📌 Show: open <code>src/app/actions.ts</code>. Point at the <code>SEARCH_EVENTS_SQL</code> import. Hover the <code>results</code> variable to surface the inferred return type briefly.</em></p>
 </div>
 
-<h2 style="background: linear-gradient(135deg, #0891b2, #0e7490); color: white; padding: 1rem 1.5rem; border-radius: 8px; margin: 2.5rem 0 1.5rem;">☁️ PART 2 — Azure skills deployment (Steps 10-12, 7:00 → 9:15)</h2>
-<p style="margin: -0.5rem 0 1.5rem; color: #555; font-style: italic;">Same agentic primitive (read context, propose, apply, approve) at the infrastructure layer. The <strong>One-time Azure deploy</strong> card at the top of this document is the off-camera prep that produces the saved Copilot Chat transcript and the live cloud URL these three steps reference.</p>
-
 <div class="card">
-    <h3>🔹 Step 10: Same agentic primitive, deployment layer (7:00 → 8:00)</h3>
-    <p><strong>⚠️ Prerequisite:</strong> the saved Copilot Chat transcript this step scrolls through comes from the <strong>One-time Azure deploy</strong> card above (off-camera, ~15 min, run once before your first tape). If that prep has not happened, skip Steps 10-11 of this take.</p>
-    <p class="voiceover">"OpenSpec drove the local build. The same primitive — agent reads context, proposes, applies, I approve — works for infrastructure too. I ran this before tape because a cold cloud deploy takes about five minutes. Let me scroll the chat so you can see what happened."</p>
-    <p><em>📌 Where: GitHub Copilot Chat panel. Scroll to the saved <code>/opsx-apply add-azure-deployment</code> transcript. Highlight task 0 (the agent installs <code>microsoft/azure-skills</code> itself), then the <code>azure-prepare</code> → <code>azure-validate</code> → <code>azure-deploy</code> chain.</em></p>
-    <p class="voiceover">"Task zero is the plugin install. The agent picks up the OpenSpec change, sees it needs Azure skills, and installs them. Then it generates the Bicep, the Dockerfile, and the deploy plan. I approve each gate. Five minutes later, <code>azd up</code> finishes. Container Apps environment, Azure SQL Database on the free offer, an Ollama sidecar running the same <code>nomic-embed-text</code> model that runs on my Mac. Zero dollars on free-tier resources. No Azure OpenAI quota required."</p>
-    <p><strong>Expected:</strong> the saved chat shows the three approval gates, the generated <code>infra/main.bicep</code>, and the final live URL printed at the end of <code>azure-deploy</code>.</p>
-</div>
-
-<div class="card">
-    <h3>🔹 Step 11: Same app, in Azure (8:00 → 8:45)</h3>
-    <p class="voiceover">"And here it is in Azure. Same UI, same searches, same SQL Server vectors (now Azure SQL Database on the free offer), same embedding model (now running as a Container Apps sidecar instead of on my Mac). Different host, identical code."</p>
-    <p><em>📌 Where: a fresh browser tab on the cloud URL printed at the end of the deploy. <strong>Pre-warm the URL by hitting <code>/</code> a few minutes before tape</strong> so the free-tier SQL DB does not cold-resume on camera.</em></p>
-    <pre id="code7">type safety across the stack</pre>
-    <button class="copy-btn" onclick="copyToClipboard('code7')">Copy</button>
-    <p><strong>Expected:</strong> the cloud app returns <code>tRPC Conf 2026</code> or another end-to-end-typescript / contracts event. CFP-open pill visible on at least one row. Roundtrip 2-4 seconds (Ollama on CPU is slower than Metal on the host).</p>
-    <p class="voiceover">"Two agentic flows. OpenSpec for the code, Azure skills for the platform. Both natural language, both inside VS Code, both backed by my repo's source of truth."</p>
-</div>
-
-<div class="card">
-    <h3>🔹 Step 12: Closing statement (8:45 → 9:15)</h3>
-    <p class="voiceover">"That is TalkScout. Spec-driven local development and agent-driven cloud deployment, end to end inside VS Code, in about ten minutes. SQL Server 2025 stored the vectors. Prisma kept the TypeScript clean. GitHub Copilot, with OpenSpec, drove the build. The same agent, with Azure skills, drove the deploy. Repo and links are below. Thanks for watching."</p>
-    <p><em>📌 Show on screen during the wrap: open the closing recap slide in your host browser at <code>file:///Users/carlos/scout-talk-app/demo/walkthrough-slide.html</code> (dark, click-to-advance). It walks through the 12-step timeline as you talk through the summary.</em></p>
+    <h3>🔹 Step 10: Closing statement (7:00 → 7:30)</h3>
+    <p class="voiceover">"That is TalkScout. Spec-driven semantic search end to end inside VS Code, in about seven minutes. SQL Server 2025 stored the vectors. Prisma kept the TypeScript clean. GitHub Copilot, with OpenSpec, drove the build. One agent, every surface in this demo. Repo and links are below. Thanks for watching."</p>
+    <p><em>📌 Show on screen during the wrap: open the closing recap slide in your host browser at <code>file:///Users/carlos/scout-talk-app/demo/walkthrough-slide.html</code> (dark, click-to-advance). It walks through the 10-step timeline as you talk through the summary.</em></p>
 </div>
 
 <h2>🎯 What We Accomplished</h2>
 <div class="card">
-    <p>In this demo, we composed six tools inside VS Code to build a semantic-search application and ship it to Azure:</p>
+    <p>In this demo, we composed five tools inside VS Code Insiders to build a semantic-search application end to end:</p>
     <ul>
-        <li>✅ Drove the entire workflow with <strong>OpenSpec</strong> slash commands (<code>/opsx-propose</code>, <code>/opsx-apply</code>) inside GitHub Copilot Chat</li>
-        <li>✅ Showed <strong>GitHub Copilot Chat in agent mode</strong> editing a real SQL file and opening the MSSQL Schema Designer with full schema awareness</li>
+        <li>✅ Drove the entire workflow with <strong>OpenSpec</strong> slash commands (<code>/opsx-propose</code>, <code>/opsx-apply</code>) inside the new Agents UI in VS Code Insiders</li>
+        <li>✅ Showed the agent in <strong>agentic mode</strong> editing a real SQL file in plain English, with the Changes panel rendering every diff and approval gate</li>
         <li>✅ Used <strong>SQL Server 2025</strong>'s native <code>VECTOR(768)</code> data type and <code>VECTOR_DISTANCE</code> function, no separate vector database</li>
-        <li>✅ Used <strong>Ollama</strong> with <code>nomic-embed-text</code> for embeddings, host-Metal locally and as a Container Apps sidecar in Azure</li>
+        <li>✅ Used <strong>Ollama</strong> on the host with <code>nomic-embed-text</code> for embeddings, free, no API keys, no data egress</li>
         <li>✅ Used <strong>Prisma 7</strong> with the <code>@prisma/adapter-mssql</code> driver to keep all SQL strings out of TypeScript</li>
-        <li>✅ Used <strong>the MSSQL VS Code extension</strong> to inspect the <code>VECTOR(768)</code> column live and to render the Schema Designer</li>
-        <li>✅ Demonstrated two semantic-search "magic moments" where the top result contained none of the query keywords</li>
-        <li>✅ Deployed the same app to <strong>Azure</strong> with <strong>microsoft/azure-skills</strong>: Container Apps + Azure SQL Database free offer + Ollama sidecar, $0 on a free Azure account, no Azure OpenAI quota required</li>
+        <li>✅ Used <strong>the MSSQL VS Code extension</strong>'s Schema Designer to inspect the <code>VECTOR(768)</code> column visually alongside the relational fields</li>
+        <li>✅ Demonstrated the "magic moment" of semantic search: a query whose top result contained none of the query's keywords, ranked by vector distance</li>
     </ul>
     <p><strong>Key takeaways:</strong></p>
     <ul>
-        <li>SQL Server 2025's <code>VECTOR</code> type brings AI capabilities directly into your database, no external vector store required, and works on every Azure SQL tier including free</li>
-        <li>Ollama works the same way locally and in Azure: a Container Apps sidecar gives you a free, key-less embedding endpoint with internal-only DNS</li>
+        <li>SQL Server 2025's <code>VECTOR</code> type brings AI capabilities directly into your database, no external vector store required</li>
+        <li>Ollama on the host gives you a free, key-less embedding endpoint that the audience can clone and run with zero cloud accounts</li>
         <li>Prisma + a runtime SQL loader keeps application TypeScript free of T-SQL string literals</li>
-        <li>The same agentic primitive that drove local development also drove cloud deployment: read the spec, propose, apply, approve. OpenSpec for the code, microsoft/azure-skills for the platform</li>
+        <li>The OpenSpec workflow inside VS Code Insiders Agents lets one developer go from idea to shipped feature in a coherent, spec-driven flow</li>
     </ul>
 </div>
 
 <h2>🎯 Closing Statement</h2>
-<p class="voiceover">"In about ten minutes, we proposed a change with OpenSpec, watched GitHub Copilot apply it, edited a real SQL file with the agent, ran semantic search against SQL Server 2025's native vectors, and deployed the same app to Azure with microsoft/azure-skills, all without leaving VS Code and without writing a single line of SQL string literal in our application code. The local stack is reproducible with one command. The cloud stack costs zero dollars on a free Azure account."</p>
+<p class="voiceover">"In about seven minutes, we proposed a change with OpenSpec, watched GitHub Copilot in agent mode apply it, edited a real SQL file with the agent in plain English, and ran semantic search against SQL Server 2025's native vectors. All without leaving VS Code Insiders. Without writing a single line of SQL string literal in our application code. And the local stack is reproducible with one command."</p>
 
 <h2>📚 Resources</h2>
 <div class="card">

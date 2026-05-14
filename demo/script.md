@@ -170,48 +170,17 @@ Open `src/app/actions.ts`. Read aloud: "A handful of lines of business logic. On
 
 Hover the import for `SEARCH_EVENTS_SQL` from `@/lib/sql`. Show the inferred type briefly, then close.
 
-## 7:00 to 8:00, Marquee 3: same agentic primitive, deployment layer
+## 7:00 to 7:30, Wrap
 
-> *Speaker notes: stay on the Copilot Chat panel. Switch to branch `002-azure-deploy` (or whichever branch carries the saved deploy transcript). Scroll to the saved `/opsx-apply add-azure-deployment` exchange. Use the scrollbar smoothly so the audience can read.*
+> *Speaker notes: switch to the browser tab with `file:///Users/carlos/scout-talk-app/demo/walkthrough-slide.html` for the closing recap. Voice up. Smile.*
 
-Say, as the transcript scrolls:
-
-> *"OpenSpec drove the local build. The same primitive (the agent reads context, proposes, applies, I approve) works for infrastructure too. I ran this before tape rolled because a cold cloud deploy takes about five minutes. Let me scroll the chat so you can see what happened."*
-
-Highlight task 0 in `openspec/changes/add-azure-deployment/tasks.md`: `/plugin install azure@claude-plugins-official`. Say:
-
-> *"Task zero is the plugin install. The agent picks up the OpenSpec change, sees it needs Azure skills, and installs them. Then it generates the Bicep, the Dockerfile, and the deploy plan. I approve each gate."*
-
-Scroll past the `azure-prepare` → `azure-validate` → `azure-deploy` chain. Pause on the final live URL output. Say:
-
-> *"Five minutes later, `azd up` finishes. Container Apps environment, Azure SQL Database on the free offer, an Ollama sidecar running the same `nomic-embed-text` model that runs on my Mac. Zero dollars on free-tier resources. No Azure OpenAI quota required."*
-
-## 8:00 to 8:45, Marquee 4: same app, in Azure
-
-> *Speaker notes: switch to the browser tab with the cloud URL. The DB was pre-warmed before tape so this is fast. If you forgot to pre-warm, the first query may take 30-60 seconds while the free-tier serverless DB resumes — keep talking.*
-
-Click into the search input. Type: `type safety across the stack`. Press Enter.
-
-Wait for results. Read the top result aloud. Say:
-
-> *"Same UI, same searches, same SQL Server vectors (now Azure SQL Database on the free offer), same embedding model (now running as a Container Apps sidecar instead of on my Mac). Different host, identical code."*
-
-Then close the laptop lid metaphorically:
-
-> *"Two agentic flows. OpenSpec for the code, Azure skills for the platform. Both natural language, both inside VS Code, both backed by my repo's source of truth."*
-
-## 8:45 to 9:15, Wrap
-
-> *Speaker notes: back to camera. Voice up. Smile.*
-
-"That is TalkScout. Spec-driven local development and agent-driven cloud deployment, end to end inside VS Code, in about ten minutes. SQL Server 2025 stored the vectors. Prisma kept the TypeScript clean. GitHub Copilot, with OpenSpec, drove the build. The same agent, with Azure skills, drove the deploy. Repo and links are below. Thanks for watching."
+"That is TalkScout. Spec-driven semantic search end to end inside VS Code Insiders, in about seven minutes. SQL Server 2025 stored the vectors. Prisma kept the TypeScript clean. GitHub Copilot in agent mode, with OpenSpec, drove the build — one agent, every surface in this demo. Repo and links are below. Thanks for watching."
 
 End recording.
 
 ## Notes for the operator (not for camera)
 
-- If the live `/opsx-apply` (Steps 3-4) runs over time, cut to a saved screenshot of the Explorer panel showing all generated files, then to the running app. Better to skip the marquee GitHub Copilot in SQL moment than to overrun.
+- If the live `/opsx-apply` (Steps 3-4) runs over time, cut to a saved screenshot of the Explorer panel showing all generated files, then to the running app. Better to skip the marquee SQL beat than to overrun.
 - If a primary search query fails to surface its expected top during a take, the backup queries are in `data/queries.md`. Pick whichever stays on-message.
-- After each take, run `npm run demo:reset` and wait for the "Demo reset complete" message before starting the next take. **Note: `demo:reset` does NOT touch the cloud stack.** The Azure deploy was provisioned once off-camera (see `demo/azure-deploy-runbook.md`) and is shared across all takes. Pre-warm the cloud URL by hitting `/` a few times 5 minutes before tape so the free-tier SQL DB does not cold-resume on camera.
-- If the cloud URL 500s on the live search during the take, fall back to a saved screenshot of the cloud app showing prior results, and narrate over it. Better to show a still than a broken UI.
-- If the Azure beat needs to be cut entirely (e.g., 002-azure-deploy did not make the merge gate), record from the `001-talkscout` branch and end at 8:00 as in the original 8-min cadence.
+- After each take, run `npm run demo:reset` and wait for the "Demo reset complete" message before starting the next take.
+- Azure deployment was tabled for this demo; the off-camera prep and on-camera Step 10/11 cards moved to `demo/prompts-azure.html` (gitignored). Revive when you're ready to extend.

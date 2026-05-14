@@ -16,6 +16,9 @@ scripts/.caddy-root.crt
 # Operator runbook (private notes, per-machine)
 demo/demo.md
 
+# Azure deploy notes (tabled; private per-operator, never committed)
+demo/prompts-azure.html
+
 # OpenSpec change-proposal artifacts (created live by /opsx-propose, regenerated on every demo:reset)
 openspec/changes/*/
 !openspec/changes/archive/
