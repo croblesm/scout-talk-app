@@ -1,68 +1,45 @@
 #!/usr/bin/env node
 /**
- * Restart the Next.js dev server cleanly after a many-file drop from
- * /opsx-apply. Used between Step 4 and Step 5 of the demo (Tailwind v4
- * class scanner sometimes misses new classes on a hot reload).
+ * Clean restart of the Next.js dev server in the CURRENT terminal.
  *
- * Kills by PORT (not by process name) so this script does NOT
- * self-terminate the way a shell `pkill -f 'next dev'` does (the npm
- * script's own shell has 'next dev' in its command line).
+ * Used between Step 4 and Step 5 of the demo when /opsx-apply drops
+ * many files at once and Tailwind v4 misses some new class names on
+ * the hot reload.
+ *
+ * The operator is responsible for stopping the previous dev server
+ * BEFORE running this. Stop it cleanly with Ctrl+C in whichever
+ * terminal is running `next dev`.
+ *
+ * The previous version of this script killed by port (lsof + kill -9).
+ * That was destructive inside VS Code dev containers: it terminated
+ * VS Code's own port-forwarding agent on :3000, broke the dev
+ * container connection, and required a full window reload. The script
+ * no longer kills anything. If port :3000 is still bound, `npm run
+ * dev` will fall back to :3001/:3002 and print a warning. That is a
+ * signal to Ctrl+C the prior dev terminal and rerun this command.
  *
  * Sequence:
- *   1. Find PIDs bound to :3000 via lsof. Kill -9 each.
- *   2. Also pkill 'next-server' (the worker) - safe because the script
- *      itself doesn't contain that string.
- *   3. Wait briefly for the kernel to release the port.
- *   4. rm -rf .next.
- *   5. Exec `npm run dev` in the foreground of this terminal.
+ *   1. rm -rf .next (so Tailwind re-scans every newly created file)
+ *   2. exec `npm run dev` in the foreground of this terminal
  *
- * Usage: npm run dev:restart
+ * Usage:
+ *   - Operator presses Ctrl+C in the terminal running `next dev`.
+ *   - In the SAME terminal: `npm run dev:restart`.
+ *   - When done: Ctrl+C to stop.
  */
-import { spawn, spawnSync } from 'node:child_process'
+import { spawn } from 'node:child_process'
 import { rmSync, existsSync } from 'node:fs'
 
-function killByPort(port) {
-  const lsof = spawnSync('lsof', ['-ti', `:${port}`], { encoding: 'utf8' })
-  if (lsof.status !== 0 || !lsof.stdout.trim()) return []
-  const pids = lsof.stdout.trim().split('\n').filter(Boolean)
-  for (const pid of pids) {
-    spawnSync('kill', ['-9', pid], { stdio: 'ignore' })
-  }
-  return pids
+if (existsSync('.next')) {
+  console.log('[1/2] removing .next/ for a clean Tailwind re-scan')
+  rmSync('.next', { recursive: true, force: true })
+} else {
+  console.log('[1/2] no .next/ to remove')
 }
 
-async function main() {
-  console.log('[1/4] killing processes bound to :3000')
-  const killed = killByPort(3000)
-  if (killed.length) {
-    console.log(`      killed PIDs: ${killed.join(', ')}`)
-  } else {
-    console.log('      none found on :3000')
-  }
-
-  console.log('[2/4] pkill next-server (the worker)')
-  spawnSync('pkill', ['-f', 'next-server'], { stdio: 'ignore' })
-
-  console.log('[3/4] waiting 800ms for port to release')
-  await new Promise((r) => setTimeout(r, 800))
-
-  if (existsSync('.next')) {
-    console.log('[4/4] removing .next/ and starting fresh next dev')
-    rmSync('.next', { recursive: true, force: true })
-  } else {
-    console.log('[4/4] .next/ already clean; starting fresh next dev')
-  }
-
-  // Exec npm run dev in the foreground of this terminal.
-  const child = spawn('npm', ['run', 'dev'], { stdio: 'inherit' })
-  child.on('exit', (code) => process.exit(code ?? 0))
-  // Forward Ctrl+C to the child so the operator can stop it cleanly.
-  for (const sig of ['SIGINT', 'SIGTERM']) {
-    process.on(sig, () => child.kill(sig))
-  }
+console.log('[2/2] starting fresh next dev in this terminal')
+const child = spawn('npm', ['run', 'dev'], { stdio: 'inherit' })
+child.on('exit', (code) => process.exit(code ?? 0))
+for (const sig of ['SIGINT', 'SIGTERM']) {
+  process.on(sig, () => child.kill(sig))
 }
-
-main().catch((err) => {
-  console.error(err)
-  process.exit(1)
-})

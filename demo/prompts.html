@@ -219,7 +219,7 @@ Deploy TalkScout to Azure Container Apps with Azure SQL Database (free tier) and
 <div class="card">
     <h3>🔹 Step 2: The pitch and the architecture (0:30 → 1:30)</h3>
     <p class="voiceover">"OpenSpec is config-light. One config.yaml plus a long-lived specs folder. The architecture file in there is the thesis of this entire demo: five tools doing one job each."</p>
-    <p><em>📌 Show: open <code>openspec/specs/architecture.md</code>. Press <code>Cmd+K V</code> to open the side-by-side Markdown preview. Scroll to top.</em></p>
+    <p><em>📌 Show on screen: open the architecture intro slide in your host browser at <code>file:///Users/carlos/scout-talk-app/demo/architecture-slide.html</code> (dark, click-to-advance). Use that for the visual; the Mermaid diagrams in <code>openspec/specs/architecture.md</code> back the same flow if you want to switch to the raw file with <code>Cmd+K V</code>.</em></p>
     <ol>
         <li>Read the "What this stack gives you" paragraph aloud. Lead with: "End-to-end semantic search inside VS Code. No separate vector database. No cloud embedding API. No SQL strings in TypeScript."</li>
         <li>Cursor down to the five-tool table. Read each row, one breath each: SQL Server 2025 → Ollama → Prisma → MSSQL extension → GitHub Copilot with OpenSpec.</li>
@@ -264,10 +264,10 @@ Add the user-facing semantic search UI to TalkScout. The repo already has the fo
     <pre id="code2c" style="white-space: pre-wrap;">The build is failing with: "A 'use server' file can only export async functions, found object" at src/app/actions.ts. Move any non-async-function export (constant, object, schema, default export) out of src/app/actions.ts into src/lib/types.ts. Keep actions.ts containing only 'use server' and `export async function searchEvents(...)`. Update imports in src/app/page.tsx and any component that consumed the moved export. Then show me the diff for all three files.</pre>
     <button class="copy-btn" onclick="copyToClipboard('code2c')">Copy</button>
 
-    <p><strong>📌 Then restart the dev server</strong> (Tailwind v4 misses many-file class drops on Apple Silicon). Go to Terminal B (the one running <code>npm run dev</code> from pre-flight setup) and press <strong>Ctrl+C</strong> to stop the server. Then in the SAME Terminal B run:</p>
+    <p><strong>📌 Then restart the dev server</strong> (Tailwind v4 misses many-file class drops on Apple Silicon). <strong>In Terminal B (the one running <code>npm run dev</code>), press Ctrl+C to stop the server.</strong> Wait until the prompt returns. Then in the SAME Terminal B run:</p>
     <pre id="code2b">npm run dev:restart</pre>
     <button class="copy-btn" onclick="copyToClipboard('code2b')">Copy</button>
-    <p><em>Wipes <code>.next/</code> and starts a fresh dev server in the foreground of Terminal B (it also kills anything still on :3000 as a belt-and-suspenders step, but Ctrl+C should have done that already). The browser hot-reloads with the proper styled UI: gradient-bordered search input, dark backgrounds, placeholder cycling.</em></p>
+    <p><em>The script only does two things now: wipes <code>.next/</code>, then runs <code>npm run dev</code> in the foreground. It does NOT kill anything — that is your job via Ctrl+C above. (The previous version killed by port and tore down VS Code's port-forwarding agent in the dev container; do not let any future version add killing back.) The browser hot-reloads with the proper styled UI.</em></p>
 
     <p><strong>Final check before Step 5:</strong> refresh <code>localhost:3000</code>. You should see the styled search input centered on the page, not the placeholder text. If you still see the placeholder, redo the Verify step above.</p>
 </div>
@@ -342,6 +342,7 @@ AND cfpCloseDate &gt;= GETDATE()</pre>
 <div class="card">
     <h3>🔹 Step 12: Closing statement (8:45 → 9:15)</h3>
     <p class="voiceover">"That is TalkScout. Spec-driven local development and agent-driven cloud deployment, end to end inside VS Code, in about ten minutes. SQL Server 2025 stored the vectors. Prisma kept the TypeScript clean. GitHub Copilot, with OpenSpec, drove the build. The same agent, with Azure skills, drove the deploy. Repo and links are below. Thanks for watching."</p>
+    <p><em>📌 Show on screen during the wrap: open the closing recap slide in your host browser at <code>file:///Users/carlos/scout-talk-app/demo/walkthrough-slide.html</code> (dark, click-to-advance). It walks through the 12-step timeline as you talk through the summary.</em></p>
 </div>
 
 <h2>🎯 What We Accomplished</h2>

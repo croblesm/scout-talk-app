@@ -226,7 +226,11 @@ After `/opsx-apply` finishes during a rehearsal, **Ctrl+C the dev server in Term
 
 ```bash
 npm run dev              # Next.js dev server on :3000 (foreground; Ctrl+C to stop)
-npm run dev:restart      # kill anything on :3000, wipe .next/, start fresh dev
+npm run dev:restart      # wipe .next/, start fresh `npm run dev` in this terminal.
+                         # Does NOT kill processes — Ctrl+C the prior `npm run dev`
+                         # yourself FIRST (killing by port tore down VS Code's port-
+                         # forwarding agent inside dev containers and broke the
+                         # session, so the kill step was removed).
                          # (run this in Terminal B after /opsx-apply lands new files
                          #  so Tailwind v4 re-scans every class name)
 npm run typecheck        # tsc --noEmit

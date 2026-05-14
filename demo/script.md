@@ -91,13 +91,13 @@ Expected total time: 60 to 120 seconds. While files appear, narrate: "The agent 
 >
 > *Wait for the diff. Approve it. Then continue with the dev:restart below.*
 
-> *Speaker notes — dev:restart (~5 seconds, off-camera-friendly): the auto-reloaded page at `localhost:3000` may render unstyled (plain serif heading, raw browser input). This is a Tailwind v4 hot-reload quirk on Apple Silicon when many class names are introduced in one drop. Go to Terminal B (the one running `npm run dev` from pre-flight setup), press Ctrl+C to stop the server, then in the SAME Terminal B run:*
+> *Speaker notes — dev:restart (~5 seconds, off-camera-friendly): the auto-reloaded page at `localhost:3000` may render unstyled (plain serif heading, raw browser input). Tailwind v4 hot-reload quirk on Apple Silicon when many class names land at once. Go to Terminal B (running `npm run dev`), press **Ctrl+C** to stop the server cleanly, wait for the prompt to return, THEN in the same Terminal B run:*
 >
 > ```bash
 > npm run dev:restart
 > ```
 >
-> *This wipes `.next/` and starts a fresh dev server in the foreground of Terminal B. Tailwind re-scans every newly created file; the page hot-reloads with proper styling.*
+> *The script only wipes `.next/` and execs `npm run dev` — it does NOT kill processes. Killing by port would kill VS Code's port-forwarding agent inside the dev container, which breaks the container session. Your Ctrl+C is the only kill step. Tailwind re-scans; page hot-reloads styled.*
 
 > *Speaker notes — final check before Step 5: refresh `localhost:3000`. You should see the styled search input centered on the page, NOT the placeholder text. If still placeholder, redo the Verify step above.*
 
