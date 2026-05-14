@@ -53,19 +53,22 @@ Keep Terminal B alive through Steps 1, 2, 3, and 4. After `/opsx-apply` finishes
 
 ## 1:30 to 2:30, Foundation plan — the BEFORE state
 
-> *Speaker notes: open `file:///Users/carlos/scout-talk-app/demo/foundation-slide.html` in the host browser. Also briefly flash `docs/plan.md` in VS Code so the audience sees the plan is a real file in the repo, not slide-only. Click-to-advance pacing.*
+> *Speaker notes: stay in VS Code. Open `docs/plan.md` and press `Cmd+K V` for the side-by-side Markdown preview — same pane you used for architecture.md in Step 2. No app switching.*
 
-The honesty beat. Read once, then advance the slide:
+The honesty beat:
 
-> *"Quick honesty beat. Everything I just showed you — the schema, the migrations, the embedding pipeline, the 91 seeded rows — that did not come from OpenSpec. I scaffolded it from a one-page plan I wrote at the start. Here is that plan. Then I will tell you why I stopped writing plans and switched to OpenSpec for everything after this point."*
+> *"Quick honesty beat. Everything I just showed you — the schema, the migrations, the embedding pipeline, the 91 seeded rows — that did not come from OpenSpec. I scaffolded it from a one-page plan I wrote at the start. Here is that plan, sitting right in the repo. Then I will tell you why I stopped writing plans and switched to OpenSpec for everything after this point."*
 
-Click through the slide as you talk: Goal → Stack Choices (SQL Server 2025, Ollama, Prisma 7, prisma/sql boundary) → Data Model (one table, `Unsupported("VECTOR(768)")` carries the column, CAST happens in T-SQL) → Seed Pipeline (events.json, content-hash gated, MERGE through the SQL file).
+Scroll through the preview as you talk:
+- **Goal** — read it (10s).
+- **Stack Choices** — SQL Server 2025 native vectors, Ollama on host, Prisma 7, `prisma/sql/` boundary (15s).
+- **Data Model** — point at `Unsupported("VECTOR(768)")`. "One table. CAST happens in T-SQL." (15s).
+- **Seed Pipeline** — hand-curated `events.json`, content-hash gated, MERGE through the SQL file. Re-runs are no-ops. (10s).
+- **Next** — read aloud as the pivot:
 
-Reveal the closing "pivot" card. Read it aloud:
+> *"The next layer is the search UI. I want it built agentically. Plain-English proposal in, spec out, agent applies it, I approve. That is what OpenSpec gives me. From here on, every change is a slash-opsx-propose followed by a slash-opsx-apply."*
 
-> *"The next layer is the search UI. I want it built agentically. Plain-English proposal in, spec out, agent applies it, I approve. That is what OpenSpec gives me — and it starts on the next slide."*
-
-Switch back to VS Code, into the Agents chat panel. Step 4 is the on-ramp.
+Close the preview. Focus back on the Agents chat panel. Step 4 is the on-ramp.
 
 ## 2:30 to 3:45, /opsx-propose (live)
 

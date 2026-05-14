@@ -170,17 +170,17 @@
 
 <div class="card">
     <h3>🔹 Step 3: How we got to the baseline — the foundation plan (1:30 → 2:30)</h3>
-    <p class="voiceover">"Quick honesty beat. Everything I just showed you — the schema, the migrations, the embedding pipeline, the 91 seeded rows — that did not come from OpenSpec. I scaffolded it from a one-page plan I wrote at the start. Here is that plan. Then I will tell you why I stopped writing plans and switched to OpenSpec for everything after this point."</p>
-    <p><em>📌 Show on screen: open the foundation slide in your host browser at <code>file:///Users/carlos/scout-talk-app/demo/foundation-slide.html</code> (dark, click-to-advance). The source it summarizes lives at <code>docs/plan.md</code> in the repo — open it briefly in VS Code so the audience sees it is a real file, not a slide-only artifact.</em></p>
+    <p class="voiceover">"Quick honesty beat. Everything I just showed you — the schema, the migrations, the embedding pipeline, the 91 seeded rows — that did not come from OpenSpec. I scaffolded it from a one-page plan I wrote at the start. Here is that plan, sitting right in the repo. Then I will tell you why I stopped writing plans and switched to OpenSpec for everything after this point."</p>
+    <p><em>📌 Stay in VS Code. Open <code>docs/plan.md</code> and press <strong>Cmd+K V</strong> for side-by-side Markdown preview. Same preview pane you used for <code>architecture.md</code> in Step 2 — no app switching.</em></p>
     <ol>
-        <li>Click in the slide once to reveal "Goal." Read it. (10s)</li>
-        <li>Click again to reveal "Stack Choices." Trace the four rows fast: SQL Server 2025 native vectors, Ollama on the host, Prisma 7, SQL boundary in <code>prisma/sql/</code>. (20s)</li>
-        <li>Click for "Data Model." Say: "One table. Relational columns plus one native vector column. <code>Unsupported('VECTOR(768)')</code> is how Prisma carries the column through migrations; the actual CAST happens in T-SQL." (15s)</li>
-        <li>Click for "Seed Pipeline." Say: "Hand-curated events.json, content-hash gated re-embedding, MERGE through the SQL file. Re-running on unchanged data is a no-op." (10s)</li>
-        <li>Click once more to reveal the gradient "pivot" card at the bottom. Read it aloud:</li>
+        <li>Scroll to the top. Read the <strong>Goal</strong> paragraph aloud. (10s)</li>
+        <li>Scroll to <strong>Stack Choices</strong>. Trace the four rows fast: SQL Server 2025 native vectors, Ollama on the host, Prisma 7, SQL boundary in <code>prisma/sql/</code>. (15s)</li>
+        <li>Scroll to <strong>Data Model</strong>. Point at the <code>Unsupported("VECTOR(768)")</code> line. Say: "One table. Relational columns plus one native vector column. The CAST happens in T-SQL." (15s)</li>
+        <li>Scroll to <strong>Seed Pipeline</strong>. Say: "Hand-curated <code>events.json</code>, content-hash gated re-embedding, MERGE through the SQL file. Re-running on unchanged data is a no-op." (10s)</li>
+        <li>Scroll to the <strong>Next</strong> section at the bottom. Read it aloud as the pivot:</li>
     </ol>
-    <p class="voiceover">"The next layer is the search UI. I want it built agentically. Plain-English proposal in, spec out, agent applies it, I approve. That is what OpenSpec gives me — and it starts on the next slide."</p>
-    <p><em>📌 Then switch back to VS Code, into the Agents chat panel. Step 4 is the on-ramp.</em></p>
+    <p class="voiceover">"The next layer is the search UI. I want it built agentically. Plain-English proposal in, spec out, agent applies it, I approve. That is what OpenSpec gives me. From here on, every change is a slash-opsx-propose followed by a slash-opsx-apply."</p>
+    <p><em>📌 Close the preview. Switch focus back to the Agents chat panel. Step 4 is the on-ramp.</em></p>
 </div>
 
 <div class="card">
@@ -310,7 +310,7 @@ AND cfpCloseDate &gt;= GETDATE()</pre>
 <div class="card">
     <ul>
         <li>📖 <strong>Setup Instructions:</strong> See <a href="../README.md">README.md</a> for the dev container and host install paths</li>
-        <li>📝 <strong>Foundation plan:</strong> See <a href="../docs/plan.md">docs/plan.md</a> for the pre-OpenSpec scaffolding write-up; the on-screen slide is <a href="foundation-slide.html">demo/foundation-slide.html</a></li>
+        <li>📝 <strong>Foundation plan:</strong> See <a href="../docs/plan.md">docs/plan.md</a> for the pre-OpenSpec scaffolding write-up (shown on camera as a Markdown preview in VS Code)</li>
         <li>📐 <strong>Architecture:</strong> See <a href="../openspec/specs/architecture.md">openspec/specs/architecture.md</a> for the runtime and seed-time flow diagrams</li>
         <li>🐙 <strong>OpenSpec:</strong> <a href="https://github.com/Fission-AI/OpenSpec" target="_blank">github.com/Fission-AI/OpenSpec</a></li>
         <li>💡 <strong>SQL Server 2025 vectors:</strong> <a href="https://learn.microsoft.com/sql/relational-databases/vectors/vectors-sql-server" target="_blank">Microsoft Learn docs</a></li>
