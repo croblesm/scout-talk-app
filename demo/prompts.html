@@ -188,7 +188,13 @@ Deploy TalkScout to Azure Container Apps with Azure SQL Database (free tier) and
     <p>Then the apply (same chat):</p>
     <pre id="ot7">/opsx-apply add-azure-deployment</pre>
     <button class="copy-btn" onclick="copyToClipboard('ot7')">Copy</button>
-    <p>The agent runs: Task 0 (<code>/plugin install azure@claude-plugins-official</code> — the plugin lives in the spec, not the repo) → generates Dockerfile, Bicep, azure.yaml → <code>azure-prepare</code> → <code>azure-validate</code> → <code>azure-deploy</code> (<code>azd up</code>, ~5 min cold start). Approve each gate.</p>
+    <p>The agent runs the tasks from <code>tasks.md</code> in order. Tasks 0.1 and 0.2 are the GitHub Copilot plugin install — the agent prompts YOU to paste them into the Copilot Chat input because <code>/plugin</code> is a chat slash command, not something the agent can self-execute. Paste each when prompted:</p>
+    <pre id="ot7a">/plugin marketplace add microsoft/azure-skills</pre>
+    <button class="copy-btn" onclick="copyToClipboard('ot7a')">Copy</button>
+    <pre id="ot7b">/plugin install azure@azure-skills</pre>
+    <button class="copy-btn" onclick="copyToClipboard('ot7b')">Copy</button>
+    <p>After the install lands, <code>azure-prepare</code>, <code>azure-validate</code>, and <code>azure-deploy</code> become available as agent tools. The agent continues: generates Dockerfile, Bicep, azure.yaml → invokes <code>azure-prepare</code> → <code>azure-validate</code> → <code>azure-deploy</code> (<code>azd up</code>, ~5 min cold start). Approve each gate.</p>
+    <p><em>Source for the install commands: <a href="https://github.com/microsoft/azure-skills#github-copilot-cli">microsoft/azure-skills README — GitHub Copilot CLI section</a>.</em></p>
 
     <p><strong>Verify the live URL</strong>:</p>
     <pre id="ot8">curl -sI "https://&lt;your-live-url&gt;/"

@@ -66,7 +66,10 @@ In the SAME Copilot Chat session (do not clear it):
 
 The agent reads `tasks.md` and executes in order. Expected tasks:
 
-- **Task 0**: install `microsoft/azure-skills` plugin (`/plugin install azure@claude-plugins-official`).
+- **Tasks 0.1 + 0.2**: install the `microsoft/azure-skills` plugin in GitHub Copilot Chat. The agent prompts you to paste these two commands (it cannot self-execute `/plugin` slash commands):
+  1. `/plugin marketplace add microsoft/azure-skills` (one-time per machine)
+  2. `/plugin install azure@azure-skills`
+  Source: [microsoft/azure-skills README → GitHub Copilot CLI](https://github.com/microsoft/azure-skills#github-copilot-cli)
 - **Tasks 1-N (code)**: agent creates `src/lib/embed-ollama.ts`, refactors `src/lib/embed.ts` into a dispatcher, adds `Dockerfile`, `.dockerignore`, `.env.production.example`, sets `output: 'standalone'` in `next.config.ts`, updates `package.json`. Approve each gate.
 - **Task N+1 (`azure-prepare`)**: agent invokes the skill with the architecture spec as context. Expected output: `.azure/deployment-plan.md`, `azure.yaml`, `infra/main.bicep` (or equivalent). Review carefully; spot-check that the Bicep contains:
   - One Resource Group

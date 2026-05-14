@@ -251,8 +251,16 @@ rules:
     - Tasks must be independently testable; typecheck and build are the gates.
   deployment:
     - The first task of any Azure-deployment change MUST be installing the
-      microsoft/azure-skills plugin via `/plugin install
-      azure@claude-plugins-official`. The repo does not vendor the plugin.
+      microsoft/azure-skills plugin in the agent's CLI. For GitHub Copilot
+      (the agent used by this project), the install is TWO commands in this
+      order: `/plugin marketplace add microsoft/azure-skills` (one-time per
+      machine, registers the GitHub-hosted marketplace) followed by
+      `/plugin install azure@azure-skills`. Mark these as tasks 0.1 and 0.2
+      in tasks.md. The marketplace name is `microsoft/azure-skills` (a
+      GitHub repo path), NOT `claude-plugins-official` (which is a Claude
+      Code marketplace and does not exist in GitHub Copilot). The repo
+      does not vendor the plugin; the agent installs it itself at apply-
+      time. Source: https://github.com/microsoft/azure-skills#github-copilot-cli
     - One resource group per environment. Bicep must be idempotent; re-running
       `azd up` against an existing RG produces no drift.
     - No literal passwords or API keys on the deployed web revision. Use
