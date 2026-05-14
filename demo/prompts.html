@@ -141,6 +141,8 @@
     <p><strong>After Step 4 (the live /opsx-apply)</strong>: in Terminal B, manually Ctrl+C → <code>rm -rf .next</code> → <code>npm run dev</code>. Three commands typed by hand. The Step 4 card has the same instruction in its operator-action block. No helper script.</p>
 
     <p><strong>Open the Agents UI in VS Code Insiders BEFORE Step 1</strong> so the audience can see the Skills panel (workspace-level <code>openspec-*</code> skills), the Changes panel (empty), and the agentic-mode chat panel ready to receive input. These three panels are the visual identity of the demo.</p>
+
+    <p><strong>Enable the MSSQL extension's MCP server (Step 9 prereq, one time per VS Code session)</strong>: Command Palette → <code>MS SQL: Start MCP Server</code> → pick the <code>talkscout</code> connection. After this, the Skills panel in Agents shows the MSSQL tools alongside the OpenSpec ones. If you see them already, skip.</p>
 </div>
 
 <div class="card">
@@ -255,14 +257,30 @@ AND cfpCloseDate &gt;= GETDATE()</pre>
 </div>
 
 <div class="card">
-    <h3>🔹 Step 9: Open actions.ts — the clean TypeScript moment (6:30 → 7:00)</h3>
+    <h3>🔹 Step 9: Chat with the data — MSSQL extension MCP server (6:30 → 7:30)</h3>
+    <p class="voiceover">"Vector search is one way to reach the database. Here is another. The MSSQL extension ships an MCP server. Once it is running, GitHub Copilot can read the same <code>talkscout</code> connection and answer plain-English questions against the same <code>Event</code> table. No new app code. No new endpoint. Same database."</p>
+    <p><em>📌 Where: back to the Agents chat panel in VS Code Insiders. The MSSQL extension's MCP server was enabled in Pre-take setup (<code>MS SQL: Start MCP Server</code> → pick the <code>talkscout</code> connection). The Skills panel now lists the MSSQL tools alongside the OpenSpec ones.</em></p>
+    <p><strong>Prompt 1:</strong> paste into Agents chat and press Enter.</p>
+    <pre id="codeMcp1">Using the MSSQL MCP server on the talkscout connection, count how many events have an open CFP right now (cfpOpenDate &lt;= today AND cfpCloseDate &gt;= today). Group by the first topic in the topics array. Sort by count descending. Return a small table.</pre>
+    <button class="copy-btn" onclick="copyToClipboard('codeMcp1')">Copy</button>
+    <p><strong>Expected:</strong> Copilot invokes an MSSQL MCP tool (visible as an approval gate in the Changes panel), runs a SELECT against Event, returns a small markdown table inline in chat. ~5-10 sec.</p>
+    <p class="voiceover">"That ran against the same database the search uses. The agent picked the SQL itself."</p>
+    <p><strong>Prompt 2:</strong> follow-up. Same chat panel.</p>
+    <pre id="codeMcp2">Same connection. Which event has the next CFP closing soonest, and how many days from today is that?</pre>
+    <button class="copy-btn" onclick="copyToClipboard('codeMcp2')">Copy</button>
+    <p><strong>Expected:</strong> one-row answer with event name and a day count. ~5 sec.</p>
+    <p class="voiceover">"One database, two ways to ask. Vector distance for semantic match, MCP for plain-English SQL. Same data, same row, no extra services."</p>
+</div>
+
+<div class="card">
+    <h3>🔹 Step 10: Open actions.ts — the clean TypeScript moment (7:30 → 8:00)</h3>
     <p class="voiceover">"Here is what the application code sees. A handful of lines of business logic. One embed call, one parameterized query. No SQL strings. The .sql file is loaded once at module load by <code>src/lib/sql.ts</code> and passed in. Type safety stays end-to-end."</p>
     <p><em>📌 Show: open <code>src/app/actions.ts</code>. Point at the <code>SEARCH_EVENTS_SQL</code> import. Hover the <code>results</code> variable to surface the inferred return type briefly.</em></p>
 </div>
 
 <div class="card">
-    <h3>🔹 Step 10: Closing statement (7:00 → 7:30)</h3>
-    <p class="voiceover">"That is TalkScout. Spec-driven semantic search end to end inside VS Code, in about seven minutes. SQL Server 2025 stored the vectors. Prisma kept the TypeScript clean. GitHub Copilot, with OpenSpec, drove the build. One agent, every surface in this demo. Repo and links are below. Thanks for watching."</p>
+    <h3>🔹 Step 11: Closing statement (8:00 → 8:30)</h3>
+    <p class="voiceover">"That is TalkScout. Spec-driven semantic search, plus plain-English SQL over MCP, end to end inside VS Code Insiders, in about eight minutes. SQL Server 2025 stored the vectors. Prisma kept the TypeScript clean. The MSSQL extension exposed the same database to Copilot as an MCP server. GitHub Copilot, with OpenSpec, drove the build. One agent, every surface in this demo. Repo and links are below. Thanks for watching."</p>
     <p><em>📌 Show on screen during the wrap: open the closing recap slide in your host browser at <code>file:///Users/carlos/scout-talk-app/demo/walkthrough-slide.html</code> (dark, click-to-advance). It walks through the 10-step timeline as you talk through the summary.</em></p>
 </div>
 
@@ -276,6 +294,7 @@ AND cfpCloseDate &gt;= GETDATE()</pre>
         <li>✅ Used <strong>Ollama</strong> on the host with <code>nomic-embed-text</code> for embeddings, free, no API keys, no data egress</li>
         <li>✅ Used <strong>Prisma 7</strong> with the <code>@prisma/adapter-mssql</code> driver to keep all SQL strings out of TypeScript</li>
         <li>✅ Used <strong>the MSSQL VS Code extension</strong>'s Schema Designer to inspect the <code>VECTOR(768)</code> column visually alongside the relational fields</li>
+        <li>✅ Used the same extension's <strong>MCP server</strong> to let Copilot answer plain-English questions against the same <code>Event</code> table, no app code, no new endpoint</li>
         <li>✅ Demonstrated the "magic moment" of semantic search: a query whose top result contained none of the query's keywords, ranked by vector distance</li>
     </ul>
     <p><strong>Key takeaways:</strong></p>
@@ -288,7 +307,7 @@ AND cfpCloseDate &gt;= GETDATE()</pre>
 </div>
 
 <h2>🎯 Closing Statement</h2>
-<p class="voiceover">"In about seven minutes, we proposed a change with OpenSpec, watched GitHub Copilot in agent mode apply it, edited a real SQL file with the agent in plain English, and ran semantic search against SQL Server 2025's native vectors. All without leaving VS Code Insiders. Without writing a single line of SQL string literal in our application code. And the local stack is reproducible with one command."</p>
+<p class="voiceover">"In about eight minutes, we proposed a change with OpenSpec, watched GitHub Copilot in agent mode apply it, edited a real SQL file with the agent in plain English, ran semantic search against SQL Server 2025's native vectors, then turned around and let the agent answer plain-English questions against the same database over the MSSQL extension's MCP server. All without leaving VS Code Insiders. Without writing a single line of SQL string literal in our application code. And the local stack is reproducible with one command."</p>
 
 <h2>📚 Resources</h2>
 <div class="card">
