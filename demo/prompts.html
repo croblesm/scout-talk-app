@@ -125,7 +125,7 @@
 <h2>🚀 Step-by-Step Walkthrough</h2>
 
 <div class="card" style="border-left-color: #dc2626; background-color: #fef2f2;">
-    <h3>🛑 Pre-flight setup (BEFORE Step 1, off-camera)</h3>
+    <h3>🛑 Pre-flight Part 1 — Local stack (immediately before Step 1, off-camera, ~60 seconds)</h3>
     <p><strong><code>npm run demo:reset</code> does NOT start the dev server. You start it manually so you have full control over it across the recording.</strong> Two commands in two terminals:</p>
     <ol>
         <li>Terminal A: <code>npm run demo:reset</code>. Wait for "Demo reset complete in Ns".</li>
@@ -133,6 +133,56 @@
         <li>Open <code>http://localhost:3000</code>. You MUST see the placeholder: <em>"Search UI lands when you run /opsx-propose and then /opsx-apply."</em></li>
     </ol>
     <p><strong>Why this design:</strong> the dev server is your "BEFORE" state on camera. Keeping it in a visible foreground terminal means you always know whether it is running, and Ctrl+C stops it cleanly. Steps 1, 2, 3, and 4 all run while Terminal B keeps the dev server alive. After <code>/opsx-apply</code> finishes (end of Step 4), Ctrl+C Terminal B and run <code>npm run dev:restart</code> there to pick up new Tailwind classes — that gives you the "AFTER" state.</p>
+</div>
+
+<div class="card" style="border-left-color: #dc2626; background-color: #fef2f2;">
+    <h3>🛑 Pre-flight Part 2 — Azure stack (T-3h to T-1h before tape, off-camera)</h3>
+    <p>Steps 10 and 11 of this recording <strong>require a saved Copilot Chat transcript and a live cloud URL</strong>. Both come from off-camera prep on the SAME <code>001-talkscout</code> branch you record from — <strong>002-azure-deploy has been merged in, there is NO branch switching</strong>. Full step-by-step lives in <code>demo/azure-deploy-runbook.md</code>; condensed flow below.</p>
+
+    <p><strong>Step 2.1 — Auth on the host</strong> (~30s, one-time per session):</p>
+    <pre id="azprep1">az login
+az account set --subscription "&lt;id-or-name&gt;"
+azd auth login</pre>
+    <button class="copy-btn" onclick="copyToClipboard('azprep1')">Copy</button>
+
+    <p><strong>Step 2.2 — Branch hygiene</strong>:</p>
+    <pre id="azprep2">git fetch --tags --force origin
+git switch 001-talkscout
+git pull --rebase origin 001-talkscout
+git status      # must be clean</pre>
+    <button class="copy-btn" onclick="copyToClipboard('azprep2')">Copy</button>
+
+    <p><strong>Step 2.3 — In GitHub Copilot Chat (agent mode), paste this single prompt</strong>:</p>
+    <pre id="azprep3" style="white-space: pre-wrap;">/opsx-propose add-azure-deployment
+
+Deploy TalkScout to Azure Container Apps with Azure SQL Database (free tier) and a sibling Ollama container for embeddings (same nomic-embed-text 768-dim model as local). Use system-assigned managed identity for app to DB. The agentic deployment depends on the microsoft/azure-skills plugin; installing it is the first task in tasks.md.</pre>
+    <button class="copy-btn" onclick="copyToClipboard('azprep3')">Copy</button>
+    <p><em>Expected:</em> directory <code>openspec/changes/add-azure-deployment/</code> appears with <code>proposal.md</code>, <code>design.md</code>, <code>tasks.md</code>. Review them. Commit when satisfied.</p>
+
+    <p><strong>Step 2.4 — In the SAME Copilot Chat session, paste</strong>:</p>
+    <pre id="azprep4">/opsx-apply add-azure-deployment</pre>
+    <button class="copy-btn" onclick="copyToClipboard('azprep4')">Copy</button>
+    <p><em>The agent runs:</em> Task 0 (<code>/plugin install azure@claude-plugins-official</code>) → generates Dockerfile, embed-ollama.ts, etc. → invokes <code>azure-prepare</code> (Bicep + azure.yaml) → <code>azure-validate</code> → <code>azure-deploy</code> (<code>azd up</code>, ~5 minutes cold). Approve each gate. <strong>DO NOT clear this chat session — Step 10 scrolls through it on camera.</strong></p>
+
+    <p><strong>Step 2.5 — Verify the cloud URL</strong> (the deploy output prints it):</p>
+    <pre id="azprep5">curl -sI "https://&lt;your-live-url&gt;/"
+# expect: HTTP/2 200</pre>
+    <button class="copy-btn" onclick="copyToClipboard('azprep5')">Copy</button>
+    <p>Hit it in a browser, run both scripted searches, confirm they return real results. <strong>If it 500s, fix now — do not record on a broken cloud.</strong></p>
+
+    <p><strong>Step 2.6 — Confirm $0 spend</strong>:</p>
+    <pre id="azprep6">az consumption usage list \
+  --start-date "$(date -u -v-1d +%Y-%m-%dT00:00:00Z)" \
+  --end-date   "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+  -g &lt;your-rg-name&gt; -o table</pre>
+    <button class="copy-btn" onclick="copyToClipboard('azprep6')">Copy</button>
+    <p>Expected: zero billed line items. The "running on free tier" claim must hold.</p>
+
+    <p><strong>Step 2.7 — T-15min before tape, pre-warm the cloud URL</strong>: open it in a browser, run any search, close the tab. Twice. This keeps the free-tier SQL DB from cold-resuming on camera.</p>
+
+    <p><strong>Result of Pre-flight Part 2:</strong> a Copilot Chat history on <code>001-talkscout</code> that shows the full <code>/opsx-propose → /opsx-apply → azure-prepare → azure-validate → azure-deploy</code> chain. That is what Step 10 scrolls past. The live cloud URL is what Step 11 hits.</p>
+
+    <p><strong>If this prep fails or runs out of time:</strong> skip Steps 10-11 entirely. Record the local-only flow (Steps 1-9 + Step 12 wrap, adjust closing voiceover to drop the cloud mention). <code>demo/azure-deploy-runbook.md</code> Step 7 covers the formal T-2h decision gate.</p>
 </div>
 
 <div class="card">
@@ -249,6 +299,7 @@ AND cfpCloseDate &gt;= GETDATE()</pre>
 
 <div class="card">
     <h3>🔹 Step 10: Same agentic primitive, deployment layer (7:00 → 8:00)</h3>
+    <p><strong>⚠️ Prerequisite:</strong> the saved Copilot Chat transcript this step scrolls through comes from <strong>Pre-flight Part 2</strong> above (off-camera <code>/opsx-propose add-azure-deployment</code> + <code>/opsx-apply add-azure-deployment</code>, run T-3h to T-1h before tape). Same <code>001-talkscout</code> branch you record from — no branch switching. If you skipped Pre-flight Part 2, skip this step and Step 11.</p>
     <p class="voiceover">"OpenSpec drove the local build. The same primitive — agent reads context, proposes, applies, I approve — works for infrastructure too. I ran this before tape because a cold cloud deploy takes about five minutes. Let me scroll the chat so you can see what happened."</p>
     <p><em>📌 Where: GitHub Copilot Chat panel. Scroll to the saved <code>/opsx-apply add-azure-deployment</code> transcript. Highlight task 0 (the agent installs <code>microsoft/azure-skills</code> itself), then the <code>azure-prepare</code> → <code>azure-validate</code> → <code>azure-deploy</code> chain.</em></p>
     <p class="voiceover">"Task zero is the plugin install. The agent picks up the OpenSpec change, sees it needs Azure skills, and installs them. Then it generates the Bicep, the Dockerfile, and the deploy plan. I approve each gate. Five minutes later, <code>azd up</code> finishes. Container Apps environment, Azure SQL Database on the free offer, an Ollama sidecar running the same <code>nomic-embed-text</code> model that runs on my Mac. Zero dollars on free-tier resources. No Azure OpenAI quota required."</p>
