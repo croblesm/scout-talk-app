@@ -39,54 +39,41 @@ Keep Terminal B alive through Steps 1, 2, 3, and 4. After `/opsx-apply` finishes
 
 ## 0:30 to 1:30, Step 2 — The plan: how I got here
 
-> *Speaker notes: stay in VS Code. Open `docs/plan.md` and press `Cmd+K V` for the side-by-side Markdown preview. Scroll top-to-bottom as you talk.*
+> *Speaker notes: open `docs/plan.md`, press `Cmd+K V` for side-by-side preview. Scroll: Overview → Architecture → Stack → Data model → Seed (done) → Search (done) → UI (NOT DONE).*
 
-Open the segment:
+Two voiceover lines, that's it. The plan does the visual work — let it.
 
-> *"Before I add anything to my app, let me show you the plan I wrote when I started this project. One page. It captures the goal, the stack, the data model, and what is left to build."*
+> *"Before I add anything to my app, let me show the plan I wrote when I started this project. One page. The goal, the architecture, the stack, the data model. The seed and the search are already done — 91 conferences embedded via Ollama, vector ranking in SQL Server."*
 
-Scroll through the preview as you talk. The plan has real sections; do not blow past them:
+Scroll to the **UI** section (last section of the plan). Then:
 
-- **Overview** (10s) — goal, the "no external vector store / no cloud embedding API" guardrails.
-- **Architecture diagram** (10s) — three processes: browser, Server Action, SQL Server. Embedding via host Ollama; ranking via VECTOR_DISTANCE.
-- **Stack and rationale** (15s) — SQL Server 2025 (native vector), Ollama (free, no key), Prisma 7 (typed bridge), and the SQL boundary rule.
-- **Data model** (10s) — point at `Unsupported("VECTOR(768)")`. "One table. CAST happens in T-SQL."
-- **Seed pipeline** (5s) — "Already done. 91 conferences. Content-hash gated."
-- **UI plan (what's left to build)** (10s) — Server Action + three components + page composition. Read the table heading.
+> *"What is NOT done is this last section — the UI. A Server Action and three React components that replace the placeholder. That is what I am going to build next."*
 
-> *"What is NOT done yet is the UI itself. A Server Action, three React components, a page composition that replaces the placeholder. The plan calls it out as the remaining work. That is what I am going to build next."*
+Close the preview.
 
 Close the preview.
 
 ## 1:30 to 2:45, Step 3 — Meet OpenSpec: the surface, the context, the data
 
-> *Speaker notes: opens with the WHY. The previous step's pivot line said "from here, agentic." Step 3 unpacks what that means: three things inside VS Code, in order — Agents UI (surface), config.yaml (project context), schema.prisma (data layer).*
+> *Speaker notes: three short beats, three voiceover lines. Don't over-narrate — let the panels speak.*
 
-Open the segment:
+### (a) Surface — Agents view
 
-> *"My plan said: from here, agentic. So let me show you what that means in practice. Three things, all inside VS Code, all next to my code: the surface where I drive the agent, the file that tells the agent about THIS project, and the data layer the agent will work against."*
+Open the Agents view. Point at Skills (four `openspec-*`), Changes (empty), chat input.
 
-### (a) The surface — Agents view (~30s)
+> *"My plan said: from here, agentic. So let me show the three pieces that drive that. First, the surface — this is the new Agents view. Four OpenSpec skills, one per phase of a change. A Changes panel where every diff lands with an approval gate. And a chat input — plain English in, agent actions out."*
 
-Open the Agents view (new top-left panel in VS Code Insiders). Walk the three sub-panels:
-
-- **Skills panel** — point at `openspec-propose`, `openspec-apply`, `openspec-explore`, `openspec-archive`. Say: *"Four skills, one per phase of a change. The agent loads them from this workspace automatically. I will use propose and apply in a minute."*
-- **Changes panel** — empty. Say: *"Where every file the agent writes lands as a diff, with its own approval gate."*
-- **Chat input** — say: *"Plain English in, agent actions out. This is the only thing I type for the next five minutes."*
-
-### (b) The project context — `openspec/config.yaml` (~25s)
+### (b) Project context — `openspec/config.yaml`
 
 Open `openspec/config.yaml`. Scroll to the `context:` block.
 
-> *"But the agent does not operate in a vacuum. This file is the project context. Architectural rules in plain English — all T-SQL only in `prisma/sql/`, embeddings done in Node not T-SQL, container limits at 2 GB and 2 CPUs. Every time I run slash-opsx-propose, the agent reads this first. That is how the spec it generates ends up matching the rest of the repo."*
+> *"Second, project context. This file is what the agent reads before it does anything: architectural rules in plain English. All T-SQL only in `prisma/sql`. Embeddings in Node. Container limits at 2 GB and 2 CPUs. That is how the spec the agent generates ends up matching the rest of the repo."*
 
-### (c) The data layer — `prisma/schema.prisma` (~15s)
+### (c) Data layer — `prisma/schema.prisma`
 
-Open `prisma/schema.prisma`. Scroll to the `Event` model. Point at `embedding Unsupported("VECTOR(768)")?`.
+Open `prisma/schema.prisma`. Point at `embedding Unsupported("VECTOR(768)")?`. Close both files when done.
 
-> *"And here is the data the agent will work against. One table, one native vector column. Same column we will see live in the database later."*
-
-Close `schema.prisma` and `config.yaml`. Focus back on the Agents chat input. Step 4 is the on-ramp.
+> *"And third, the data layer. One table, one native vector column. Same column we will see live in the database later."*
 
 ## 2:45 to 4:00, Step 4 — /opsx-propose (live)
 

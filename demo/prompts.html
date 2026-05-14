@@ -181,26 +181,11 @@
 <div class="card">
     <h3>🔹 Step 2: The plan — how I got here (0:30 → 1:30)</h3>
 
-    <p class="show"><span class="label">📌 Show:</span> stay in VS Code. Open <code>docs/plan.md</code>, press <strong>Cmd+K V</strong> for side-by-side preview. Scroll top to bottom as you talk.</p>
-    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "Before I add anything to my app, let me show you the plan I wrote when I started this project. One page. It captures the goal, the stack, the data model, and what is left to build."</p>
+    <p class="show"><span class="label">📌 Show:</span> open <code>docs/plan.md</code>, press <strong>Cmd+K V</strong> for side-by-side preview. Scroll: Overview → Architecture diagram → Stack table → Data model snippet → Seed (done) → Search (done) → <strong>UI (NOT DONE)</strong>.</p>
 
-    <p class="show"><span class="label">📌 Show:</span> scroll to the <strong>Overview</strong> at the top.</p>
-    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "A semantic CFP finder. A speaker types a plain-English description of a talk; the app returns the upcoming conferences whose CFPs match by topic. End to end on my Mac, inside VS Code. No external vector store, no cloud embedding API, no API keys."</p>
+    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "Before I add anything to my app, let me show the plan I wrote when I started this project. One page. The goal, the architecture, the stack, the data model. The seed and the search are already done — 91 conferences embedded via Ollama, vector ranking in SQL Server."</p>
 
-    <p class="show"><span class="label">📌 Show:</span> scroll to the <strong>Architecture</strong> Mermaid diagram.</p>
-    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "Three processes total. Browser, Next.js Server Action, and SQL Server 2025. The Server Action embeds the query through host Ollama, runs one ranked query through Prisma, gets back the top five. That's the whole hot path."</p>
-
-    <p class="show"><span class="label">📌 Show:</span> scroll to <strong>Stack and rationale</strong>. Trace the rows.</p>
-    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "SQL Server 2025 because the vector type is native — no Pinecone alongside Postgres, no sync problem. Ollama on the host with nomic-embed-text, 768 dimensions, free. Prisma 7 as the typed bridge. And one rule: every T-SQL statement lives in <code>prisma/sql</code>, never as a string in TypeScript."</p>
-
-    <p class="show"><span class="label">📌 Show:</span> scroll to <strong>Data model</strong>. Point at <code>Unsupported("VECTOR(768)")</code>.</p>
-    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "One table. Relational columns plus one native vector column. Prisma carries it through migrations with this Unsupported hint; the actual CAST to VECTOR happens in T-SQL."</p>
-
-    <p class="show"><span class="label">📌 Show:</span> scroll to <strong>Seed pipeline</strong>.</p>
-    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "That table is already seeded. 91 conferences. Each one embedded via Ollama. Content-hash gated so re-runs are no-ops."</p>
-
-    <p class="show"><span class="label">📌 Show:</span> scroll to <strong>UI plan (what's left to build)</strong>.</p>
-    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "What is NOT done yet is the UI. A Server Action, three React components, a page composition that replaces the placeholder. The plan calls it out as the remaining work. That is what I am going to build next."</p>
+    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "What is NOT done is this last section — the UI. A Server Action and three React components that replace the placeholder. That is what I am going to build next."</p>
 
     <p class="show"><span class="label">📌 Show:</span> close the preview.</p>
 </div>
@@ -208,27 +193,17 @@
 <div class="card">
     <h3>🔹 Step 3: Meet OpenSpec — the surface, the context, the data (1:30 → 2:45)</h3>
 
-    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "My plan said: from here, agentic. So let me show you what that means in practice. Three things, all inside VS Code, all right next to my code: the surface where I drive the agent, the file that tells the agent about THIS project, and the data layer the agent will work against."</p>
+    <p class="show"><span class="label">📌 Show:</span> open the <strong>Agents</strong> view (new top-left panel in VS Code Insiders). Point at <strong>Skills</strong> (four <code>openspec-*</code> entries), <strong>Changes</strong> (empty), and the <strong>chat input</strong>.</p>
 
-    <p class="show"><span class="label">📌 Show:</span> (a) Open the <strong>Agents</strong> view (new top-left panel in VS Code Insiders).</p>
-    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "First, the surface. This is the new Agents view in VS Code Insiders. Three sub-panels."</p>
+    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "My plan said: from here, agentic. So let me show the three pieces that drive that. First, the surface — this is the new Agents view. Four OpenSpec skills, one per phase of a change. A Changes panel where every diff lands with an approval gate. And a chat input — plain English in, agent actions out."</p>
 
-    <p class="show"><span class="label">📌 Show:</span> point at the <strong>Skills</strong> panel: <code>openspec-propose</code>, <code>openspec-apply</code>, <code>openspec-explore</code>, <code>openspec-archive</code>.</p>
-    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "Skills. Four of them, one per phase of a change. The agent loads them from this workspace automatically. I will use propose and apply in a minute."</p>
+    <p class="show"><span class="label">📌 Show:</span> open <code>openspec/config.yaml</code>. Scroll to the <code>context:</code> block.</p>
 
-    <p class="show"><span class="label">📌 Show:</span> point at the <strong>Changes</strong> panel (currently empty).</p>
-    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "Changes. Currently empty. Every file the agent writes lands here as a diff, with its own approval gate."</p>
+    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "Second, project context. This file is what the agent reads before it does anything: architectural rules in plain English. All T-SQL only in <code>prisma/sql</code>. Embeddings in Node. Container limits at 2 GB and 2 CPUs. That is how the spec the agent generates ends up matching the rest of the repo."</p>
 
-    <p class="show"><span class="label">📌 Show:</span> point at the <strong>chat input</strong> at the bottom.</p>
-    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "And the chat. Plain English in, agent actions out. This is the only thing I type for the next five minutes."</p>
+    <p class="show"><span class="label">📌 Show:</span> open <code>prisma/schema.prisma</code>. Point at <code>embedding Unsupported("VECTOR(768)")?</code>. Close both files when done.</p>
 
-    <p class="show"><span class="label">📌 Show:</span> (b) Open <code>openspec/config.yaml</code>. Scroll to the <code>context:</code> block.</p>
-    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "Second, the project context. The agent does not operate in a vacuum. This file is where I tell it about this project. Architectural rules in plain English — all T-SQL only in <code>prisma/sql/</code>, embeddings done in Node not T-SQL, container limits at 2 GB and 2 CPUs. Every time I run slash-opsx-propose, the agent reads this first. That is how the spec it generates ends up matching the rest of the repo."</p>
-
-    <p class="show"><span class="label">📌 Show:</span> (c) Open <code>prisma/schema.prisma</code>. Scroll to the <code>Event</code> model. Point at <code>embedding Unsupported("VECTOR(768)")?</code>.</p>
-    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "Third, the data. This is what the agent will work against. One table. One native vector column. Same column we will see live in the database later."</p>
-
-    <p class="show"><span class="label">📌 Show:</span> close <code>schema.prisma</code> and <code>config.yaml</code>. Focus back on the Agents chat input.</p>
+    <p class="voiceover"><span class="label">🎤 Voiceover:</span> "And third, the data layer. One table, one native vector column. Same column we will see live in the database later."</p>
 </div>
 
 <div class="card">
