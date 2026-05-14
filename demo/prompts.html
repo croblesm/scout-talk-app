@@ -165,16 +165,26 @@
 </div>
 
 <div class="card">
-    <h3>🔹 Step 3: Meet OpenSpec and the Agents UI (1:30 → 2:45)</h3>
-    <p class="voiceover">"OpenSpec is the tool that takes me from plan-driven to agent-driven. It lives as a folder in my repo, plus four skills loaded by the agent. Let me show you the surface I will be working in for the rest of the demo."</p>
-    <p><em>📌 Stay in VS Code. Open the <strong>Agents</strong> view (the new top-left panel in VS Code Insiders). Walk the three sub-panels in order, then a 10-second peek at <code>prisma/schema.prisma</code> to ground the data layer.</em></p>
+    <h3>🔹 Step 3: Meet OpenSpec — the surface, the context, the data (1:30 → 2:45)</h3>
+    <p class="voiceover">"My plan said: from here, agentic. So let me show you what that means in practice. Three things, all inside VS Code, all next to my code: the surface where I drive the agent, the file that tells the agent about THIS project, and the data layer the agent will work against."</p>
+
+    <p><strong>(a) The surface — VS Code Insiders Agents view (~30s)</strong></p>
+    <p><em>📌 Open the <strong>Agents</strong> view (new top-left panel in VS Code Insiders). Walk the three sub-panels.</em></p>
     <ol>
-        <li><strong>Skills panel</strong> — workspace-level skills: <code>openspec-propose</code>, <code>openspec-apply</code>, <code>openspec-explore</code>, <code>openspec-archive</code>. Say: "Four skills, one per phase. Propose creates the spec. Apply implements it. Explore reads project context. Archive closes the loop. The agent loads them automatically." (25s)</li>
-        <li><strong>Changes panel</strong> — currently empty. Say: "Empty for now. In a minute, every file the agent writes lands here as a diff with its own approval gate." (15s)</li>
-        <li><strong>Agentic-mode chat input</strong> at the bottom. Say: "Plain English in, agent actions out. This is the only thing I will type into for the next five minutes." (10s)</li>
-        <li>Quick switch to the Explorer. Open <code>prisma/schema.prisma</code>. Scroll to the <code>Event</code> model. Point at the line <code>embedding Unsupported("VECTOR(768)")?</code>. Say: "This is the data the agent will work against. One table, with a native vector column. Same column we will see in the live database later." (15s)</li>
+        <li><strong>Skills panel</strong> — point at <code>openspec-propose</code>, <code>openspec-apply</code>, <code>openspec-explore</code>, <code>openspec-archive</code>. Say: "Four skills, one per phase of a change. The agent loads them from this workspace automatically. I will use propose and apply in a minute."</li>
+        <li><strong>Changes panel</strong> — currently empty. Say: "Where every file the agent writes lands as a diff, with its own approval gate."</li>
+        <li><strong>Agentic-mode chat input</strong> at the bottom. Say: "Plain English in, agent actions out. This is the only thing I type for the next five minutes."</li>
     </ol>
-    <p><em>📌 Close <code>schema.prisma</code>. Focus back on the Agents chat input. We are ready to propose.</em></p>
+
+    <p><strong>(b) The project context — <code>openspec/config.yaml</code> (~25s)</strong></p>
+    <p><em>📌 Open <code>openspec/config.yaml</code>. Scroll to the <code>context:</code> block.</em></p>
+    <p>Say: "But the agent does not operate in a vacuum. This file is the project context. Architectural rules in plain English — all T-SQL only in <code>prisma/sql/</code>, embeddings done in Node not T-SQL, container limits at 2 GB and 2 CPUs. Every time I run slash-opsx-propose, the agent reads this first. That is how the spec it generates ends up matching the rest of the repo."</p>
+
+    <p><strong>(c) The data layer — <code>prisma/schema.prisma</code> (~15s)</strong></p>
+    <p><em>📌 Open <code>prisma/schema.prisma</code>. Scroll to the <code>Event</code> model. Point at <code>embedding Unsupported("VECTOR(768)")?</code>.</em></p>
+    <p>Say: "And here is the data the agent will work against. One table, one native vector column. Same column we will see live in the database later."</p>
+
+    <p><em>📌 Close <code>schema.prisma</code> and <code>config.yaml</code>. Focus back on the Agents chat input. We are ready to propose.</em></p>
 </div>
 
 <div class="card">

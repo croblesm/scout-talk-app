@@ -56,24 +56,35 @@ Scroll through the preview as you talk:
 
 Close the preview.
 
-## 1:30 to 2:45, Step 3 — Meet OpenSpec and the Agents UI
+## 1:30 to 2:45, Step 3 — Meet OpenSpec: the surface, the context, the data
 
-> *Speaker notes: stay in VS Code. Open the Agents view (top-left panel in VS Code Insiders). Walk the three sub-panels in order, then a 10-second peek at `prisma/schema.prisma`.*
+> *Speaker notes: opens with the WHY. The previous step's pivot line said "from here, agentic." Step 3 unpacks what that means: three things inside VS Code, in order — Agents UI (surface), config.yaml (project context), schema.prisma (data layer).*
 
 Open the segment:
 
-> *"OpenSpec is the tool that takes me from plan-driven to agent-driven. It lives as a folder in my repo, plus four skills loaded by the agent. Let me show you the surface I will be working in for the rest of the demo."*
+> *"My plan said: from here, agentic. So let me show you what that means in practice. Three things, all inside VS Code, all next to my code: the surface where I drive the agent, the file that tells the agent about THIS project, and the data layer the agent will work against."*
 
-Walk the panels:
-- **Skills panel** (~25s) — list the four `openspec-*` skills. Say: *"Four skills, one per phase. Propose creates the spec. Apply implements it. Explore reads project context. Archive closes the loop. The agent loads them automatically."*
-- **Changes panel** (~15s) — empty. Say: *"Empty for now. In a minute, every file the agent writes lands here as a diff with its own approval gate."*
-- **Agentic-mode chat input** (~10s) — point at it. Say: *"Plain English in, agent actions out. This is the only thing I will type into for the next five minutes."*
+### (a) The surface — Agents view (~30s)
 
-Quick data-layer grounding (~15s): switch to Explorer, open `prisma/schema.prisma`. Scroll to the `Event` model. Point at `embedding Unsupported("VECTOR(768)")?`. Say:
+Open the Agents view (new top-left panel in VS Code Insiders). Walk the three sub-panels:
 
-> *"This is the data the agent will work against. One table, with a native vector column. Same column we will see in the live database later."*
+- **Skills panel** — point at `openspec-propose`, `openspec-apply`, `openspec-explore`, `openspec-archive`. Say: *"Four skills, one per phase of a change. The agent loads them from this workspace automatically. I will use propose and apply in a minute."*
+- **Changes panel** — empty. Say: *"Where every file the agent writes lands as a diff, with its own approval gate."*
+- **Chat input** — say: *"Plain English in, agent actions out. This is the only thing I type for the next five minutes."*
 
-Close `schema.prisma`. Focus back on the Agents chat input. Step 4 is the on-ramp.
+### (b) The project context — `openspec/config.yaml` (~25s)
+
+Open `openspec/config.yaml`. Scroll to the `context:` block.
+
+> *"But the agent does not operate in a vacuum. This file is the project context. Architectural rules in plain English — all T-SQL only in `prisma/sql/`, embeddings done in Node not T-SQL, container limits at 2 GB and 2 CPUs. Every time I run slash-opsx-propose, the agent reads this first. That is how the spec it generates ends up matching the rest of the repo."*
+
+### (c) The data layer — `prisma/schema.prisma` (~15s)
+
+Open `prisma/schema.prisma`. Scroll to the `Event` model. Point at `embedding Unsupported("VECTOR(768)")?`.
+
+> *"And here is the data the agent will work against. One table, one native vector column. Same column we will see live in the database later."*
+
+Close `schema.prisma` and `config.yaml`. Focus back on the Agents chat input. Step 4 is the on-ramp.
 
 ## 2:45 to 4:00, Step 4 — /opsx-propose (live)
 
