@@ -124,112 +124,93 @@
 
 <h2>🚀 Step-by-Step Walkthrough</h2>
 
-<p style="text-align: center; padding: 0.5rem 1rem; background: #fef9c3; border-radius: 6px; margin: 1rem 0;"><strong>Recording prep happens in three off-camera phases, in this order:</strong> <strong>Part 1</strong> (build the local app via OpenSpec, ~5 min) → <strong>Part 2</strong> (deploy the result to Azure via azure-skills, ~10 min) → <strong>Pre-tape reset</strong> (wipe local back to the placeholder so Steps 1-9 can redo it live, ~60s). The Copilot Chat history and the cloud deployment survive the pre-tape reset.</p>
+<p style="text-align: center; padding: 0.5rem 1rem; background: #fef9c3; border-radius: 6px; margin: 1rem 0;">The on-camera demo splits into <strong>PART 1 (Steps 1-9, live spec-driven build)</strong> and <strong>PART 2 (Steps 10-12, Azure skills deployment shown via saved chat + live cloud URL)</strong>. Off-camera setup has two cards below: <strong>Pre-take setup</strong> (per take, ~60s) and <strong>One-time Azure deploy</strong> (run ONCE before the first tape, ~15 min — the cloud and the chat history persist across all subsequent takes).</p>
 
 <div class="card" style="border-left-color: #dc2626; background-color: #fef2f2;">
-    <h3>🛑 Pre-flight Part 1 — Specs and local app (off-camera, T-3h before tape, ~5 min)</h3>
-    <p>This phase builds the final local app state via OpenSpec. The Azure deploy in Part 2 packages this code, so Part 1 MUST complete before Part 2. After this phase: localhost:3000 shows a working search UI with the CFP filter applied. The Copilot Chat history holds the full <code>/opsx-propose</code> + <code>/opsx-apply</code> chain (will not be cleared).</p>
+    <h3>🛑 Pre-take setup — Local stack (off-camera, immediately before each take, ~60s)</h3>
+    <p>Two commands in two terminals. This wipes back to the pre-implement placeholder so Steps 3-9 can do their spec-driven work LIVE on camera.</p>
 
-    <p><strong>Step 1.1 — Clean baseline + foreground dev server</strong> (two terminals):</p>
-    <pre id="p1prep1">npm run demo:reset       # Terminal A — clean local state</pre>
-    <button class="copy-btn" onclick="copyToClipboard('p1prep1')">Copy</button>
-    <pre id="p1prep1b">npm run dev              # Terminal B — foreground dev server</pre>
-    <button class="copy-btn" onclick="copyToClipboard('p1prep1b')">Copy</button>
-    <p>Wait for "Demo reset complete" in A and "✓ Ready in Ns" in B. Open <code>http://localhost:3000</code> and confirm the placeholder renders.</p>
+    <p><strong>Terminal A — clean local baseline</strong>:</p>
+    <pre id="prep1a">npm run demo:reset</pre>
+    <button class="copy-btn" onclick="copyToClipboard('prep1a')">Copy</button>
+    <p>Wait for "Demo reset complete in Ns". Wipes working tree back to <code>pre-implement</code>, drops <code>openspec/changes/*</code>, recreates Docker, re-migrates, re-seeds. Does NOT touch the Copilot Chat panel or the Azure deployment.</p>
 
-    <p><strong>Step 1.2 — In GitHub Copilot Chat (agent mode), paste this single prompt</strong>:</p>
-    <pre id="p1prep2" style="white-space: pre-wrap;">/opsx-propose add-semantic-search-ui
+    <p><strong>Terminal B — foreground dev server</strong> (new tab/split, Cmd+\):</p>
+    <pre id="prep1b">npm run dev</pre>
+    <button class="copy-btn" onclick="copyToClipboard('prep1b')">Copy</button>
+    <p>Wait for <code>✓ Ready in Ns</code>. Open <code>http://localhost:3000</code> in your host browser. You MUST see the placeholder ("Search UI lands when you run /opsx-propose and then /opsx-apply"). This is your on-camera "BEFORE" state.</p>
 
-Add the user-facing semantic search UI to TalkScout. The repo already has the foundation (Prisma schema, migrations applied, src/lib/db.ts, src/lib/embed.ts wrapping host Ollama, src/lib/sql.ts loading prisma/sql/searchEvents.sql, the database seeded with 91 events including embeddings, and the placeholder page at src/app/page.tsx). What is missing: a Server Action that embeds the user's query and runs prisma.$queryRawUnsafe(SEARCH_EVENTS_SQL, ...), three React components (SearchInput with gradient border and placeholder cycling, EventCard with clickable CFP link, CfpStatusPill with five visual states), a pure-function cfp-status utility, and the page composition that wires it all together. The two scripted on-camera queries are "agentic workflows for databases" and "type safety across the stack". Honor the architectural and UI rules in openspec/config.yaml.</pre>
-    <button class="copy-btn" onclick="copyToClipboard('p1prep2')">Copy</button>
-    <p><em>Expected:</em> agent creates <code>openspec/changes/add-semantic-search-ui/{proposal,design,tasks}.md</code>.</p>
+    <p><strong>After Step 4 (the live /opsx-apply)</strong>: Ctrl+C Terminal B, then <code>npm run dev:restart</code> there to pick up new Tailwind classes. The Step 4 card has this in its operator-action block.</p>
 
-    <p><strong>Step 1.3 — Same chat, paste</strong>:</p>
-    <pre id="p1prep3">/opsx-apply add-semantic-search-ui</pre>
-    <button class="copy-btn" onclick="copyToClipboard('p1prep3')">Copy</button>
-    <p>Approve every diff including the <code>src/app/page.tsx</code> modification gate. Wait for completion.</p>
+    <p><strong>Pre-warm the cloud</strong> (if you are recording PART 2): open the cloud URL in another host browser tab, run any search, close. Repeat. The free-tier SQL DB cold-pauses after ~1h of idle.</p>
 
-    <p><strong>Step 1.4 — Same chat, apply the CFP filter</strong>:</p>
-    <pre id="p1prep4" style="white-space: pre-wrap;">The search keeps returning events whose CFP is already closed or has not opened yet. Filter the search SQL so it only returns events with an open CFP right now.</pre>
-    <button class="copy-btn" onclick="copyToClipboard('p1prep4')">Copy</button>
-    <p>Accept the diff in <code>prisma/sql/searchEvents.sql</code>.</p>
-
-    <p><strong>Step 1.5 — Restart the dev server to pick up Tailwind classes</strong>: Ctrl+C Terminal B, then:</p>
-    <pre id="p1prep5">npm run dev:restart</pre>
-    <button class="copy-btn" onclick="copyToClipboard('p1prep5')">Copy</button>
-    <p>Refresh <code>localhost:3000</code>. You must see the styled search UI. Type any query (e.g., "agentic workflows for databases") and confirm only CFP-open events come back. <strong>This is the "final local state" Part 2 will deploy.</strong></p>
-
-    <p><strong>DO NOT clear this Copilot Chat session.</strong> Part 2 continues in the same chat. Step 10 of the recording scrolls past both parts of the chat.</p>
+    <p><strong>Last check before hitting record</strong>: scroll to the top of the Copilot Chat panel and confirm the saved <code>/opsx-apply add-azure-deployment</code> transcript is still there. If it is missing, your chat history was cleared — you must rerun the One-time Azure deploy below before recording PART 2.</p>
 </div>
 
 <div class="card" style="border-left-color: #dc2626; background-color: #fef2f2;">
-    <h3>🛑 Pre-flight Part 2 — Azure skills deployment (off-camera, depends on Part 1, ~10 min)</h3>
-    <p>This phase invokes <code>microsoft/azure-skills</code> through agent mode to provision Azure resources and deploy the local app state from Part 1. <strong>Must run AFTER Part 1 completes</strong> — the deploy packages whatever is in the working tree.</p>
+    <h3>🛑 One-time Azure deploy (off-camera, run ONCE before your first tape, ~15 min)</h3>
+    <p>This produces the assets PART 2 of the demo references on camera: a saved Copilot Chat transcript scrolled in Step 10, and a live cloud URL hit in Step 11. <strong>The cloud and the chat history survive across all rehearsals and takes</strong>, so you only repeat this if you intentionally tear down the Azure stack (<code>azd down --force --purge</code>) or if the Copilot Chat history gets cleared.</p>
 
-    <p><strong>Step 2.1 — Auth on the host</strong> (~30s, one-time per session, in a host terminal not the dev container):</p>
-    <pre id="azprep1">az login
+    <p>The agent runs the whole local spec build + Azure deploy in ONE chat session. The local-spec build is what your tape will later show LIVE in PART 1; running it here off-camera produces the working-tree code that the Azure deploy packages.</p>
+
+    <p><strong>Prereq A — Auth on the host</strong> (host terminal, NOT the dev container):</p>
+    <pre id="ot1">az login
 az account set --subscription "&lt;id-or-name&gt;"
 azd auth login</pre>
-    <button class="copy-btn" onclick="copyToClipboard('azprep1')">Copy</button>
+    <button class="copy-btn" onclick="copyToClipboard('ot1')">Copy</button>
 
-    <p><strong>Step 2.2 — In the SAME Copilot Chat session from Part 1, paste</strong>:</p>
-    <pre id="azprep2" style="white-space: pre-wrap;">/opsx-propose add-azure-deployment
+    <p><strong>Prereq B — Clean local baseline so the spec build has empty changes/ to write to</strong> (run inside the dev container):</p>
+    <pre id="ot2">npm run demo:reset
+npm run dev      # in a second terminal, leave running</pre>
+    <button class="copy-btn" onclick="copyToClipboard('ot2')">Copy</button>
+
+    <p><strong>Now in GitHub Copilot Chat (agent mode), paste these four prompts IN ORDER, in the SAME chat session</strong>. Approve each diff/gate as it appears. Do not clear the chat between them.</p>
+
+    <p><strong>Prompt 1/4 — Propose the local spec change</strong>:</p>
+    <pre id="ot3" style="white-space: pre-wrap;">/opsx-propose add-semantic-search-ui
+
+Add the user-facing semantic search UI to TalkScout. The repo already has the foundation (Prisma schema, migrations applied, src/lib/db.ts, src/lib/embed.ts wrapping host Ollama, src/lib/sql.ts loading prisma/sql/searchEvents.sql, the database seeded with 91 events including embeddings, and the placeholder page at src/app/page.tsx). What is missing: a Server Action that embeds the user's query and runs prisma.$queryRawUnsafe(SEARCH_EVENTS_SQL, ...), three React components (SearchInput with gradient border and placeholder cycling, EventCard with clickable CFP link, CfpStatusPill with five visual states), a pure-function cfp-status utility, and the page composition that wires it all together. The two scripted on-camera queries are "agentic workflows for databases" and "type safety across the stack". Honor the architectural and UI rules in openspec/config.yaml.</pre>
+    <button class="copy-btn" onclick="copyToClipboard('ot3')">Copy</button>
+
+    <p><strong>Prompt 2/4 — Apply the local spec change</strong>:</p>
+    <pre id="ot4">/opsx-apply add-semantic-search-ui</pre>
+    <button class="copy-btn" onclick="copyToClipboard('ot4')">Copy</button>
+
+    <p><strong>Prompt 3/4 — Apply the CFP filter to the SQL file</strong> (this is what your tape's Step 6 does live):</p>
+    <pre id="ot5" style="white-space: pre-wrap;">The search keeps returning events whose CFP is already closed or has not opened yet. Filter the search SQL so it only returns events with an open CFP right now.</pre>
+    <button class="copy-btn" onclick="copyToClipboard('ot5')">Copy</button>
+
+    <p><strong>Prompt 4/4 — Propose and apply the Azure deployment via azure-skills</strong>. First the propose:</p>
+    <pre id="ot6" style="white-space: pre-wrap;">/opsx-propose add-azure-deployment
 
 Deploy TalkScout to Azure Container Apps with Azure SQL Database (free tier) and a sibling Ollama container for embeddings (same nomic-embed-text 768-dim model as local). Use system-assigned managed identity for app to DB. The agentic deployment depends on the microsoft/azure-skills plugin; installing it is the first task in tasks.md.</pre>
-    <button class="copy-btn" onclick="copyToClipboard('azprep2')">Copy</button>
-    <p><em>Expected:</em> directory <code>openspec/changes/add-azure-deployment/{proposal,design,tasks}.md</code>.</p>
+    <button class="copy-btn" onclick="copyToClipboard('ot6')">Copy</button>
+    <p>Then the apply (same chat):</p>
+    <pre id="ot7">/opsx-apply add-azure-deployment</pre>
+    <button class="copy-btn" onclick="copyToClipboard('ot7')">Copy</button>
+    <p>The agent runs: Task 0 (<code>/plugin install azure@claude-plugins-official</code> — the plugin lives in the spec, not the repo) → generates Dockerfile, Bicep, azure.yaml → <code>azure-prepare</code> → <code>azure-validate</code> → <code>azure-deploy</code> (<code>azd up</code>, ~5 min cold start). Approve each gate.</p>
 
-    <p><strong>Step 2.3 — Same chat, paste</strong>:</p>
-    <pre id="azprep3">/opsx-apply add-azure-deployment</pre>
-    <button class="copy-btn" onclick="copyToClipboard('azprep3')">Copy</button>
-    <p>The agent runs:</p>
-    <ol>
-        <li>Task 0: <code>/plugin install azure@claude-plugins-official</code> (the azure-skills plugin lives in the spec, not the repo — the agent installs it itself)</li>
-        <li>Generates Dockerfile, .env.production.example, etc.</li>
-        <li>Invokes <code>azure-prepare</code> → Bicep + azure.yaml</li>
-        <li>Invokes <code>azure-validate</code> → fixes any blockers</li>
-        <li>Invokes <code>azure-deploy</code> → <code>azd up</code> (~5 min cold start)</li>
-    </ol>
-    <p>Approve each gate. <strong>DO NOT clear this chat.</strong> The full transcript is what Step 10 of the recording scrolls past on camera.</p>
-
-    <p><strong>Step 2.4 — Verify the cloud URL</strong> (printed at end of azure-deploy output):</p>
-    <pre id="azprep4">curl -sI "https://&lt;your-live-url&gt;/"
+    <p><strong>Verify the live URL</strong>:</p>
+    <pre id="ot8">curl -sI "https://&lt;your-live-url&gt;/"
 # expect: HTTP/2 200</pre>
-    <button class="copy-btn" onclick="copyToClipboard('azprep4')">Copy</button>
-    <p>Hit it in a host browser, run both scripted searches, confirm real results. <strong>If 500s, fix before recording.</strong></p>
+    <button class="copy-btn" onclick="copyToClipboard('ot8')">Copy</button>
+    <p>Hit it in a host browser, run both scripted queries, confirm sane results. <strong>If 500s, fix before tape.</strong></p>
 
-    <p><strong>Step 2.5 — Confirm $0 spend</strong>:</p>
-    <pre id="azprep5">az consumption usage list \
+    <p><strong>Confirm $0 spend</strong>:</p>
+    <pre id="ot9">az consumption usage list \
   --start-date "$(date -u -v-1d +%Y-%m-%dT00:00:00Z)" \
   --end-date   "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
   -g &lt;your-rg-name&gt; -o table</pre>
-    <button class="copy-btn" onclick="copyToClipboard('azprep5')">Copy</button>
+    <button class="copy-btn" onclick="copyToClipboard('ot9')">Copy</button>
     <p>Expected: zero billed line items.</p>
 
-    <p><strong>Result of Part 2:</strong> Azure resources provisioned (ACA env, talkscout-web, talkscout-ollama sidecar, Azure SQL DB free offer, seed Job). Cloud URL is live with the app from Part 1. Copilot Chat session holds the full Part 1 + Part 2 transcript ready to scroll on camera. <strong>If this prep fails:</strong> skip Steps 10-11 of the recording, ship the local-only flow.</p>
+    <p><strong>Result:</strong> Azure resources are live. The Copilot Chat session holds the full propose+apply for both the local spec and the Azure deploy. PART 2 of the recording scrolls past the Azure portion of that chat (Step 10) and hits the live URL (Step 11). <strong>DO NOT CLEAR THIS CHAT.</strong></p>
+
+    <p>To re-deploy from scratch (rarely needed): <code>azd down --force --purge</code> then rerun this card from the top.</p>
 </div>
 
-<div class="card" style="border-left-color: #dc2626; background-color: #fef2f2;">
-    <h3>🛑 Pre-tape reset (immediately before recording, ~60s)</h3>
-    <p>After Parts 1 and 2 succeed, the local working tree has the full app code from Part 1. The recording's Steps 3-9 are designed to recreate that LIVE on camera. So we wipe local back to the placeholder, while leaving the Copilot Chat history and the deployed cloud untouched.</p>
-
-    <p><strong>Step 0.1 — Reset local state</strong> (Terminal A):</p>
-    <pre id="ptr1">npm run demo:reset</pre>
-    <button class="copy-btn" onclick="copyToClipboard('ptr1')">Copy</button>
-    <p>Wipes the working tree back to <code>pre-implement</code>, drops <code>openspec/changes/*</code>, recreates Docker, re-migrates, re-seeds. Does NOT touch the Copilot Chat panel or the Azure deployment.</p>
-
-    <p><strong>Step 0.2 — Start the foreground dev server</strong> (Terminal B):</p>
-    <pre id="ptr2">npm run dev</pre>
-    <button class="copy-btn" onclick="copyToClipboard('ptr2')">Copy</button>
-    <p>Wait for <code>✓ Ready in Ns</code>. Open <code>http://localhost:3000</code>. You MUST see the placeholder. This is your on-camera "BEFORE" state.</p>
-
-    <p><strong>Step 0.3 — Pre-warm the cloud URL</strong> (the free-tier SQL DB cold-pauses after ~1h of idle):</p>
-    <p>Open the cloud URL in a host browser, run any search, close. Repeat. ~30 seconds.</p>
-
-    <p><strong>Step 0.4 — Verify the Copilot Chat panel</strong>: the session from Pre-flight Parts 1+2 must still be visible. Scroll to the top of that chat. That is where Step 10 will start on camera.</p>
-
-    <p>Hit record. Follow Steps 1-12 below.</p>
-</div>
+<h2 style="background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; padding: 1rem 1.5rem; border-radius: 8px; margin: 2.5rem 0 1.5rem;">🎬 PART 1 — Specs (live on camera, Steps 1-9, 0:00 → 7:00)</h2>
+<p style="margin: -0.5rem 0 1.5rem; color: #555; font-style: italic;">Spec-driven local development via OpenSpec and GitHub Copilot. Every step in this part happens live — the audience watches the agent propose the change, apply it, fix the SQL, and reveal the magic moment.</p>
 
 <div class="card">
     <h3>🔹 Step 1: Frame the project (0:00 → 0:30)</h3>
@@ -343,9 +324,12 @@ AND cfpCloseDate &gt;= GETDATE()</pre>
     <p><em>📌 Show: open <code>src/app/actions.ts</code>. Point at the <code>SEARCH_EVENTS_SQL</code> import. Hover the <code>results</code> variable to surface the inferred return type briefly.</em></p>
 </div>
 
+<h2 style="background: linear-gradient(135deg, #0891b2, #0e7490); color: white; padding: 1rem 1.5rem; border-radius: 8px; margin: 2.5rem 0 1.5rem;">☁️ PART 2 — Azure skills deployment (Steps 10-12, 7:00 → 9:15)</h2>
+<p style="margin: -0.5rem 0 1.5rem; color: #555; font-style: italic;">Same agentic primitive (read context, propose, apply, approve) at the infrastructure layer. The <strong>One-time Azure deploy</strong> card at the top of this document is the off-camera prep that produces the saved Copilot Chat transcript and the live cloud URL these three steps reference.</p>
+
 <div class="card">
     <h3>🔹 Step 10: Same agentic primitive, deployment layer (7:00 → 8:00)</h3>
-    <p><strong>⚠️ Prerequisite:</strong> the saved Copilot Chat transcript this step scrolls through comes from <strong>Pre-flight Part 2</strong> above (off-camera <code>/opsx-propose add-azure-deployment</code> + <code>/opsx-apply add-azure-deployment</code>, run T-3h to T-1h before tape). Same <code>001-talkscout</code> branch you record from — no branch switching. If you skipped Pre-flight Part 2, skip this step and Step 11.</p>
+    <p><strong>⚠️ Prerequisite:</strong> the saved Copilot Chat transcript this step scrolls through comes from the <strong>One-time Azure deploy</strong> card above (off-camera, ~15 min, run once before your first tape). If that prep has not happened, skip Steps 10-11 of this take.</p>
     <p class="voiceover">"OpenSpec drove the local build. The same primitive — agent reads context, proposes, applies, I approve — works for infrastructure too. I ran this before tape because a cold cloud deploy takes about five minutes. Let me scroll the chat so you can see what happened."</p>
     <p><em>📌 Where: GitHub Copilot Chat panel. Scroll to the saved <code>/opsx-apply add-azure-deployment</code> transcript. Highlight task 0 (the agent installs <code>microsoft/azure-skills</code> itself), then the <code>azure-prepare</code> → <code>azure-validate</code> → <code>azure-deploy</code> chain.</em></p>
     <p class="voiceover">"Task zero is the plugin install. The agent picks up the OpenSpec change, sees it needs Azure skills, and installs them. Then it generates the Bicep, the Dockerfile, and the deploy plan. I approve each gate. Five minutes later, <code>azd up</code> finishes. Container Apps environment, Azure SQL Database on the free offer, an Ollama sidecar running the same <code>nomic-embed-text</code> model that runs on my Mac. Zero dollars on free-tier resources. No Azure OpenAI quota required."</p>
