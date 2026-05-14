@@ -37,22 +37,22 @@ Keep Terminal B alive through Steps 1, 2, 3, and 4. After `/opsx-apply` finishes
 
 > *"I am Carlos Robles, Principal PM for SQL developer experiences at Microsoft. Every developer who speaks at conferences hits the same problem: where should I submit this talk? Listings sites organize events by date and region, never by topical fit. I am building TalkScout — a CFP finder. Type a plain-English description of a talk, get the upcoming conferences whose CFPs match. End to end inside VS Code. In about nine minutes."*
 
-## 0:30 to 1:30, Step 2 — How I got to this point (foundation plan)
+## 0:30 to 1:30, Step 2 — The plan: how I got here
 
 > *Speaker notes: stay in VS Code. Open `docs/plan.md` and press `Cmd+K V` for the side-by-side Markdown preview. Scroll top-to-bottom as you talk.*
 
 Open the segment:
 
-> *"Before I add anything to my app, let's understand how I got here. Let me open this plan — it is a single page in my repo, and it captures everything I built before today: the data layer, a SQL Server 2025 container, a Prisma schema with a native VECTOR column, 91 conferences seeded with embeddings generated on my Mac via Ollama."*
+> *"Before I add anything to my app, let me show you the plan I wrote when I started this project. One page. It captures the goal, the stack, the data model, and what is left to build."*
 
 Scroll through the preview as you talk:
-- **Goal** — read it (10s).
-- **Stack Choices** — SQL Server 2025 native vectors, Ollama on host, Prisma 7, `prisma/sql/` boundary (15s).
-- **Data Model** — point at `Unsupported("VECTOR(768)")`. "One table. CAST happens in T-SQL." (10s).
-- **Seed Pipeline** — hand-curated `events.json`, content-hash gated, MERGE through the SQL file. Re-runs are no-ops. (10s).
-- **Next** — read aloud as the pivot:
+- **Intro paragraph** — goal, scope, the "no external vector store / no cloud embedding API" guardrails (10s).
+- **Stack** — SQL Server 2025 native vectors, Ollama on host, Prisma 7, `prisma/sql/` boundary, Next.js Server Action + components for the UI (15s).
+- **Data model** — point at `Unsupported("VECTOR(768)")`. "One table. CAST happens in T-SQL." (10s).
+- **Seed** — "Already done. 91 conferences, embedded, MERGE-ed in." (10s).
+- **Search** — read the section header. Then:
 
-> *"The next layer is the search UI itself. I could write more plan files and keep going by hand. But I want something better: plain-English proposal in, spec out, agent applies it, I approve. That is what OpenSpec gives me — and that is the rest of this demo."*
+> *"What is NOT done yet is this last section: the search itself. A Server Action that embeds the query, runs the ranked SQL, and three React components that render the result. That is what I am going to build next."*
 
 Close the preview.
 
