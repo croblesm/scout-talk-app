@@ -43,7 +43,7 @@ Keep Terminal B alive through Steps 1, 2, 3, and 4. After `/opsx-apply` finishes
 
 Open the segment:
 
-> *"Before we get into the live build, here is what is already done. I have the data layer: a SQL Server 2025 container, a Prisma schema with a native VECTOR column, 91 conferences seeded with embeddings generated on my Mac via Ollama. I scaffolded all of that from a one-page plan I wrote at the start. Here is that plan, right in the repo."*
+> *"Before I add anything to my app, let's understand how I got here. Let me open this plan — it is a single page in my repo, and it captures everything I built before today: the data layer, a SQL Server 2025 container, a Prisma schema with a native VECTOR column, 91 conferences seeded with embeddings generated on my Mac via Ollama."*
 
 Scroll through the preview as you talk:
 - **Goal** — read it (10s).
