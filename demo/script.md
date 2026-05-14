@@ -1,10 +1,8 @@
-# TalkScout Demo Script (~8.5 minutes)
+# TalkScout Demo Script (8 minutes)
 
 The on-camera teleprompter is `demo/prompts.html`. This file is the timed version with speaker notes for rehearsal.
 
-Times are wall-clock from when recording starts. The total budget is 10:00 with comfortable buffer; the live content runs ~8:30 (SC-004).
-
-Pre-take side-prereq for Step 9: in VS Code Insiders, Command Palette → `MS SQL: Start MCP Server` → pick the `talkscout` connection. One time per VS Code session. The MSSQL extension already ships this; no install required.
+Times are wall-clock from when recording starts. The total budget is 8:00 with at least 30 seconds of buffer (SC-004).
 
 ## Pre-flight setup (BEFORE Step 1, off-camera)
 
@@ -164,35 +162,7 @@ Read the top result aloud. Then say:
 
 Expected: every result has a CFP-open pill. Top result is tagged with topics like "AI agents", "MCP", or "autonomous tooling".
 
-## 6:30 to 7:30, Chat with the data via the MSSQL extension's MCP server
-
-> *Speaker notes: switch back to the Agents chat panel in VS Code Insiders. The MSSQL MCP server was enabled in Pre-take setup (`MS SQL: Start MCP Server` against the `talkscout` connection). The Skills panel should list MSSQL tools next to the OpenSpec ones.*
-
-Say:
-
-> *"Vector search is one way to reach the database. Here is another. The MSSQL extension ships an MCP server. Once it's running, Copilot can read the same `talkscout` connection and answer plain-English questions against the same `Event` table. No new app code. No new endpoint. Same database."*
-
-Paste Prompt 1 into the chat input:
-
-```
-Using the MSSQL MCP server on the talkscout connection, count how many events have an open CFP right now (cfpOpenDate <= today AND cfpCloseDate >= today). Group by the first topic in the topics array. Sort by count descending. Return a small table.
-```
-
-Approve the MCP tool gate in the Changes panel. Wait 5-10 sec. A small markdown table renders inline.
-
-> *"That ran against the same database the search uses. The agent picked the SQL itself."*
-
-Paste Prompt 2:
-
-```
-Same connection. Which event has the next CFP closing soonest, and how many days from today is that?
-```
-
-One-row answer. ~5 sec.
-
-> *"One database, two ways to ask. Vector distance for semantic match, MCP for plain-English SQL. Same data, same row, no extra services."*
-
-## 7:30 to 8:00, Clean TypeScript moment
+## 6:30 to 7:00, Clean TypeScript moment
 
 > *Speaker notes: open actions.ts. Hover the SEARCH_EVENTS_SQL import.*
 
@@ -200,11 +170,11 @@ Open `src/app/actions.ts`. Read aloud: "A handful of lines of business logic. On
 
 Hover the import for `SEARCH_EVENTS_SQL` from `@/lib/sql`. Show the inferred type briefly, then close.
 
-## 8:00 to 8:30, Wrap
+## 7:00 to 7:30, Wrap
 
 > *Speaker notes: switch to the browser tab with `file:///Users/carlos/scout-talk-app/demo/walkthrough-slide.html` for the closing recap. Voice up. Smile.*
 
-"That is TalkScout. Spec-driven semantic search, plus plain-English SQL over MCP, end to end inside VS Code Insiders, in about eight minutes. SQL Server 2025 stored the vectors. Prisma kept the TypeScript clean. The MSSQL extension exposed the same database to Copilot as an MCP server. GitHub Copilot in agent mode, with OpenSpec, drove the build — one agent, every surface in this demo. Repo and links are below. Thanks for watching."
+"That is TalkScout. Spec-driven semantic search end to end inside VS Code Insiders, in about seven minutes. SQL Server 2025 stored the vectors. Prisma kept the TypeScript clean. GitHub Copilot in agent mode, with OpenSpec, drove the build — one agent, every surface in this demo. Repo and links are below. Thanks for watching."
 
 End recording.
 
