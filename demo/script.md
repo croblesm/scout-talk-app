@@ -37,43 +37,31 @@ Keep Terminal B alive through Steps 1, 2, 3, and 4. After `/opsx-apply` finishes
 
 > *"I am Carlos Robles, Principal PM for SQL developer experiences at Microsoft. Every developer who speaks at conferences hits the same problem: where should I submit this talk? Listings sites organize events by date and region, never by topical fit. I am building TalkScout — a CFP finder. Type a plain-English description of a talk, get the upcoming conferences whose CFPs match. End to end inside VS Code. In about nine minutes."*
 
-## 0:30 to 1:30, Step 2 — The plan: how I got here
+## 0:30 to 1:30, Step 2 — How I got here: the plan
 
-> *Speaker notes: open `docs/plan.md`, press `Cmd+K V` for side-by-side preview. Scroll: Overview → Architecture → Stack → Data model → Seed (done) → Search (done) → UI (NOT DONE).*
+> *Speaker notes: open `docs/plan.md`, press `Cmd+K V` for side-by-side preview. Scroll top to bottom while you talk. One voiceover paragraph, that's it.*
 
-Two voiceover lines, that's it. The plan does the visual work — let it.
-
-> *"Before I add anything to my app, let me show the plan I wrote when I started this project. One page. The goal, the architecture, the stack, the data model. The seed and the search are already done — 91 conferences embedded via Ollama, vector ranking in SQL Server."*
-
-Scroll to the **UI** section (last section of the plan). Then:
-
-> *"What is NOT done is this last section — the UI. A Server Action and three React components that replace the placeholder. That is what I am going to build next."*
+> *"This is how I got here. I used GitHub Copilot in plan mode to generate and implement this plan. As you can see, I have an architecture defined, a stack, a data model with a single Event table and a native VECTOR column, a seed pipeline that loaded 91 conferences and embedded them via Ollama, and the ranked search query against SQL Server. All of that is already done. What is NOT done is the UI — a Server Action and three React components that replace the placeholder. That is what I am going to build next."*
 
 Close the preview.
 
 Close the preview.
 
-## 1:30 to 2:45, Step 3 — Meet OpenSpec: the surface, the context, the data
+## 1:30 to 2:45, Step 3 — Meet OpenSpec: the agentic next step
 
-> *Speaker notes: three short beats, three voiceover lines. Don't over-narrate — let the panels speak.*
+> *Speaker notes: two beats. First, open the Agents view and walk the four skills in their natural order. Second, briefly show config.yaml.*
 
-### (a) Surface — Agents view
+### (a) Agents view + the four skills
 
-Open the Agents view. Point at Skills (four `openspec-*`), Changes (empty), chat input.
+Open the Agents view (top-left panel in VS Code Insiders). Point at the Skills panel showing four entries in order: `openspec-explore`, `openspec-propose`, `openspec-apply`, `openspec-archive`. Also point at the empty Changes panel and the chat input.
 
-> *"My plan said: from here, agentic. So let me show the three pieces that drive that. First, the surface — this is the new Agents view. Four OpenSpec skills, one per phase of a change. A Changes panel where every diff lands with an approval gate. And a chat input — plain English in, agent actions out."*
+> *"After applying this plan I realized I could take advantage of the new agentic experience in VS Code to build what is left, using OpenSpec. OpenSpec is an alternative to GitHub Spec Kit that's a great fit for small projects like this one. The way it works: I wrote four skills that map to a four-phase loop. **Explore** reads the project and answers questions about it. **Propose** generates a change — proposal, design, and a tasks file. **Apply** walks the tasks file and writes the code, gated by an approval in the Changes panel. **Archive** closes the change once it ships. Same chat input for all of them."*
 
 ### (b) Project context — `openspec/config.yaml`
 
-Open `openspec/config.yaml`. Scroll to the `context:` block.
+Open `openspec/config.yaml`. Scroll to the `context:` block. Close it when done.
 
-> *"Second, project context. This file is what the agent reads before it does anything: architectural rules in plain English. All T-SQL only in `prisma/sql`. Embeddings in Node. Container limits at 2 GB and 2 CPUs. That is how the spec the agent generates ends up matching the rest of the repo."*
-
-### (c) Data layer — `prisma/schema.prisma`
-
-Open `prisma/schema.prisma`. Point at `embedding Unsupported("VECTOR(768)")?`. Close both files when done.
-
-> *"And third, the data layer. One table, one native vector column. Same column we will see live in the database later."*
+> *"And this is the project context — architectural rules in plain English. T-SQL only in `prisma/sql`, embeddings in Node, container limits. The agent reads this before every propose so the spec it generates matches the rest of the repo."*
 
 ## 2:45 to 4:00, Step 4 — /opsx-propose (live)
 
@@ -100,20 +88,6 @@ What appears, in roughly this order. **Approve each one as it appears in the dif
 - ✏️ `src/app/page.tsx` (MODIFIED — the placeholder is REPLACED; needs its own approval gate, easy to miss)
 
 Expected total time: 60 to 120 seconds. While files appear, narrate: "The agent is reading tasks.md and creating exactly the files it lists. No more, no less. The page.tsx is the wiring layer; that is what makes the UI show up."
-
-> *Speaker notes — VERIFY 1: page.tsx replaced (~5 seconds): open `src/app/page.tsx`. It must start with `'use client'` and import SearchInput + EventCard. If you still see the placeholder paragraph, paste this into the SAME Copilot Chat to recover:*
->
-> ```
-> You did not modify src/app/page.tsx. Per openspec/changes/add-semantic-search-ui/tasks.md, the placeholder Home component must be REPLACED with one that uses the new SearchInput and EventCard components and manages search state with useState. Apply that change now, then show me the diff.
-> ```
-
-> *Speaker notes — VERIFY 2: actions.ts has only async exports (~5 seconds): open `src/app/actions.ts`. It must start with `'use server'`. Every export must be `export async function` OR `export type`/`export interface`. NO `export const`, NO `export default {...}`, NO exported schemas. If the dev-server logs show `A "use server" file can only export async functions, found object`, paste this into the SAME Copilot Chat:*
->
-> ```
-> The build is failing with: "A 'use server' file can only export async functions, found object" at src/app/actions.ts. Move any non-async-function export (constant, object, schema, default export) out of src/app/actions.ts into src/lib/types.ts. Keep actions.ts containing only 'use server' and `export async function searchEvents(...)`. Update imports in src/app/page.tsx and any component that consumed the moved export. Then show me the diff for all three files.
-> ```
->
-> *Wait for the diff. Approve it. Then continue with the manual dev restart below.*
 
 > *Speaker notes — manual dev restart (~10 seconds, off-camera-friendly): the auto-reloaded page at `localhost:3000` may render unstyled (plain serif heading, raw browser input). Tailwind v4 hot-reload quirk on Apple Silicon when many class names land at once. In Terminal B (running `npm run dev`), three commands typed by hand:*
 >
