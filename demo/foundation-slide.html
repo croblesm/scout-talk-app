@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TalkScout Foundation Plan</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0a0f;
+    color: #e4e4e7;
+    font-family: 'Inter', -apple-system, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 2rem 3rem 4rem;
+    overflow-y: auto;
+  }
+  .container { max-width: 1100px; width: 100%; }
+
+  .header {
+    text-align: center;
+    margin-bottom: 2.2rem;
+    opacity: 0;
+    animation: fadeInDown 0.8s ease forwards;
+  }
+  .subtitle-top {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #818cf8;
+    margin-bottom: 0.6rem;
+  }
+  .header h1 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #818cf8, #c084fc, #f472b6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
+  }
+  .tagline {
+    font-size: 1.0rem;
+    color: #71717a;
+    font-weight: 300;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .section {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    padding: 1.1rem 1.4rem;
+    margin-bottom: 1.1rem;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  .section.active { animation: slideUp 0.55s ease forwards; }
+  .section h2 {
+    font-size: 0.78rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #a5b4fc;
+    margin-bottom: 0.7rem;
+  }
+  .section p {
+    font-size: 0.95rem;
+    color: #a1a1aa;
+    line-height: 1.55;
+    margin-bottom: 0.55rem;
+  }
+  .section p:last-child { margin-bottom: 0; }
+  .section code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.82rem;
+    background: rgba(129, 140, 248, 0.1);
+    color: #a5b4fc;
+    padding: 0.08rem 0.4rem;
+    border-radius: 3px;
+  }
+  .section ul { padding-left: 1.2rem; }
+  .section li {
+    font-size: 0.92rem;
+    color: #a1a1aa;
+    line-height: 1.6;
+    margin-bottom: 0.25rem;
+  }
+
+  .stack {
+    display: grid;
+    grid-template-columns: 130px 1.2fr 2fr;
+    gap: 0.5rem 1.1rem;
+    font-size: 0.88rem;
+  }
+  .stack .h {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.66rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #52525b;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .stack .layer {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: #6ee7b7;
+    padding: 0.4rem 0;
+  }
+  .stack .choice {
+    font-weight: 600;
+    color: #e4e4e7;
+    padding: 0.4rem 0;
+  }
+  .stack .why {
+    color: #a1a1aa;
+    padding: 0.4rem 0;
+    line-height: 1.45;
+  }
+
+  .pivot {
+    background: linear-gradient(135deg, rgba(129, 140, 248, 0.12), rgba(244, 114, 182, 0.12));
+    border: 1px solid rgba(129, 140, 248, 0.3);
+    border-radius: 12px;
+    padding: 1.2rem 1.4rem;
+    text-align: center;
+    margin-top: 0.4rem;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  .pivot.active { animation: slideUp 0.55s ease forwards; }
+  .pivot p {
+    font-size: 1.0rem;
+    color: #e4e4e7;
+    line-height: 1.55;
+    font-weight: 300;
+  }
+  .pivot em {
+    background: linear-gradient(135deg, #818cf8, #c084fc, #f472b6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-style: normal;
+    font-weight: 600;
+  }
+
+  .hint {
+    position: fixed;
+    bottom: 1.2rem;
+    right: 1.6rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: #52525b;
+    letter-spacing: 0.06em;
+  }
+
+  @keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-15px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <div class="subtitle-top">Before OpenSpec</div>
+    <h1>Foundation Plan</h1>
+    <p class="tagline">The one-page plan I worked from before any agent touched the repo. After this point, every change is delivered as an OpenSpec proposal — not a hand-coded step.</p>
+  </div>
+
+  <div class="section">
+    <h2>Goal</h2>
+    <p>A CFP finder that takes a plain-English description of a talk and returns the upcoming conferences whose CFP topics match. End to end inside VS Code. No external vector store. No cloud embedding API.</p>
+  </div>
+
+  <div class="section">
+    <h2>Stack Choices</h2>
+    <div class="stack">
+      <div class="h">Layer</div><div class="h">Choice</div><div class="h">Why</div>
+      <div class="layer">database</div>
+      <div class="choice">SQL Server 2025</div>
+      <div class="why">Native <code>VECTOR(768)</code> + <code>VECTOR_DISTANCE</code>. One DB for relational rows and embeddings.</div>
+      <div class="layer">embeddings</div>
+      <div class="choice">Ollama · nomic-embed-text</div>
+      <div class="why">Free, no API key, no data egress. Apple Silicon Metal acceleration on the host.</div>
+      <div class="layer">orm</div>
+      <div class="choice">Prisma 7 + adapter-mssql</div>
+      <div class="why">Typed bridge from TypeScript to SQL. Migrations live in the repo.</div>
+      <div class="layer">sql boundary</div>
+      <div class="choice">prisma/sql/*.sql, loaded once</div>
+      <div class="why">App TypeScript never holds a SQL string literal. One file per query.</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Data Model — one table</h2>
+    <p>Relational columns for bookkeeping (slug, name, dates, location, topics, CFP window, contentHash) and one native vector column for the embedding. <code>Unsupported("VECTOR(768)")</code> carries the column through Prisma migrations; the actual <code>CAST(... AS VECTOR(768))</code> happens in T-SQL.</p>
+  </div>
+
+  <div class="section">
+    <h2>Seed Pipeline</h2>
+    <ul>
+      <li>Read <code>data/events.json</code> (91 events, hand-curated).</li>
+      <li>Compute <code>contentHash</code> per row; skip embedding when the hash matches.</li>
+      <li>Batch the new/changed events through <code>embedBatch()</code> against host Ollama.</li>
+      <li>MERGE into <code>Event</code> via <code>prisma/sql/upsertEvents.sql</code>. Re-running on unchanged data is a no-op.</li>
+    </ul>
+  </div>
+
+  <div class="pivot">
+    <p>The next layer is the search UI. <em>I want it built agentically.</em> Plain-English proposal in, spec out, agent applies it, I approve. That is what OpenSpec gives me — and it starts on the next slide.</p>
+  </div>
+
+</div>
+
+<div class="hint">Foundation slide · click to advance</div>
+
+<script>
+  const reveals = document.querySelectorAll('.header, .section, .pivot');
+  let i = 0;
+  reveals[0].classList.add('active');
+  document.body.addEventListener('click', () => {
+    i = Math.min(i + 1, reveals.length - 1);
+    reveals[i].classList.add('active');
+    reveals[i].scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+</script>
+
+</body>
+</html>
