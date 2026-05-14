@@ -145,9 +145,10 @@ async function main() {
   console.log('  /opsx-propose and then /opsx-apply") BEFORE you proceed to')
   console.log('  Step 1 of the demo. This is your on-camera "before" state.')
   console.log('')
-  console.log('  After /opsx-apply finishes, stop this dev server (Ctrl+C),')
-  console.log('  then run `npm run dev:restart` from a fresh terminal to get')
-  console.log('  Tailwind to re-scan the new files.\n')
+  console.log('  After /opsx-apply finishes, in the SAME terminal:')
+  console.log('    Ctrl+C  →  rm -rf .next  →  npm run dev')
+  console.log('  Three commands by hand. Tailwind v4 needs the .next wipe to')
+  console.log('  pick up the newly-generated component classes.\n')
 }
 
 main().catch((err) => {
