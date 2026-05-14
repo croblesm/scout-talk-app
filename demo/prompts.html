@@ -124,65 +124,111 @@
 
 <h2>🚀 Step-by-Step Walkthrough</h2>
 
+<p style="text-align: center; padding: 0.5rem 1rem; background: #fef9c3; border-radius: 6px; margin: 1rem 0;"><strong>Recording prep happens in three off-camera phases, in this order:</strong> <strong>Part 1</strong> (build the local app via OpenSpec, ~5 min) → <strong>Part 2</strong> (deploy the result to Azure via azure-skills, ~10 min) → <strong>Pre-tape reset</strong> (wipe local back to the placeholder so Steps 1-9 can redo it live, ~60s). The Copilot Chat history and the cloud deployment survive the pre-tape reset.</p>
+
 <div class="card" style="border-left-color: #dc2626; background-color: #fef2f2;">
-    <h3>🛑 Pre-flight Part 1 — Local stack (immediately before Step 1, off-camera, ~60 seconds)</h3>
-    <p><strong><code>npm run demo:reset</code> does NOT start the dev server. You start it manually so you have full control over it across the recording.</strong> Two commands in two terminals:</p>
-    <ol>
-        <li>Terminal A: <code>npm run demo:reset</code>. Wait for "Demo reset complete in Ns".</li>
-        <li>Terminal B (new tab/split, <code>Cmd+\</code>): <code>npm run dev</code>. Wait for <code>✓ Ready in Ns</code>.</li>
-        <li>Open <code>http://localhost:3000</code>. You MUST see the placeholder: <em>"Search UI lands when you run /opsx-propose and then /opsx-apply."</em></li>
-    </ol>
-    <p><strong>Why this design:</strong> the dev server is your "BEFORE" state on camera. Keeping it in a visible foreground terminal means you always know whether it is running, and Ctrl+C stops it cleanly. Steps 1, 2, 3, and 4 all run while Terminal B keeps the dev server alive. After <code>/opsx-apply</code> finishes (end of Step 4), Ctrl+C Terminal B and run <code>npm run dev:restart</code> there to pick up new Tailwind classes — that gives you the "AFTER" state.</p>
+    <h3>🛑 Pre-flight Part 1 — Specs and local app (off-camera, T-3h before tape, ~5 min)</h3>
+    <p>This phase builds the final local app state via OpenSpec. The Azure deploy in Part 2 packages this code, so Part 1 MUST complete before Part 2. After this phase: localhost:3000 shows a working search UI with the CFP filter applied. The Copilot Chat history holds the full <code>/opsx-propose</code> + <code>/opsx-apply</code> chain (will not be cleared).</p>
+
+    <p><strong>Step 1.1 — Clean baseline + foreground dev server</strong> (two terminals):</p>
+    <pre id="p1prep1">npm run demo:reset       # Terminal A — clean local state</pre>
+    <button class="copy-btn" onclick="copyToClipboard('p1prep1')">Copy</button>
+    <pre id="p1prep1b">npm run dev              # Terminal B — foreground dev server</pre>
+    <button class="copy-btn" onclick="copyToClipboard('p1prep1b')">Copy</button>
+    <p>Wait for "Demo reset complete" in A and "✓ Ready in Ns" in B. Open <code>http://localhost:3000</code> and confirm the placeholder renders.</p>
+
+    <p><strong>Step 1.2 — In GitHub Copilot Chat (agent mode), paste this single prompt</strong>:</p>
+    <pre id="p1prep2" style="white-space: pre-wrap;">/opsx-propose add-semantic-search-ui
+
+Add the user-facing semantic search UI to TalkScout. The repo already has the foundation (Prisma schema, migrations applied, src/lib/db.ts, src/lib/embed.ts wrapping host Ollama, src/lib/sql.ts loading prisma/sql/searchEvents.sql, the database seeded with 91 events including embeddings, and the placeholder page at src/app/page.tsx). What is missing: a Server Action that embeds the user's query and runs prisma.$queryRawUnsafe(SEARCH_EVENTS_SQL, ...), three React components (SearchInput with gradient border and placeholder cycling, EventCard with clickable CFP link, CfpStatusPill with five visual states), a pure-function cfp-status utility, and the page composition that wires it all together. The two scripted on-camera queries are "agentic workflows for databases" and "type safety across the stack". Honor the architectural and UI rules in openspec/config.yaml.</pre>
+    <button class="copy-btn" onclick="copyToClipboard('p1prep2')">Copy</button>
+    <p><em>Expected:</em> agent creates <code>openspec/changes/add-semantic-search-ui/{proposal,design,tasks}.md</code>.</p>
+
+    <p><strong>Step 1.3 — Same chat, paste</strong>:</p>
+    <pre id="p1prep3">/opsx-apply add-semantic-search-ui</pre>
+    <button class="copy-btn" onclick="copyToClipboard('p1prep3')">Copy</button>
+    <p>Approve every diff including the <code>src/app/page.tsx</code> modification gate. Wait for completion.</p>
+
+    <p><strong>Step 1.4 — Same chat, apply the CFP filter</strong>:</p>
+    <pre id="p1prep4" style="white-space: pre-wrap;">The search keeps returning events whose CFP is already closed or has not opened yet. Filter the search SQL so it only returns events with an open CFP right now.</pre>
+    <button class="copy-btn" onclick="copyToClipboard('p1prep4')">Copy</button>
+    <p>Accept the diff in <code>prisma/sql/searchEvents.sql</code>.</p>
+
+    <p><strong>Step 1.5 — Restart the dev server to pick up Tailwind classes</strong>: Ctrl+C Terminal B, then:</p>
+    <pre id="p1prep5">npm run dev:restart</pre>
+    <button class="copy-btn" onclick="copyToClipboard('p1prep5')">Copy</button>
+    <p>Refresh <code>localhost:3000</code>. You must see the styled search UI. Type any query (e.g., "agentic workflows for databases") and confirm only CFP-open events come back. <strong>This is the "final local state" Part 2 will deploy.</strong></p>
+
+    <p><strong>DO NOT clear this Copilot Chat session.</strong> Part 2 continues in the same chat. Step 10 of the recording scrolls past both parts of the chat.</p>
 </div>
 
 <div class="card" style="border-left-color: #dc2626; background-color: #fef2f2;">
-    <h3>🛑 Pre-flight Part 2 — Azure stack (T-3h to T-1h before tape, off-camera)</h3>
-    <p>Steps 10 and 11 of this recording <strong>require a saved Copilot Chat transcript and a live cloud URL</strong>. Both come from off-camera prep on the SAME <code>001-talkscout</code> branch you record from — <strong>002-azure-deploy has been merged in, there is NO branch switching</strong>. Full step-by-step lives in <code>demo/azure-deploy-runbook.md</code>; condensed flow below.</p>
+    <h3>🛑 Pre-flight Part 2 — Azure skills deployment (off-camera, depends on Part 1, ~10 min)</h3>
+    <p>This phase invokes <code>microsoft/azure-skills</code> through agent mode to provision Azure resources and deploy the local app state from Part 1. <strong>Must run AFTER Part 1 completes</strong> — the deploy packages whatever is in the working tree.</p>
 
-    <p><strong>Step 2.1 — Auth on the host</strong> (~30s, one-time per session):</p>
+    <p><strong>Step 2.1 — Auth on the host</strong> (~30s, one-time per session, in a host terminal not the dev container):</p>
     <pre id="azprep1">az login
 az account set --subscription "&lt;id-or-name&gt;"
 azd auth login</pre>
     <button class="copy-btn" onclick="copyToClipboard('azprep1')">Copy</button>
 
-    <p><strong>Step 2.2 — Branch hygiene</strong>:</p>
-    <pre id="azprep2">git fetch --tags --force origin
-git switch 001-talkscout
-git pull --rebase origin 001-talkscout
-git status      # must be clean</pre>
-    <button class="copy-btn" onclick="copyToClipboard('azprep2')">Copy</button>
-
-    <p><strong>Step 2.3 — In GitHub Copilot Chat (agent mode), paste this single prompt</strong>:</p>
-    <pre id="azprep3" style="white-space: pre-wrap;">/opsx-propose add-azure-deployment
+    <p><strong>Step 2.2 — In the SAME Copilot Chat session from Part 1, paste</strong>:</p>
+    <pre id="azprep2" style="white-space: pre-wrap;">/opsx-propose add-azure-deployment
 
 Deploy TalkScout to Azure Container Apps with Azure SQL Database (free tier) and a sibling Ollama container for embeddings (same nomic-embed-text 768-dim model as local). Use system-assigned managed identity for app to DB. The agentic deployment depends on the microsoft/azure-skills plugin; installing it is the first task in tasks.md.</pre>
+    <button class="copy-btn" onclick="copyToClipboard('azprep2')">Copy</button>
+    <p><em>Expected:</em> directory <code>openspec/changes/add-azure-deployment/{proposal,design,tasks}.md</code>.</p>
+
+    <p><strong>Step 2.3 — Same chat, paste</strong>:</p>
+    <pre id="azprep3">/opsx-apply add-azure-deployment</pre>
     <button class="copy-btn" onclick="copyToClipboard('azprep3')">Copy</button>
-    <p><em>Expected:</em> directory <code>openspec/changes/add-azure-deployment/</code> appears with <code>proposal.md</code>, <code>design.md</code>, <code>tasks.md</code>. Review them. Commit when satisfied.</p>
+    <p>The agent runs:</p>
+    <ol>
+        <li>Task 0: <code>/plugin install azure@claude-plugins-official</code> (the azure-skills plugin lives in the spec, not the repo — the agent installs it itself)</li>
+        <li>Generates Dockerfile, .env.production.example, etc.</li>
+        <li>Invokes <code>azure-prepare</code> → Bicep + azure.yaml</li>
+        <li>Invokes <code>azure-validate</code> → fixes any blockers</li>
+        <li>Invokes <code>azure-deploy</code> → <code>azd up</code> (~5 min cold start)</li>
+    </ol>
+    <p>Approve each gate. <strong>DO NOT clear this chat.</strong> The full transcript is what Step 10 of the recording scrolls past on camera.</p>
 
-    <p><strong>Step 2.4 — In the SAME Copilot Chat session, paste</strong>:</p>
-    <pre id="azprep4">/opsx-apply add-azure-deployment</pre>
-    <button class="copy-btn" onclick="copyToClipboard('azprep4')">Copy</button>
-    <p><em>The agent runs:</em> Task 0 (<code>/plugin install azure@claude-plugins-official</code>) → generates Dockerfile, embed-ollama.ts, etc. → invokes <code>azure-prepare</code> (Bicep + azure.yaml) → <code>azure-validate</code> → <code>azure-deploy</code> (<code>azd up</code>, ~5 minutes cold). Approve each gate. <strong>DO NOT clear this chat session — Step 10 scrolls through it on camera.</strong></p>
-
-    <p><strong>Step 2.5 — Verify the cloud URL</strong> (the deploy output prints it):</p>
-    <pre id="azprep5">curl -sI "https://&lt;your-live-url&gt;/"
+    <p><strong>Step 2.4 — Verify the cloud URL</strong> (printed at end of azure-deploy output):</p>
+    <pre id="azprep4">curl -sI "https://&lt;your-live-url&gt;/"
 # expect: HTTP/2 200</pre>
-    <button class="copy-btn" onclick="copyToClipboard('azprep5')">Copy</button>
-    <p>Hit it in a browser, run both scripted searches, confirm they return real results. <strong>If it 500s, fix now — do not record on a broken cloud.</strong></p>
+    <button class="copy-btn" onclick="copyToClipboard('azprep4')">Copy</button>
+    <p>Hit it in a host browser, run both scripted searches, confirm real results. <strong>If 500s, fix before recording.</strong></p>
 
-    <p><strong>Step 2.6 — Confirm $0 spend</strong>:</p>
-    <pre id="azprep6">az consumption usage list \
+    <p><strong>Step 2.5 — Confirm $0 spend</strong>:</p>
+    <pre id="azprep5">az consumption usage list \
   --start-date "$(date -u -v-1d +%Y-%m-%dT00:00:00Z)" \
   --end-date   "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
   -g &lt;your-rg-name&gt; -o table</pre>
-    <button class="copy-btn" onclick="copyToClipboard('azprep6')">Copy</button>
-    <p>Expected: zero billed line items. The "running on free tier" claim must hold.</p>
+    <button class="copy-btn" onclick="copyToClipboard('azprep5')">Copy</button>
+    <p>Expected: zero billed line items.</p>
 
-    <p><strong>Step 2.7 — T-15min before tape, pre-warm the cloud URL</strong>: open it in a browser, run any search, close the tab. Twice. This keeps the free-tier SQL DB from cold-resuming on camera.</p>
+    <p><strong>Result of Part 2:</strong> Azure resources provisioned (ACA env, talkscout-web, talkscout-ollama sidecar, Azure SQL DB free offer, seed Job). Cloud URL is live with the app from Part 1. Copilot Chat session holds the full Part 1 + Part 2 transcript ready to scroll on camera. <strong>If this prep fails:</strong> skip Steps 10-11 of the recording, ship the local-only flow.</p>
+</div>
 
-    <p><strong>Result of Pre-flight Part 2:</strong> a Copilot Chat history on <code>001-talkscout</code> that shows the full <code>/opsx-propose → /opsx-apply → azure-prepare → azure-validate → azure-deploy</code> chain. That is what Step 10 scrolls past. The live cloud URL is what Step 11 hits.</p>
+<div class="card" style="border-left-color: #dc2626; background-color: #fef2f2;">
+    <h3>🛑 Pre-tape reset (immediately before recording, ~60s)</h3>
+    <p>After Parts 1 and 2 succeed, the local working tree has the full app code from Part 1. The recording's Steps 3-9 are designed to recreate that LIVE on camera. So we wipe local back to the placeholder, while leaving the Copilot Chat history and the deployed cloud untouched.</p>
 
-    <p><strong>If this prep fails or runs out of time:</strong> skip Steps 10-11 entirely. Record the local-only flow (Steps 1-9 + Step 12 wrap, adjust closing voiceover to drop the cloud mention). <code>demo/azure-deploy-runbook.md</code> Step 7 covers the formal T-2h decision gate.</p>
+    <p><strong>Step 0.1 — Reset local state</strong> (Terminal A):</p>
+    <pre id="ptr1">npm run demo:reset</pre>
+    <button class="copy-btn" onclick="copyToClipboard('ptr1')">Copy</button>
+    <p>Wipes the working tree back to <code>pre-implement</code>, drops <code>openspec/changes/*</code>, recreates Docker, re-migrates, re-seeds. Does NOT touch the Copilot Chat panel or the Azure deployment.</p>
+
+    <p><strong>Step 0.2 — Start the foreground dev server</strong> (Terminal B):</p>
+    <pre id="ptr2">npm run dev</pre>
+    <button class="copy-btn" onclick="copyToClipboard('ptr2')">Copy</button>
+    <p>Wait for <code>✓ Ready in Ns</code>. Open <code>http://localhost:3000</code>. You MUST see the placeholder. This is your on-camera "BEFORE" state.</p>
+
+    <p><strong>Step 0.3 — Pre-warm the cloud URL</strong> (the free-tier SQL DB cold-pauses after ~1h of idle):</p>
+    <p>Open the cloud URL in a host browser, run any search, close. Repeat. ~30 seconds.</p>
+
+    <p><strong>Step 0.4 — Verify the Copilot Chat panel</strong>: the session from Pre-flight Parts 1+2 must still be visible. Scroll to the top of that chat. That is where Step 10 will start on camera.</p>
+
+    <p>Hit record. Follow Steps 1-12 below.</p>
 </div>
 
 <div class="card">
