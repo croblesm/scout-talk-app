@@ -164,28 +164,15 @@ azd auth login</pre>
 npm run dev      # in a second terminal, leave running</pre>
     <button class="copy-btn" onclick="copyToClipboard('ot2')">Copy</button>
 
-    <p><strong>Now in GitHub Copilot Chat (agent mode), paste these four prompts IN ORDER, in the SAME chat session</strong>. Approve each diff/gate as it appears. Do not clear the chat between them.</p>
+    <p><strong>Prereq C — Run PART 1 of the demo end-to-end in this SAME Copilot Chat session first</strong>. Use the Step 3, Step 4, and Step 6 prompts from the cards below (<code>/opsx-propose add-semantic-search-ui</code> with the full inline prompt → <code>/opsx-apply add-semantic-search-ui</code> → the CFP filter prompt). Approve every diff. Restart the dev server (<code>npm run dev:restart</code>) and confirm <code>localhost:3000</code> shows the working app with the CFP filter applied. <strong>The next prompts below need this code to exist in the working tree.</strong> Do NOT clear the chat between PART 1 and the Azure prompts.</p>
 
-    <p><strong>Prompt 1/4 — Propose the local spec change</strong>:</p>
-    <pre id="ot3" style="white-space: pre-wrap;">/opsx-propose add-semantic-search-ui
-
-Add the user-facing semantic search UI to TalkScout. The repo already has the foundation (Prisma schema, migrations applied, src/lib/db.ts, src/lib/embed.ts wrapping host Ollama, src/lib/sql.ts loading prisma/sql/searchEvents.sql, the database seeded with 91 events including embeddings, and the placeholder page at src/app/page.tsx). What is missing: a Server Action that embeds the user's query and runs prisma.$queryRawUnsafe(SEARCH_EVENTS_SQL, ...), three React components (SearchInput with gradient border and placeholder cycling, EventCard with clickable CFP link, CfpStatusPill with five visual states), a pure-function cfp-status utility, and the page composition that wires it all together. The two scripted on-camera queries are "agentic workflows for databases" and "type safety across the stack". Honor the architectural and UI rules in openspec/config.yaml.</pre>
-    <button class="copy-btn" onclick="copyToClipboard('ot3')">Copy</button>
-
-    <p><strong>Prompt 2/4 — Apply the local spec change</strong>:</p>
-    <pre id="ot4">/opsx-apply add-semantic-search-ui</pre>
-    <button class="copy-btn" onclick="copyToClipboard('ot4')">Copy</button>
-
-    <p><strong>Prompt 3/4 — Apply the CFP filter to the SQL file</strong> (this is what your tape's Step 6 does live):</p>
-    <pre id="ot5" style="white-space: pre-wrap;">The search keeps returning events whose CFP is already closed or has not opened yet. Filter the search SQL so it only returns events with an open CFP right now.</pre>
-    <button class="copy-btn" onclick="copyToClipboard('ot5')">Copy</button>
-
-    <p><strong>Prompt 4/4 — Propose and apply the Azure deployment via azure-skills</strong>. First the propose:</p>
+    <p><strong>Now propose the Azure deployment</strong> (same chat session):</p>
     <pre id="ot6" style="white-space: pre-wrap;">/opsx-propose add-azure-deployment
 
 Deploy TalkScout to Azure Container Apps with Azure SQL Database (free tier) and a sibling Ollama container for embeddings (same nomic-embed-text 768-dim model as local). Use system-assigned managed identity for app to DB. The agentic deployment depends on the microsoft/azure-skills plugin; installing it is the first task in tasks.md.</pre>
     <button class="copy-btn" onclick="copyToClipboard('ot6')">Copy</button>
-    <p>Then the apply (same chat):</p>
+
+    <p><strong>Then apply</strong> (same chat):</p>
     <pre id="ot7">/opsx-apply add-azure-deployment</pre>
     <button class="copy-btn" onclick="copyToClipboard('ot7')">Copy</button>
     <p>The agent runs the tasks from <code>tasks.md</code> in order. Tasks 0.1 and 0.2 are the GitHub Copilot plugin install — the agent prompts YOU to paste them into the Copilot Chat input because <code>/plugin</code> is a chat slash command, not something the agent can self-execute. Paste each when prompted:</p>
