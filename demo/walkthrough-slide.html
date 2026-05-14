@@ -359,38 +359,38 @@
   <div class="timeline">
 
     <div class="step narrate">
-      <div class="node"><span class="icon">📂</span><span class="num">01</span></div>
+      <div class="node"><span class="icon">🎯</span><span class="num">01</span></div>
       <div class="content">
         <div class="content-header">
-          <h3>Framed the problem</h3>
+          <h3>The goal — a CFP finder</h3>
           <span class="timing">0:00 → 0:30</span>
           <span class="tag tag-narrate">Setup</span>
         </div>
-        <p>Walked through the project structure: <code>openspec/</code> with an empty <code>changes/</code> directory, <code>prisma/sql/</code> as the only home for T-SQL, and the placeholder page at <code>localhost:3000</code>.</p>
+        <p>Stated the problem: speakers cannot find conferences by topical fit. Showed the placeholder browser tab on <code>localhost:3000</code> as the BEFORE state — no search UI yet.</p>
       </div>
     </div>
 
     <div class="step narrate">
-      <div class="node"><span class="icon">📜</span><span class="num">02</span></div>
+      <div class="node"><span class="icon">📝</span><span class="num">02</span></div>
       <div class="content">
         <div class="content-header">
-          <h3>Walked the project context</h3>
+          <h3>How I got here — foundation plan</h3>
           <span class="timing">0:30 → 1:30</span>
           <span class="tag tag-narrate">Narrate</span>
         </div>
-        <p>Opened <code>openspec/config.yaml</code> with the architectural rules, <code>searchEvents.sql</code> with VECTOR_DISTANCE, and <code>src/lib/sql.ts</code> the runtime SQL loader.</p>
+        <p>Opened <code>docs/plan.md</code> in VS Code preview. One-page plan that scaffolded the data layer: SQL Server 2025, Prisma schema with <code>VECTOR(768)</code>, 91 events seeded via host Ollama. None of it from an agent. Ended on the "Next" line as the pivot into OpenSpec.</p>
       </div>
     </div>
 
     <div class="step narrate">
-      <div class="node"><span class="icon">📝</span><span class="num">03</span></div>
+      <div class="node"><span class="icon">🤖</span><span class="num">03</span></div>
       <div class="content">
         <div class="content-header">
-          <h3>Foundation plan — the BEFORE state</h3>
-          <span class="timing">1:30 → 2:30</span>
-          <span class="tag tag-narrate">Pivot</span>
+          <h3>Meet OpenSpec and the Agents UI</h3>
+          <span class="timing">1:30 → 2:45</span>
+          <span class="tag tag-narrate">Setup</span>
         </div>
-        <p>Opened <code>docs/plan.md</code> and the foundation slide. The one-page plan I wrote before any agent touched the repo: stack choices, the <code>Event</code> table with <code>VECTOR(768)</code>, the seed pipeline that embeds 91 events via host Ollama. From here on, every change is OpenSpec.</p>
+        <p>Walked the three Agents sub-panels: Skills (four <code>openspec-*</code> skills), Changes (empty, ready to receive diffs), agentic-mode chat input. Quick peek at <code>prisma/schema.prisma</code> showing the <code>embedding VECTOR(768)</code> column the agent will work against.</p>
       </div>
     </div>
 
@@ -399,10 +399,10 @@
       <div class="content">
         <div class="content-header">
           <h3>Proposed the change</h3>
-          <span class="timing">2:30 → 3:45</span>
+          <span class="timing">2:45 → 4:00</span>
           <span class="tag tag-live">Live</span>
         </div>
-        <p>Ran <code>/opsx-propose add-semantic-search-ui</code> in GitHub Copilot Chat. OpenSpec generated <code>proposal.md</code>, <code>design.md</code>, and <code>tasks.md</code> from the project context.</p>
+        <p>Ran <code>/opsx-propose add-semantic-search-ui</code> in the Agents chat. OpenSpec generated <code>proposal.md</code>, <code>design.md</code>, and <code>tasks.md</code> from the project context.</p>
       </div>
     </div>
 
@@ -411,10 +411,10 @@
       <div class="content">
         <div class="content-header">
           <h3>Applied the change</h3>
-          <span class="timing">3:45 → 5:15</span>
+          <span class="timing">4:00 → 5:30</span>
           <span class="tag tag-live">Live</span>
         </div>
-        <p>Ran <code>/opsx-apply</code>. GitHub Copilot generated the Server Action, three React components, the cfp-status utility, and wired them into the page. Browser hot-reloaded into a working UI.</p>
+        <p>Ran <code>/opsx-apply</code>. The agent generated the Server Action, three React components, the cfp-status utility, and wired them into the page. Browser hot-reloaded into a working UI.</p>
       </div>
     </div>
 
@@ -423,7 +423,7 @@
       <div class="content">
         <div class="content-header">
           <h3>First search — found the closed-CFP problem</h3>
-          <span class="timing">5:15 → 5:45</span>
+          <span class="timing">5:30 → 6:00</span>
           <span class="tag tag-hands">Hands-on</span>
         </div>
         <p>Searched the live UI for "agentic workflows for databases". Results rendered but some had the <em>CFP closed</em> pill. Pointed at the problem on screen as motivation for the next step.</p>
@@ -435,7 +435,7 @@
       <div class="content">
         <div class="content-header">
           <h3>GitHub Copilot Chat fixed the SQL</h3>
-          <span class="timing">5:45 → 6:15</span>
+          <span class="timing">6:00 → 6:30</span>
           <span class="tag tag-live">Marquee #1</span>
         </div>
         <p>Asked Copilot in plain English to filter the search to events with an open CFP right now. The agent edited <code>prisma/sql/searchEvents.sql</code> directly with correct T-SQL syntax for SQL Server 2025.</p>
@@ -446,11 +446,11 @@
       <div class="node"><span class="icon">🗄️</span><span class="num">08</span></div>
       <div class="content">
         <div class="content-header">
-          <h3>MSSQL Schema Designer — table + VECTOR(768)</h3>
-          <span class="timing">6:15 → 6:45</span>
+          <h3>MSSQL Schema Designer — live-DB proof</h3>
+          <span class="timing">6:30 → 7:00</span>
           <span class="tag tag-hands">Marquee #2</span>
         </div>
-        <p>Opened the MSSQL extension's Schema Designer on the <code>Event</code> table. Visual layout showed the relational columns and the native <code>VECTOR(768)</code> embedding column side by side. No external vector store.</p>
+        <p>Opened the MSSQL extension's Schema Designer on the <code>Event</code> table. Same <code>VECTOR(768)</code> column we saw in <code>schema.prisma</code>, now live in the running database, alongside the relational fields.</p>
       </div>
     </div>
 
@@ -459,7 +459,7 @@
       <div class="content">
         <div class="content-header">
           <h3>Re-ran the search — fix landed + magic moment</h3>
-          <span class="timing">6:45 → 7:15</span>
+          <span class="timing">7:00 → 7:30</span>
           <span class="tag tag-hands">Magic moment</span>
         </div>
         <p>Same query, same database, but now only open-CFP events came back. And the top result still did not contain the word "agentic" anywhere — vocabulary mismatch handled by semantic search.</p>
@@ -471,7 +471,7 @@
       <div class="content">
         <div class="content-header">
           <h3>Showed the clean TypeScript</h3>
-          <span class="timing">7:15 → 7:45</span>
+          <span class="timing">7:30 → 8:00</span>
           <span class="tag tag-narrate">Narrate</span>
         </div>
         <p>Opened <code>src/app/actions.ts</code>: a few lines of business logic, one embed call, one parameterized query through <code>$queryRawUnsafe</code>. No T-SQL string literals in the application code.</p>
@@ -483,10 +483,10 @@
       <div class="content">
         <div class="content-header">
           <h3>Wrap</h3>
-          <span class="timing">7:45 → 8:45</span>
+          <span class="timing">8:00 → 9:00</span>
           <span class="tag tag-narrate">Closing</span>
         </div>
-        <p>Recap the arc: one-page plan got us a typed schema + seeded vectors; OpenSpec drove every change after. SQL Server 2025 native vectors, Prisma raw queries, GitHub Copilot in agent mode — all inside VS Code Insiders, all reproducible with one command.</p>
+        <p>Recap the arc: a one-page plan got us a typed schema + seeded vectors; OpenSpec drove every change after. SQL Server 2025 native vectors, Prisma raw queries, GitHub Copilot in agent mode — all inside VS Code Insiders, all reproducible with one command.</p>
       </div>
     </div>
 

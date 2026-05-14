@@ -1,8 +1,20 @@
-# TalkScout Demo Script (~8.75 minutes, fits 10-min slot)
+# TalkScout Demo Script (~9 minutes, fits 10-min slot)
 
 The on-camera teleprompter is `demo/prompts.html`. This file is the timed version with speaker notes for rehearsal.
 
-Times are wall-clock from when recording starts. Live content runs ~8:45; the 10-minute slot leaves ~1:15 buffer for pacing and pauses (SC-004).
+Times are wall-clock from when recording starts. Live content runs ~9:00; the 10-minute slot leaves ~1:00 buffer for pacing and pauses (SC-004).
+
+**Flow at a glance** (one concept per step, no app bouncing):
+1. The goal (browser placeholder)
+2. How I got here — foundation plan (`docs/plan.md`)
+3. Meet OpenSpec + Agents UI + quick schema peek
+4-5. `/opsx-propose` and `/opsx-apply` live in Agents chat
+6. First search in browser → discover closed-CFP problem
+7. Copilot fixes SQL in VS Code
+8. Schema Designer (MSSQL extension) — live-DB proof
+9. Re-run + magic moment
+10. Clean TypeScript (`actions.ts`)
+11. Wrap (host browser slide)
 
 ## Pre-flight setup (BEFORE Step 1, off-camera)
 
@@ -19,58 +31,51 @@ Why this design: the dev server is your BEFORE state on camera. Keeping it in a 
 
 Keep Terminal B alive through Steps 1, 2, 3, and 4. After `/opsx-apply` finishes (end of Step 4), manually restart the dev server in Terminal B: Ctrl+C → `rm -rf .next` → `npm run dev`. Three commands typed by hand. That picks up the new Tailwind classes and gives you the AFTER state. No helper script — earlier `npm run dev:restart` killed by port and tore down VS Code's port-forwarding agent in dev containers.
 
-## 0:00 to 0:30, Hook
+## 0:00 to 0:30, Step 1 — The goal
 
-> *Speaker notes: smile, voice up. Look at camera, not at screen. Open with the problem statement.*
+> *Speaker notes: smile, voice up. Look at camera. Show the placeholder browser tab on localhost:3000 for 3-5 seconds as the BEFORE state, then switch back to VS Code.*
 
-"I am Carlos Robles, Principal PM for SQL developer experiences at Microsoft. Every developer who speaks at conferences hits the same problem: where should I submit this talk? Listings sites organize events by date and region, never by topical fit. Today I want to show you how I built TalkScout, a CFP finder that takes a plain-English description of a talk and returns the upcoming conferences whose CFP topics match. End to end. Inside VS Code. In the next eight minutes."
+> *"I am Carlos Robles, Principal PM for SQL developer experiences at Microsoft. Every developer who speaks at conferences hits the same problem: where should I submit this talk? Listings sites organize events by date and region, never by topical fit. I am building TalkScout — a CFP finder. Type a plain-English description of a talk, get the upcoming conferences whose CFPs match. End to end inside VS Code. In about nine minutes."*
 
-## 0:30 to 1:30, The pitch and the architecture
+## 0:30 to 1:30, Step 2 — How I got to this point (foundation plan)
 
-> *Speaker notes: this is the thesis beat. Everything in steps 3-11 is a demonstration of one of the five tools mentioned here. Audience needs the frame before the rest works.*
+> *Speaker notes: stay in VS Code. Open `docs/plan.md` and press `Cmd+K V` for the side-by-side Markdown preview. Scroll top-to-bottom as you talk.*
 
-1. Open `openspec/specs/architecture.md`. Press `Cmd+K V` to open the side-by-side Markdown preview. **Scroll to top.**
+Open the segment:
 
-2. Read the "What this stack gives you" paragraph aloud:
-
-   > *"A semantic-search application end-to-end inside VS Code. No separate vector database. No cloud embedding API. No SQL string literals in TypeScript. Five tools, each doing one job."*
-
-3. Cursor moves down to the five-tool table. Read each row, one breath per row:
-
-   > *"SQL Server 2025 stores both relational and vector data, native. No Pinecone/Qdrant + Postgres dual setup. Ollama runs on my Mac, free, no API keys. Prisma is the typed bridge so the TypeScript stays clean. The MSSQL extension lets me inspect vectors live in the IDE. And GitHub Copilot with OpenSpec drives the build itself."*
-
-4. Cursor moves down to the search hot path Mermaid diagram:
-
-   > *"Here's the flow. Browser to Server Action. The action branches into Ollama for the embedding and Prisma for the loaded SQL. They converge in SQL Server, where VECTOR_DISTANCE ranks the top five. That comes back through Prisma to the UI."*
-
-5. Briefly switch to `openspec/config.yaml`, scroll to `context:`. Three architectural rules, read fast:
-
-   > *"All T-SQL only in prisma/sql/. Embeddings in Node, not T-SQL. Containers capped at 2 GB / 2 CPUs."*
-
-6. End the segment with the setup for the next step:
-
-   > *"The search UI does not exist yet. The placeholder page at localhost:3000 says so. Next, I propose adding it as an OpenSpec change."*
-
-## 1:30 to 2:30, Foundation plan — the BEFORE state
-
-> *Speaker notes: stay in VS Code. Open `docs/plan.md` and press `Cmd+K V` for the side-by-side Markdown preview — same pane you used for architecture.md in Step 2. No app switching.*
-
-The honesty beat:
-
-> *"Quick honesty beat. Everything I just showed you — the schema, the migrations, the embedding pipeline, the 91 seeded rows — that did not come from OpenSpec. I scaffolded it from a one-page plan I wrote at the start. Here is that plan, sitting right in the repo. Then I will tell you why I stopped writing plans and switched to OpenSpec for everything after this point."*
+> *"Before I show you the agent, here is what is already done. I have the data layer: a SQL Server 2025 container, a Prisma schema with a native VECTOR column, 91 conferences seeded with embeddings generated on my Mac via Ollama. None of that came from an agent. I scaffolded it from a one-page plan I wrote at the start. Here is that plan, right in the repo."*
 
 Scroll through the preview as you talk:
 - **Goal** — read it (10s).
 - **Stack Choices** — SQL Server 2025 native vectors, Ollama on host, Prisma 7, `prisma/sql/` boundary (15s).
-- **Data Model** — point at `Unsupported("VECTOR(768)")`. "One table. CAST happens in T-SQL." (15s).
+- **Data Model** — point at `Unsupported("VECTOR(768)")`. "One table. CAST happens in T-SQL." (10s).
 - **Seed Pipeline** — hand-curated `events.json`, content-hash gated, MERGE through the SQL file. Re-runs are no-ops. (10s).
 - **Next** — read aloud as the pivot:
 
-> *"The next layer is the search UI. I want it built agentically. Plain-English proposal in, spec out, agent applies it, I approve. That is what OpenSpec gives me. From here on, every change is a slash-opsx-propose followed by a slash-opsx-apply."*
+> *"The next layer is the search UI itself. I could write more plan files and keep going by hand. But I want something better: plain-English proposal in, spec out, agent applies it, I approve. That is what OpenSpec gives me — and that is the rest of this demo."*
 
-Close the preview. Focus back on the Agents chat panel. Step 4 is the on-ramp.
+Close the preview.
 
-## 2:30 to 3:45, /opsx-propose (live)
+## 1:30 to 2:45, Step 3 — Meet OpenSpec and the Agents UI
+
+> *Speaker notes: stay in VS Code. Open the Agents view (top-left panel in VS Code Insiders). Walk the three sub-panels in order, then a 10-second peek at `prisma/schema.prisma`.*
+
+Open the segment:
+
+> *"OpenSpec is the tool that takes me from plan-driven to agent-driven. It lives as a folder in my repo, plus four skills loaded by the agent. Let me show you the surface I will be working in for the rest of the demo."*
+
+Walk the panels:
+- **Skills panel** (~25s) — list the four `openspec-*` skills. Say: *"Four skills, one per phase. Propose creates the spec. Apply implements it. Explore reads project context. Archive closes the loop. The agent loads them automatically."*
+- **Changes panel** (~15s) — empty. Say: *"Empty for now. In a minute, every file the agent writes lands here as a diff with its own approval gate."*
+- **Agentic-mode chat input** (~10s) — point at it. Say: *"Plain English in, agent actions out. This is the only thing I will type into for the next five minutes."*
+
+Quick data-layer grounding (~15s): switch to Explorer, open `prisma/schema.prisma`. Scroll to the `Event` model. Point at `embedding Unsupported("VECTOR(768)")?`. Say:
+
+> *"This is the data the agent will work against. One table, with a native vector column. Same column we will see in the live database later."*
+
+Close `schema.prisma`. Focus back on the Agents chat input. Step 4 is the on-ramp.
+
+## 2:45 to 4:00, Step 4 — /opsx-propose (live)
 
 > *Speaker notes: switch to GitHub Copilot Chat panel. Paste the slash command from prompts.html Card 3. Talk through it as files appear.*
 
@@ -80,7 +85,7 @@ Open `openspec/changes/add-semantic-search-ui/tasks.md` briefly. Scroll through 
 
 > *Voiceover during the wait: "OpenSpec calls the unit of work a 'change.' The slash command takes my plain-English description, looks at the project context in config.yaml, and generates three artifacts in one shot: proposal, design, tasks. Watch the changes folder fill up."*
 
-## 3:45 to 5:15, /opsx-apply (live)
+## 4:00 to 5:30, Step 5 — /opsx-apply (live)
 
 > *Speaker notes: this is the centerpiece. Make sure the Explorer panel is visible alongside the chat panel.*
 
@@ -122,7 +127,7 @@ Expected total time: 60 to 120 seconds. While files appear, narrate: "The agent 
 
 > *Speaker notes — final check before Step 5: refresh `localhost:3000`. You should see the styled search input centered on the page, NOT the placeholder text. If still placeholder, redo the Verify step above.*
 
-## 5:15 to 5:45, First live search — discover the closed-CFP problem
+## 5:30 to 6:00, Step 6 — First live search, discover the closed-CFP problem
 
 > *Speaker notes: switch to the browser tab on localhost:3000. The styled UI from Step 4 should be alive. Click into the search input.*
 
@@ -136,7 +141,7 @@ Read the top result aloud. Then point at the CFP-status pills:
 
 Note the closed-CFP result you pointed at; that is what Step 6 will fix.
 
-## 5:45 to 6:15, Marquee 1: GitHub Copilot Chat fixes searchEvents.sql
+## 6:00 to 6:30, Step 7 — Marquee 1: GitHub Copilot Chat fixes searchEvents.sql
 
 > *Speaker notes: open `prisma/sql/searchEvents.sql` so it is the active file. In GitHub Copilot Chat, attach the file as context (paperclip or `#searchEvents.sql`). Agent mode on.*
 
@@ -157,7 +162,7 @@ AND cfpCloseDate >= GETDATE()
 
 Accept the change. Say: "Plain English in. Working SQL out. The file is the only place T-SQL lives in this project, and the agent respected that."
 
-## 6:15 to 6:45, Marquee 2: MSSQL Schema Designer
+## 6:30 to 7:00, Step 8 — Marquee 2: MSSQL Schema Designer
 
 > *Speaker notes: switch to the MSSQL VS Code extension panel. The saved `talkscout` connection (Server `talkscout-mssql`, sa, TalkScout!Demo2026) should already be there.*
 
@@ -167,7 +172,7 @@ Say:
 
 > *"One table. Relational columns and a native 768-dim vector column side by side in SQL Server 2025. No external vector store, no syncing two systems."*
 
-## 6:45 to 7:15, Re-run the search — the fix worked + the magic moment
+## 7:00 to 7:30, Step 9 — Re-run the search, fix landed + magic moment
 
 > *Speaker notes: switch back to the browser at localhost:3000. Clear the input.*
 
@@ -181,7 +186,7 @@ Read the top result aloud. Then say:
 
 Expected: every result has a CFP-open pill. Top result is tagged with topics like "AI agents", "MCP", or "autonomous tooling".
 
-## 7:15 to 7:45, Clean TypeScript moment
+## 7:30 to 8:00, Step 10 — Clean TypeScript moment
 
 > *Speaker notes: open actions.ts. Hover the SEARCH_EVENTS_SQL import.*
 
@@ -189,7 +194,7 @@ Open `src/app/actions.ts`. Read aloud: "A handful of lines of business logic. On
 
 Hover the import for `SEARCH_EVENTS_SQL` from `@/lib/sql`. Show the inferred type briefly, then close.
 
-## 7:45 to 8:45, Wrap
+## 8:00 to 9:00, Step 11 — Wrap
 
 > *Speaker notes: switch to the browser tab with `file:///Users/carlos/scout-talk-app/demo/walkthrough-slide.html` for the closing recap. Voice up. Smile.*
 
